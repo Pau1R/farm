@@ -1,0 +1,152 @@
+{
+ 'id': '4399878654741813828', 
+ 'from_user': {
+  'id': 1024426579, 
+  'is_bot': False, 
+  'first_name': 'Павел', 
+  'username': 'Pau1R', 
+  'last_name': 'Рудников', 
+  'language_code': 'en', 
+  'can_join_groups': None, 
+  'can_read_all_group_messages': None, 
+  'supports_inline_queries': None, 
+  'is_premium': None, 
+  'added_to_attachment_menu': None
+ }, 
+ 'message': {
+  'content_type': 'text', 
+  'id': 312, 
+  'message_id': 312, 
+  'from_user': <telebot.types.User object at 0x102143f40>, 
+  'date': 1712317457, 
+  'chat': <telebot.types.Chat object at 0x102143d00>, 
+  'sender_chat': None, 
+  'forward_from': None, 
+  'forward_from_chat': None, 
+  'forward_from_message_id': None, 
+  'forward_signature': None, 
+  'forward_sender_name': None, 
+  'forward_date': None, 
+  'is_automatic_forward': None, 
+  'reply_to_message': None, 
+  'via_bot': None, 
+  'edit_date': None, 
+  'has_protected_content': None, 
+  'media_group_id': None, 
+  'author_signature': None, 
+  'text': 'Выберите вашу роль:', 
+  'entities': None, 
+  'caption_entities': None, 
+  'audio': None, 
+  'document': None, 
+  'photo': None, 
+  'sticker': None, 
+  'video': None, 
+  'video_note': None, 
+  'voice': None, 
+  'caption': None, 
+  'contact': None, 
+  'location': None, 
+  'venue': None, 
+  'animation': None, 
+  'dice': None, 
+  'new_chat_member': None, 
+  'new_chat_members': None, 
+  'left_chat_member': None, 
+  'new_chat_title': None, 
+  'new_chat_photo': None, 
+  'delete_chat_photo': None, 
+  'group_chat_created': None, 
+  'supergroup_chat_created': None, 
+  'channel_chat_created': None, 
+  'migrate_to_chat_id': None, 
+  'migrate_from_chat_id': None, 
+  'pinned_message': None, 
+  'invoice': None, 
+  'successful_payment': None, 
+  'connected_website': None, 
+  'reply_markup': <telebot.types.InlineKeyboardMarkup object at 0x102143e80>, 
+  'message_thread_id': None, 
+  'is_topic_message': None, 
+  'forum_topic_created': None, 
+  'forum_topic_closed': None, 
+  'forum_topic_reopened': None, 
+  'has_media_spoiler': None, 
+  'forum_topic_edited': None, 
+  'general_forum_topic_hidden': None, 
+  'general_forum_topic_unhidden': None, 
+  'write_access_allowed': None, 
+  'user_shared': None, 
+  'chat_shared': None, 
+  'story': None, 
+  'json': {
+   'message_id': 312, 
+   'from': {
+    'id': 6910350753, 
+    'is_bot': True, 
+    'first_name': 'Услуги по 3D печати в г. Стерлитамак', 
+    'username': 'ster3Dbot'
+   }, 
+   'chat': {
+    'id': 1024426579, 
+    'first_name': 'Павел', 
+    'last_name': 'Рудников', 
+    'username': 'Pau1R', 
+    'type': 'private'
+   }, 
+   'date': 1712317457, 
+   'text': 'Выберите вашу роль:', 
+   'reply_markup': {
+    'inline_keyboard': [
+     [{'text': 'Администратор', 'callback_data': 'Администратор'}], 
+     [{'text': 'Владелец', 'callback_data': 'Владелец'}], 
+     [{'text': 'Оператор', 'callback_data': 'Оператор'}], 
+     [{'text': 'Дизайнер', 'callback_data': 'Дизайнер'}]
+    ]
+   }
+  }
+ }, 
+ 'inline_message_id': None, 
+ 'chat_instance': '-3564074752560920480', 
+ 'data': 'Владелец', 
+ 'game_short_name': None, 
+ 'json': {
+  'id': '4399878654741813828', 
+  'from': {
+   'id': 1024426579, 
+   'is_bot': False, 
+   'first_name': 'Павел', 
+   'last_name': 'Рудников', 
+   'username': 'Pau1R', 
+   'language_code': 'en'
+  }, 
+  'message': {
+   'message_id': 312, 
+   'from': {
+    'id': 6910350753, 
+    'is_bot': True, 
+    'first_name': 'Услуги по 3D печати в г. Стерлитамак', 
+    'username': 'ster3Dbot'
+   }, 
+   'chat': {
+    'id': 1024426579, 
+    'first_name': 'Павел', 
+    'last_name': 'Рудников', 
+    'username': 'Pau1R', 
+    'type': 'private'
+   }, 
+   'date': 1712317457, 
+   'text': 'Выберите вашу роль:', 
+   'reply_markup': {
+    'inline_keyboard': [
+     [{'text': 'Администратор', 'callback_data': 'Администратор'}], 
+     [{'text': 'Владелец', 'callback_data': 'Владелец'}], 
+     [{'text': 'Оператор', 'callback_data': 'Оператор'}], 
+     [{'text': 'Дизайнер', 'callback_data': 'Дизайнер'}]
+    ]
+   }
+  }, 
+  'chat_instance': '-3564074752560920480', 
+  'data': 'Владелец'
+ }
+}
