@@ -72,16 +72,18 @@ class Texts:
 				if order.quantity > 1:
 					text0 += ' со всех экземпляров'
 				text += f'\n{text0}: {int(order.support_time * order.quantity * self.app.support_remove_price)} rub'
+		if order.prepayed > 0:
+			text += f'Предоплата: внесено {order.prepayed} rub.\n'
+			if order.prepayed < order.prepayment_percent * order.price:
+				text += f'\n\nПредоплата внесена не полностью, заказ не принят в работу!'
 		return text
 
 	def supports_btns(self, order_id):
 		return [['Да, сам уберу', 'клиент,' + str(order_id) + ',order_supports'], ['Нет, уберите вы', 'продавец,' + str(order_id) + ',order_supports']]
 
-	color_btns = [['Согласен, перейти к предоплате', 'confirm'], ['Отменить заказ', 'cancel']]
-
 	price_btns = [['Согласен, перейти к предоплате', 'confirm'], ['Отменить заказ', 'cancel']]
 	
-	available_materials = 'Пока ведется оценка вы можете ознакомиться с доступными материалами и определиться с цветом изделия.'
+	# available_materials = 'Пока ведется оценка вы можете ознакомиться с доступными материалами и определиться с цветом изделия.'
 	
 	def confirm_prepayment(self, model, print, ready):
 		text = f'Предварительная стоимость заказа: {model + print} рублей\n'
@@ -96,7 +98,8 @@ class Texts:
 	def prepayment_instructions(self, price, payer_id):
 		text = f'Размер предоплаты: {price} рублей.\n'
 		text += f'Для внесения предоплаты сделайте перевод на карту сбербанка по номеру телефона указанному ниже. В комментарии к переводу обязательно укажите ваш номер покупателя: {payer_id}\n'
-		text += 'В случае успешного зачисления средств вам прийдет уведомление о принятии заказа в работу.'
+		text += 'После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
+		return text
 
 	payment_phone_number = '+71231234567'
 

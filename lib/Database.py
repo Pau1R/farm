@@ -100,6 +100,8 @@ class Database:
 			start_time_estimate DATETIME,
 			end_time_estimate DATETIME,
 			price DECIMAL,
+			prepayed DECIMAL,
+			prepayment_percent DECIMAL,
 			conditions TEXT,
 			comment TEXT """
 
@@ -191,8 +193,10 @@ class Database:
 				order.start_time_estimate = None
 			# order.end_time_estimate = line[19]
 			order.price = line[20]
-			order.comment = line[21]
-			order.conditions = line[22]
+			order.prepayed = line[21]
+			order.prepayment_percent = line[22]
+			order.comment = line[23]
+			order.conditions = line[24]
 			self.app.orders.append(order)
 
 	def create_order(self, order):
@@ -222,6 +226,8 @@ class Database:
 		values += 'start_time_estimate = "' + str(order.start_time_estimate) + '", '
 		values += 'end_time_estimate = "' + str(order.end_time_estimate) + '", '
 		values += 'price = "' + str(order.price) + '", '
+		values += 'prepayed = "' + str(order.prepayed) + '", '
+		values += 'prepayment_percent = "' + str(order.prepayment_percent) + '", '
 		values += 'conditions = "' + order.conditions + '", '
 		values += 'comment = "' + order.comment + '" '
 		self.cursor.execute('UPDATE order_ SET ' + values + ' WHERE order_id = ' + str(order.order_id))

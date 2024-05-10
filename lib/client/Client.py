@@ -1,4 +1,5 @@
 import sys
+import random
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
@@ -85,7 +86,24 @@ class Client:
 
 	def show_price(self, order_id):
 		self.context = 'price'
-		self.GUI.tell_buttons(self.texts.price_text(order_id), self.texts.price_btns.copy(), [])
+		order = self.get_order(order_id)
+		order.prepayment_percent = self.app.prepayment_percent   # save current percentage to resolve conflicts
+		
+		# generate pay code
+		used_codes = []
+		code = 0
+		for order_ in self.app.orders:
+			used_codes.append(order_.pay_code)
+		while code in used_codes:
+			code = random.randint(10, 99)
+		order.pay_code = code
+
+		text = self.texts.price_text(order_id)
+		text += '\n\nДля внесения предоплаты сделайте перевод на карту сбербанка по номеру телефона указанному ниже. '
+		text += f'В комментарии к переводу обязательно укажите код платежа: {order.pay_code}\n'
+		self.GUI.tell(text)
+		self.GUI.tell(self.app.phone_number)
+		self.GUI.tell('После зачисления средств вам прийдет уведомление о принятии заказа в работу.')
 
 	def show_rejected(self, order_id, reason):
 		my_order = self.get_order(order_id)

@@ -20,7 +20,8 @@ class App:
 
 	# settings:
 	support_remove_price = 10
-	petg_density = 1.25
+	prepayment_percent = 0.3
+	phone_number = '+79871234567'
 
 	# count = 0
 	# last_check_date = None

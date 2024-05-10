@@ -71,6 +71,21 @@ class Gui:
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption))
 		self.messages_append(message)
 
+	def tell_photo(self, caption, photo):
+		if photo == '':
+			self.tell(caption)
+		message = Message(self.app.bot.send_photo(self.chat.user_id, photo=photo, caption=caption))
+		self.messages_append(message)
+		return message
+
+	def tell_photo_buttons(self, caption, photo, bts, strict):
+		if photo == '':
+			self.tell_buttons(caption, bts, strict)
+		buttons = self.prepare_buttons(bts, strict)
+		message = Message(self.app.bot.send_photo(self.chat.user_id, photo=photo, caption=caption, reply_markup=buttons))
+		self.messages_append(message)
+		return message
+
 	def tell_buttons(self, text, bts, strict):
 		buttons = self.prepare_buttons(bts, strict)
 		message = Message(self.app.bot.send_message(self.chat.user_id, text, reply_markup=buttons))
@@ -83,11 +98,6 @@ class Gui:
 		self.messages_append(message)
 		return message
 
-	def tell_buttons_photo(self, caption, photo, bts, strict):
-		buttons = self.prepare_buttons(bts, strict)
-		message = Message(self.app.bot.send_photo(self.chat.user_id, photo=photo, caption=caption, reply_markup=buttons))
-		self.messages_append(message)
-		return message
 
 	def prepare_buttons(self, bts_, strict_):
 		buttons = tbot.InlineKeyboardMarkup()

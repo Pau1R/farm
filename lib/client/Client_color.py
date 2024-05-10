@@ -12,6 +12,7 @@ class Client_color:
 	GUI = None
 	context = ''
 	texts = None
+	color = None
 
 	def __init__(self, app, chat):
 		self.app = app
@@ -37,33 +38,58 @@ class Client_color:
 			self.show_colors()
 		elif context == 'colors':
 			self.process_colors()
+		elif context == 'color':
+			self.process_color()
 		
 #---------------------------- SHOW ----------------------------
 
 	def show_colors(self):
 		self.context = 'colors'
 		buttons = []
+		colors = []
 		for spool in self.app.equipment.spools:
 			if self.order.plastic_type == 'Любой' or (spool.type == self.order.plastic_type):
 				if spool.weight - spool.booked - 15 > self.order.weight * self.order.quantity:
-					buttons.append([spool.color, str(self.message.order_id) + ',order_color'])
-		text = self.texts.price_text(self.message.order_id)
-		text += f'\n\nВыберите цвет'
+					colors.append(spool.color)
+		colors = list(dict.fromkeys(colors))
+		for color in colors:
+			buttons.append([color, str(self.message.order_id) + ',order_color,' + color])
+
+		text = self.texts.price_text(int(self.message.order_id))
+		text += '\n\nВыберите цвет'
 		message = self.GUI.tell_buttons(text, buttons, buttons)
 		message.general_clear = False
 		message.order_id = self.message.order_id
+
+	def show_color(self):
+		self.context = 'color'
+		buttons = [['Подтверждаю выбор цвета', str(self.message.order_id) + ',order_color,yes']]
+		buttons.append (['Назад', str(self.message.order_id) + ',order_color,no'])
+		self.GUI.tell_photo_buttons(self.color.name, self.color.samplePhoto, buttons, buttons)
 
 		# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
 
 #---------------------------- PROCESS ----------------------------
 
 	def process_colors(self):
-		o = ''
-		print('process_colors')
+		self.context = ''
+		name = self.message.data.split(",")[2]
+		for color in self.app.equipment.colors:
+			if color.name == name:
+				self.color = color
+				self.show_color()
+				return
+		self.color = ''
+		self.show_colors()
 
-		# show color sample and buttons: Подтвердить выбор цвета, Назад
-
-		# move on to payment
+	def process_color(self):
+		self.context = ''
+		if self.message.data.split(",")[2] == 'yes':
+			self.chat.user.show_price(int(self.message.data.split(",")[0]))
+			# self.GUI.tell('Благодарим ')
+			# move on to payment
+		else:
+			self.show_colors()
 
 #---------------------------- LOGIC ----------------------------
 

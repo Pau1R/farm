@@ -31,6 +31,9 @@ class Order:
 	
 	price_estimate = 0.0
 	price = 0.0
+	prepayed = 0.0
+	prepayment_percent = 0.3
+	pay_code = 0
 
 	sketches = []
 	model_file = ''
