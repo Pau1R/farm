@@ -6,6 +6,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+farm.sublime-workspace
 
 # C extensions
 *.so
@@ -174,6 +175,3 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
-
-
-*.sublime-workspace
