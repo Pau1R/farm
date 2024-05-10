@@ -13,32 +13,51 @@ class Gui:
 
 	def clear_chat(self):
 		self.remove_messages(self.messages)
-		self.messages = []
 
 	def clear_order_chat(self, order_id):
 		messages = self.chat.user.GUI.messages
 		messages.extend(self.messages)
 		for message in messages:
-			if message.order_id == order_id:
+			if message.order_id == int(order_id):
 				self.remove_message(message)
 
 	def remove_messages(self, messages):
 		for message in messages:
-			if message.data == '' and message.general_clear: # exclude messages where user pressed a button
-				self.remove_message(message)
+			if message.data == '':
+				if message.general_clear:
+					self.remove_message(message)
+			else:
+				if message.general_clear:
+					self.list_remove_message(message)
 
 	def remove_message(self, message):
 		try:
 			self.app.bot.delete_message(message.chat_id, message.id)
-			self.messages.remove(message)
+			print('bot remove message', message.chat_id, message.id)
+			self.list_remove_message(message)
 		except Exception as e:
-			print ('delete error:', e)
+			self.list_remove_message(message)
+			print ('delete error:', message.chat_id, message.id, e)
+
+	def messages_append(self, message):
+		self.messages = self.messages + [message]
+
+	def list_remove_message(self, message):
+		try:
+			self.messages.remove(message)
+		except:
+			x = ''
+		try:
+			self.chat.user.GUI.messages.remove(message)
+		except:
+			x = ''
 
 	def tell(self, text):
-		self.messages.append(Message(self.app.bot.send_message(self.chat.user_id, text)))
+		self.messages_append(Message(self.app.bot.send_message(self.chat.user_id, text)))
 
 	def tell_permanent(self, text):
-		Message(self.app.bot.send_message(self.chat.user_id, text))
+		message = Message(self.app.bot.send_message(self.chat.user_id, text))
+		return message
 
 	def tell_id(self, id, text):
 		Message(self.app.bot.send_message(id, text))
@@ -46,22 +65,22 @@ class Gui:
 	def tell_document_buttons(self, document, caption, bts, strict):
 		buttons = self.prepare_buttons(bts, strict)
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption, reply_markup=buttons))
-		self.messages.append(message)
+		self.messages_append(message)
 
 	def tell_document(self, document, caption):
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption))
-		self.messages.append(message)
+		self.messages_append(message)
 
 	def tell_buttons(self, text, bts, strict):
 		buttons = self.prepare_buttons(bts, strict)
 		message = Message(self.app.bot.send_message(self.chat.user_id, text, reply_markup=buttons))
-		self.messages.append(message)
+		self.messages_append(message)
 		return message
 
 	def tell_buttons_id(self, id, text, bts, strict):
 		buttons = self.prepare_buttons(bts, strict)
 		message = Message(self.app.bot.send_message(id, text, reply_markup=buttons))
-		self.messages.append(message)
+		self.messages_append(message)
 		return message
 
 	def prepare_buttons(self, bts_, strict_):

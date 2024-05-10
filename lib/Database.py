@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 import os
 from lib.Chat import Chat
-from lib.clients.Order import Order
+from lib.client.Order import Order
 
 class Database:
 	cursor = None

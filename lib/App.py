@@ -3,7 +3,7 @@ from lib.equipment.Equipment import Equipment
 from lib.Chat import Chat
 from datetime import date
 from lib.Msg import Message
-from lib.clients.Order import Order
+from lib.client.Order import Order
 from lib.Test import Test
 import jsonpickle
 from datetime import date

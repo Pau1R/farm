@@ -2,7 +2,7 @@ import sys
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.clients.Texts import Texts
+from lib.client.Texts import Texts
 
 class Client_color:
 	app = None
@@ -10,6 +10,7 @@ class Client_color:
 	message = None
 	order = None
 	GUI = None
+	context = ''
 	texts = None
 
 	def __init__(self, app, chat):
@@ -28,7 +29,7 @@ class Client_color:
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.GUI.clear_order_chat(message.order_id)
-		self.GUI.messages.append(message)
+		self.GUI.messages_append(message)
 		self.message = message
 		context = self.context
 
@@ -37,7 +38,6 @@ class Client_color:
 		elif context == 'colors':
 			self.process_colors()
 		
-
 #---------------------------- SHOW ----------------------------
 
 	def show_colors(self):
@@ -46,14 +46,12 @@ class Client_color:
 		for spool in self.app.equipment.spools:
 			if self.order.plastic_type == 'Любой' or (spool.type == self.order.plastic_type):
 				if spool.weight - spool.booked - 15 > self.order.weight * self.order.quantity:
-					buttons.append(spool.color)
+					buttons.append([spool.color, str(self.message.order_id) + ',order_color'])
 		text = self.texts.price_text(self.message.order_id)
 		text += f'\n\nВыберите цвет'
-		self.GUI.tell_buttons(text, buttons, buttons)
-
-
-
-
+		message = self.GUI.tell_buttons(text, buttons, buttons)
+		message.general_clear = False
+		message.order_id = self.message.order_id
 
 		# - spools:
 		# 	- тип
@@ -69,6 +67,7 @@ class Client_color:
 
 	def process_colors(self):
 		o = ''
+		print('process_colors')
 
 #---------------------------- LOGIC ----------------------------
 

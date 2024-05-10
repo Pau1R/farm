@@ -2,10 +2,10 @@ import sys
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.clients.Texts import Texts
-from lib.clients.Order import Order
-from lib.clients.Client_model import Client_model
-from lib.clients.Client_color import Client_color
+from lib.client.Texts import Texts
+from lib.client.Order import Order
+from lib.client.Client_model import Client_model
+from lib.client.Client_color import Client_color
 
 class Client:
 	app = None
@@ -45,12 +45,17 @@ class Client:
 			self.order.reset()
 			self.menu = None
 			self.show_top_menu()
+		elif message.data.count(',') > 1 and message.data.split(",")[2] == 'order_supports':
+			self.process_supports()
+		elif message.data.count(',') > 0 and message.data.split(",")[1] == 'order_color':
+			self.message.order_id = message.data.split(",")[0]
+			self.client_color.new_message(self.message)
 		elif self.menu == self.client_model:
 			self.menu.new_message(message)
 		elif self.menu == self.client_color:
 			self.menu.new_message(message)
 		else:
-			self.GUI.messages.append(message)
+			self.GUI.messages_append(message)
 			if context == 'top_menu':
 				self.process_top_menu()
 			if context == 'supports':
@@ -66,7 +71,7 @@ class Client:
 		# TODO: add functionality
 
 	def show_supports(self, order_id):
-		self.context = 'supports'
+		# self.context = 'supports'
 		order = self.get_order(order_id)
 		self.GUI.tell_permanent(f'Оценка вашей модели "{order.name}" завершена.')
 		if order.support_time > 0:
@@ -104,7 +109,7 @@ class Client:
 			self.GUI.tell('Здесь вы можете загрузить свои чертежы или рисунки для создания по ним 3д модели.')
 
 	def process_supports(self):
-		self.context = ''
+		# self.context = ''
 		order_id = int(self.message.data.split(",")[1])
 		self.GUI.clear_order_chat(order_id)
 		my_order = self.get_order(order_id)

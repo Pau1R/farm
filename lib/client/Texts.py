@@ -75,7 +75,7 @@ class Texts:
 		return text
 
 	def supports_btns(self, order_id):
-		return [['Да, сам уберу', 'клиент,' + str(order_id)], ['Нет, уберите вы', 'продавец,' + str(order_id)]]
+		return [['Да, сам уберу', 'клиент,' + str(order_id) + ',order_supports'], ['Нет, уберите вы', 'продавец,' + str(order_id) + ',order_supports']]
 
 	color_btns = [['Согласен, перейти к предоплате', 'confirm'], ['Отменить заказ', 'cancel']]
 

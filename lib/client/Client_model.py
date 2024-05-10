@@ -2,7 +2,7 @@ import sys
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.clients.Texts import Texts
+from lib.client.Texts import Texts
 
 class Client_model:
 	app = None
@@ -24,7 +24,8 @@ class Client_model:
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
-		self.GUI.messages.append(message)
+		self.GUI.messages_append(message)
+		# self.GUI.messages.append(message)
 		self.message = message
 		context = self.context
 

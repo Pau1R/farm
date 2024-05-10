@@ -1,4 +1,4 @@
-from lib.clients.Texts import Texts
+from lib.client.Texts import Texts
 import json
 
 class Client_logic:

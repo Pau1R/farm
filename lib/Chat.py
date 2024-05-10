@@ -1,5 +1,5 @@
-from lib.employees.Employee import Employee
-from lib.clients.Client import Client
+from lib.employee.Employee import Employee
+from lib.client.Client import Client
 
 class Chat:
     app = None

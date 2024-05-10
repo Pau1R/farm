@@ -101,7 +101,39 @@
 
 # print( isinstance(diction,dict))
 
-from datetime import datetime
-cat = 'None'
 
-print(datetime.strptime(cat, '%m/%d/%y %H:%M:%S'))
+# class Gui:
+# 	messages = ['0']
+# 	name = ''
+# 	def messages_append(self, name, val):
+# 		self.name = name
+# 		# self.messages = val
+# 		# self.messages.append(val)
+# 		# self.messages.extend(val)
+# 		mes = [val]
+# 		self.messages = self.messages + [val]
+
+# class Client:
+# 	GUI = Gui()
+# 	GUI.name += 'client gui'
+
+# class App:
+# 	client = Client()
+# 	GUI = Gui()
+# 	GUI.name += 'app gui'
+# 	def run(self):
+# 		# self.GUI.messages.append('1')
+# 		self.GUI.messages_append('name', '1')
+# 		print(self.GUI.messages)
+# 		print(self.client.GUI.messages)
+# 		print(self.GUI.name)
+# 		print(self.client.GUI.name)
+
+
+# app = App()
+# app.run()
+
+try:
+	cat = 'asdf,asdf,asdf'
+	if cat.count(',') > 2:
+		print('yes')
