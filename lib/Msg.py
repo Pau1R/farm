@@ -12,6 +12,15 @@ class Message:
 	order_id = ''
 	general_clear = True
 
+	file1 = ''
+	file2 = ''
+	file3 = ''
+	file4 = ''
+	function = ''
+	btn_user_id = ''
+	btn_order_id = ''
+	btn_value = ''
+
 	def __init__(self, message):
 		# print('------------')
 		# print(message)
@@ -38,7 +47,27 @@ class Message:
 
 		if hasattr(message, 'data'):
 			self.type = 'button'
-			self.data = message.data
+			self.data = data
+			data = message.data
+			if self.data.startswith('!'):
+				address = data.split(",")[0]
+				address = data.split("!")[1]
+				if address.count(':') > 0:
+					self.file1 = address.split(":")[0]
+				if address.count(':') > 1:
+					self.file2 = address.split(":")[1]
+				if address.count(':') > 2:
+					self.file3 = address.split(":")[2]
+				if address.count(':') > 3:
+					self.file4 = address.split(":")[3]
+				if data.count(',') > 0:
+					self.function = data.split(",")[1]
+				if data.count(',') > 1:
+					self.btn_user_id = data.split(",")[2]
+				if data.count(',') > 2:
+					self.btn_order_id = data.split(",")[3]
+				if data.count(',') > 3:
+					self.btn_value = data.split(",")[4]
 		else:
 			if hasattr(message, 'content_type'):
 				if message.content_type == 'document':
@@ -62,6 +91,14 @@ class Message:
 			if message.caption != None:
 				self.caption = message.caption.strip()
 		
+
+		# !designer:validate:orders_design,
+		# !4:1:orders_design,button_value,sub_id
+		# !4:1,2,order_id,user_id,asdfasdfafasdfasdfasdfasdfasdsdfadfadff
+
+
+
+
 		# getting button presses
 
 		# print('creating Message. user_id:', self.user_id, 

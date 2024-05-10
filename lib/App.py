@@ -38,6 +38,7 @@ class App:
 
 	def new_message(self, message):                # find chat object and tell him to process incoming message
 		print('app.py new_message')
+		print(message)
 		message = Message(message)
 		self.chat = None
 		user_id = message.user_id
@@ -47,7 +48,6 @@ class App:
 				self.chat = obj
 		if self.chat == None:
 			self.chat = self.create_chat(message)
-
 		self.chat.new_message(message)                  # process message data
 
 		# self.remove_inactive_chats()
