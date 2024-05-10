@@ -24,7 +24,6 @@ class ContainerGUI:
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.GUI.messages_append(message)
-		# self.GUI.messages.append(message)
 		self.message = message
 		context = self.context
 

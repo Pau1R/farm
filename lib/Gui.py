@@ -83,6 +83,12 @@ class Gui:
 		self.messages_append(message)
 		return message
 
+	def tell_buttons_photo(self, caption, photo, bts, strict):
+		buttons = self.prepare_buttons(bts, strict)
+		message = Message(self.app.bot.send_photo(self.chat.user_id, photo=photo, caption=caption, reply_markup=buttons))
+		self.messages_append(message)
+		return message
+
 	def prepare_buttons(self, bts_, strict_):
 		buttons = tbot.InlineKeyboardMarkup()
 		max_row_text_length = 30

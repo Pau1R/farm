@@ -53,14 +53,6 @@ class Client_color:
 		message.general_clear = False
 		message.order_id = self.message.order_id
 
-		# - spools:
-		# 	- тип
-		# 	- цвет
-		# 	- остаток
-		# 	- бронь
-
-		# для каждой spools где тип и (остаток-бронь)>(int(order.weight)*order.quantity+15грамм)
-		# list of buttons
 		# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
 
 #---------------------------- PROCESS ----------------------------
@@ -68,6 +60,10 @@ class Client_color:
 	def process_colors(self):
 		o = ''
 		print('process_colors')
+
+		# show color sample and buttons: Подтвердить выбор цвета, Назад
+
+		# move on to payment
 
 #---------------------------- LOGIC ----------------------------
 

@@ -4,6 +4,7 @@ from lib.equipment.Extruder import Extruder
 from lib.equipment.Location import Location
 from lib.equipment.Printer import Printer
 from lib.equipment.Spool import Spool
+from lib.equipment.Color import Color
 from lib.equipment.Surface import Surface
 from datetime import date
 
@@ -18,6 +19,7 @@ class Equipment:
 	locations = []
 	printers = []
 	spools = []
+	colors = []
 	surfaces = []
 
 	# equipment = None
@@ -28,6 +30,7 @@ class Equipment:
 	location = None
 	printer = None
 	spool = None
+	color = None
 	surface = None
 
 	def init(self, db):
@@ -50,7 +53,9 @@ class Equipment:
 		for data in self.db.get_spools():
 			spool = Spool(self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9])
 			self.spools.append(spool)
-
+		for data in self.db.get_colors():
+			color = Color(self.db, data[0], data[1], data[2], data[3])
+			self.colors.append(color)
 		for data in self.db.get_surfaces():
 			surface = Surface(self.db, data[0], data[1], data[2])
 			self.surfaces.append(surface)
@@ -61,6 +66,7 @@ class Equipment:
 		self.sort_locations()
 		self.sort_printers()
 		self.sort_spools()
+		self.sort_colors()
 		self.sort_surfaces()
 
 	def get_next_free_id(self, equipment):
@@ -202,6 +208,16 @@ class Equipment:
 					previous_weight = 0
 			mini.update({spool.color: previous_weight + spool.weight})
 		return diction
+
+	def create_new_color(self, name, samplePhoto):
+		id = self.get_next_free_id(self.colors)
+		color = Color(self.db, id, date.today(), name, samplePhoto)
+		self.db.add_color(color)
+		self.colors.append(color)
+		return color
+
+	def sort_colors(self):
+		self.colors.sort(key=self.get_object_id)
 
 	def create_new_surface(self, type):
 		id = self.get_next_free_id(self.surfaces)

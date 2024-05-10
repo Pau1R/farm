@@ -69,6 +69,11 @@ class Database:
 			dried TEXT,
 			brand TEXT,
 			used TEXT"""
+		color = """
+			id INTEGER PRIMARY KEY,
+			created DATETIME,
+			name TEXT,
+			samplePhoto TEXT"""
 		surface = """
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
@@ -107,6 +112,7 @@ class Database:
 		self.cursor.execute(create + 'location (' + location + ')')
 		self.cursor.execute(create + 'printer (' + printer + ')')
 		self.cursor.execute(create + 'spool (' + spool + ')')
+		self.cursor.execute(create + 'color (' + color + ')')
 		self.cursor.execute(create + 'surface (' + surface + ')')
 		self.cursor.execute(create + 'order_ (' + order + ')')
 		self.db.commit()
@@ -336,6 +342,30 @@ class Database:
 
 	def remove_spool(self, id):
 		self.cursor.execute('DELETE FROM spool WHERE id=?', (id,))
+		self.db.commit()
+
+	def get_colors(self):
+		self.cursor.execute('SELECT id, created, name, samplePhoto FROM color')
+		sql = self.cursor.fetchall()
+		colors = []
+		for color in sql:
+			colors.append([str(color[0]), color[1], color[2], color[3]])
+		return colors
+
+	def add_color(self, color):
+		self.cursor.execute('INSERT INTO color VALUES (?,Null,Null,Null)', (color.id,))
+		self.db.commit()
+		self.update_color(color)
+
+	def update_color(self, color):
+		values = 'created = "' + str(color.date) + '", '
+		values += 'name = "' + color.name + '", '
+		values += 'samplePhoto = "' + color.samplePhoto + '" '
+		self.cursor.execute('UPDATE color SET ' + values + ' WHERE id = ' + str(color.id))
+		self.db.commit()
+
+	def remove_color(self, id):
+		self.cursor.execute('DELETE FROM color WHERE id=?', (id,))
 		self.db.commit()
 	
 	def get_surfaces(self):
