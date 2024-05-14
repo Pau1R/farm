@@ -1,28 +1,44 @@
 from lib.employee.Employee import Employee
 from lib.client.Client import Client
+from lib.Gui import Gui
 
 class Chat:
     app = None
+    GUI = None
+    message = None
     user_id: str
     is_employee = False
     created = None
     get_employed = False
     user = None
+    context = ''
 
     def __init__(self, app, user_id, isEmployee, created):
         self.app = app
         self.user_id = user_id
         self.is_employee = isEmployee
         self.created = created
+        self.GUI = Gui(app, self, '-1')
 
         self.create_user()
 
     def new_message(self, message):
-        # if message.text == '/start':
-        #     self.user = None
+        self.GUI.clear_chat()
+        self.message = message
+
         if self.user == None:
             self.create_user()
-        self.user.new_message(message)
+
+        if self.context.startswith('~'):
+            message.data_special_format(self.context)
+            self.context = ''
+        if message.file1 == '-1' and message.function == '1':
+            self.process_warn_user()
+        elif message.type == 'button' and self.context.startswith('~'):
+            self.show_warn_user()
+            return
+        else:
+            self.user.new_message(message)
 
     def create_user(self):
         if self.is_employee:
@@ -33,3 +49,16 @@ class Chat:
     def become_employee(self):
         self.is_employee = True
         self.get_employed = False
+
+    def set_context(self, address, function):
+        self.context = '~' + address + '|' + str(function) + '||'
+
+    def show_warn_user(self):
+        text = 'Вы нажали на кнопку во время ожидания ввода данных. Продолжить действие или ввести данные?'
+        buttons = ['Продолжить действие', 'Ввести данные']
+        self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
+
+    def process_warn_user(self):
+        if self.message.btn_data == 'Продолжить действие':
+            self.context = ''
+            self.new_message(self.message)
