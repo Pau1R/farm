@@ -1,4 +1,9 @@
 class Texts:
+	chat = None
+	address = ''
+
+	def __init__(self, chat, address):
+		self.chat = chat
 
 #---------------------------- OWNER TEXTS ----------------------------
 
@@ -25,7 +30,7 @@ class Texts:
 
 	spool_diameter = 1.75
 	spool_types = ['PLA', 'PETG', 'ABS', 'PC', 'TPE']
-	spool_densitys = [1.24, 1.27, 1.04, 1.2, 1.2]
+	spool_densities = [1.24, 1.27, 1.04, 1.2, 1.2]
 
 	spool_weight = ['0.1 кг', '0.5 кг', '0.7 кг', '0.9 кг', '1 кг', '2 кг', '2.5 кг', '3 кг']
 

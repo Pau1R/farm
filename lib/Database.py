@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date
 from datetime import datetime
 import os
 from lib.Chat import Chat

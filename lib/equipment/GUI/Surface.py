@@ -5,48 +5,50 @@ from lib.Gui import Gui
 from lib.Texts import Texts
 
 class SurfaceGUI:
+	address = '1/2/8'
+
 	app = None
 	chat = None
 	GUI = None
 	surface = None
-	texts = Texts()
+	texts = None
+	
+	context = ''
+	last_data = ''
 
 	type = ''
 
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
-		self.GUI = Gui(app, chat)
+		self.GUI = Gui(app, chat, self.address)
+		self.texts = Texts(chat, '1/2/1')
 
 	def first_message(self, message):
-		self.context = 'first_message'
-		self.new_message(message)
+		self.show_top_menu()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
-		self.GUI.messages_append(message)
 		self.message = message
-		context = self.context
 
-		if context == 'first_message':
-			self.show_top_menu()
-		elif context == 'top_menu':
-			self.process_top_menu()
-
-		elif context == 'surface':
-			self.process_surface()
-
-		elif context == 'add_new_surface':
-			self.process_add_new_surface()
-		elif context == 'add_confirmation':
-			self.process_add_confirmation()
-		elif context == 'delete_confirmation':
-			self.process_delete_confirmation()
+		if message.data_special_format and (message.data == '' or message.data != self.last_data):
+			self.last_data = message.data
+			if message.function == '1':
+				self.process_top_menu()
+			elif message.function == '2':
+				self.process_surface()
+			elif message.function == '3':
+				self.process_add_new_surface()
+			elif message.function == '4':
+				self.process_add_confirmation()
+			elif message.function == '5':
+				self.process_delete_confirmation()
+		if message.type == 'text':
+			self.GUI.messages_append(message)
 
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
-		self.context = 'top_menu'
 		if len(self.app.equipment.surfaces) > 0:
 			text = 'Все поверхности:'
 		else:
@@ -55,63 +57,50 @@ class SurfaceGUI:
 		for surface in self.app.equipment.surfaces:
 			buttons.append([f'{surface.id}: {surface.type}', surface.id]) 
 		buttons.extend(['Добавить', 'Назад'])
-		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'])
+		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_surface(self):
-		self.context = 'surface'
 		text = f'номер поверхности: {self.surface.id}\nдата добавления: {self.surface.date}\n'
 		text += f'тип: {self.surface.type}'
-		buttons = []
-		buttons.extend(['Удалить', 'Назад'])
-		self.GUI.tell_buttons(text, buttons, ['Удалить', 'Назад'])
+		buttons = ['Удалить', 'Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
 	def show_add_new_surface(self):
-		self.context = 'add_new_surface'
-		self.GUI.tell_buttons('Выберите тип поверхности', self.texts.surface_types.copy(), [])
+		self.GUI.tell_buttons('Выберите тип поверхности', self.texts.surface_types.copy(), [], 3, 0)
 
 	def show_add_confirmation(self):
-		self.context = 'add_confirmation'
-		buttons = []
-		buttons.append('Подтверждаю')
-		buttons.append('Отменить добавление')
-		self.GUI.tell_buttons('Подтвердите добавление поверхности', buttons, ['Подтверждаю', 'Отменить добавление'])
+		buttons = ['Подтверждаю', 'Отменить добавление']
+		self.GUI.tell_buttons('Подтвердите добавление поверхности', buttons, buttons, 4, 0)
 
 	def show_delete_confirmation(self):
-		self.context = 'delete_confirmation'
-		buttons = []
-		buttons.append('Подтверждаю')
-		buttons.append('Отменить удаление')
-		self.GUI.tell_buttons('Подтвердите удаление поверхности', buttons, ['Подтверждаю', 'Отменить удаление'])
+		buttons = ['Подтверждаю', 'Отменить удаление']
+		self.GUI.tell_buttons('Подтвердите удаление поверхности', buttons, buttons, 5, 0)
 
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
-		self.context = ''
-		if self.message.data == 'Добавить':
+		if self.message.btn_data == 'Добавить':
 			self.show_add_new_surface()
-		elif self.message.data == 'Назад':
+		elif self.message.btn_data == 'Назад':
 			self.app.chat.user.employee.show_equipment()
 		else:
 			for surface in self.app.equipment.surfaces:
-				if self.message.data == surface.id:
+				if self.message.btn_data == surface.id:
 					self.surface = surface
 					self.show_surface()
 
 	def process_surface(self):
-		self.context = ''
-		if self.message.data == 'Удалить':
+		if self.message.btn_data == 'Удалить':
 			self.show_delete_confirmation()
-		elif self.message.data == 'Назад':
+		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 
 	def process_add_new_surface(self):
-		self.context = ''
-		self.type = self.message.data
+		self.type = self.message.btn_data
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
-		self.context = ''
-		if self.message.data == 'Подтверждаю':
+		if self.message.btn_data == 'Подтверждаю':
 			self.surface = self.app.equipment.create_new_surface(self.type)
 			text = f'Создана новая поверхность:\nномер: {self.surface.id}\nтип: {self.surface.type}\n\nНе забудьте нанести номер на поверхность.'
 			self.GUI.tell(text)
@@ -119,8 +108,7 @@ class SurfaceGUI:
 		self.show_top_menu()
 
 	def process_delete_confirmation(self):
-		self.context = ''
-		if self.message.data == 'Подтверждаю':
+		if self.message.btn_data == 'Подтверждаю':
 			self.GUI.tell(f'Поверхность {self.surface.id} удалена')
 			self.app.equipment.remove_surface(self.surface.id)
 			self.surface = None

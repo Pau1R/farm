@@ -38,7 +38,6 @@ class App:
 
 	def new_message(self, message):                # find chat object and tell him to process incoming message
 		print('app.py new_message')
-		print(message)
 		message = Message(message)
 		self.chat = None
 		user_id = message.user_id
@@ -69,3 +68,25 @@ class App:
 			for obj in self.chats:
 				if (today - obj.last_access_date).days >= 10: # if chat hasn't activity last 10 days, remove object
 					chats.remove(obj)
+
+
+# app structure for buttons:
+# 1 client 
+#	1 client_model
+#	2 client_color
+#	3 client_logic
+# 1 Employee
+#	1 Owner
+#	2 Admin
+#     1 container
+#     2 dryer
+#     3 extruder
+#     4 location
+#     5 printer
+#     6 spool
+#     7 color
+#     8 surface
+#	3 Operator
+#	4 Designer
+#	  1 Validate
+#	5 Delivery

@@ -5,6 +5,8 @@ from lib.Gui import Gui
 from lib.client.Texts import Texts
 
 class Client_color:
+	address = '1/2'
+	
 	app = None
 	chat = None
 	message = None
@@ -17,29 +19,29 @@ class Client_color:
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
-		self.GUI = Gui(app, chat)
+		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(app)
 
 	def first_message(self, message):
-		order_id = int(message.data.split(",")[1])
-		self.order = self.get_order(order_id)
+		self.order = self.get_order(message.instance_id)
+		self.show_colors()
 
 		self.context = 'first_message'
 		self.new_message(message)
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
-		self.GUI.clear_order_chat(message.order_id)
-		self.GUI.messages_append(message)
+		self.GUI.clear_order_chat(message.instance_id)
 		self.message = message
-		context = self.context
 
-		if context == 'first_message':
-			self.show_colors()
-		elif context == 'colors':
-			self.process_colors()
-		elif context == 'color':
-			self.process_color()
+		if message.data_special_format and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
+			self.last_data = message.data
+			if message.function == '1':
+				self.process_colors()
+			elif message.function == '2':
+				self.process_color()
+		if message.type == 'text':
+			self.GUI.messages_append(message)
 		
 #---------------------------- SHOW ----------------------------
 
@@ -57,7 +59,7 @@ class Client_color:
 
 		text = self.texts.price_text(int(self.message.order_id))
 		text += '\n\nВыберите цвет'
-		message = self.GUI.tell_buttons(text, buttons, buttons)
+		message = self.GUI.tell_buttons(text, buttons, buttons, 1, self.order.order_id)
 		message.general_clear = False
 		message.order_id = self.message.order_id
 
@@ -65,7 +67,7 @@ class Client_color:
 		self.context = 'color'
 		buttons = [['Подтверждаю выбор цвета', str(self.message.order_id) + ',order_color,yes']]
 		buttons.append (['Назад', str(self.message.order_id) + ',order_color,no'])
-		self.GUI.tell_photo_buttons(self.color.name, self.color.samplePhoto, buttons, buttons)
+		self.GUI.tell_photo_buttons(self.color.name, self.color.samplePhoto, buttons, buttons, 2, self.order.order_id)
 
 		# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
 

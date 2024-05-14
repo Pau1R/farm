@@ -12,14 +12,15 @@ class Message:
 	order_id = ''
 	general_clear = True
 
+	data_special_format = False
 	file1 = ''
 	file2 = ''
 	file3 = ''
 	file4 = ''
 	function = ''
 	btn_user_id = ''
-	btn_order_id = ''
-	btn_value = ''
+	instance_id = ''
+	btn_data = ''
 
 	def __init__(self, message):
 		# print('------------')
@@ -47,27 +48,8 @@ class Message:
 
 		if hasattr(message, 'data'):
 			self.type = 'button'
-			self.data = data
-			data = message.data
-			if self.data.startswith('!'):
-				address = data.split(",")[0]
-				address = data.split("!")[1]
-				if address.count(':') > 0:
-					self.file1 = address.split(":")[0]
-				if address.count(':') > 1:
-					self.file2 = address.split(":")[1]
-				if address.count(':') > 2:
-					self.file3 = address.split(":")[2]
-				if address.count(':') > 3:
-					self.file4 = address.split(":")[3]
-				if data.count(',') > 0:
-					self.function = data.split(",")[1]
-				if data.count(',') > 1:
-					self.btn_user_id = data.split(",")[2]
-				if data.count(',') > 2:
-					self.btn_order_id = data.split(",")[3]
-				if data.count(',') > 3:
-					self.btn_value = data.split(",")[4]
+			self.data = message.data
+			self.data_special_format(message.data)
 		else:
 			if hasattr(message, 'content_type'):
 				if message.content_type == 'document':
@@ -90,11 +72,42 @@ class Message:
 		if hasattr(message, 'caption'):
 			if message.caption != None:
 				self.caption = message.caption.strip()
-		
 
-		# !designer:validate:orders_design,
-		# !4:1:orders_design,button_value,sub_id
-		# !4:1,2,order_id,user_id,asdfasdfafasdfasdfasdfasdfasdsdfadfadff
+	def data_special_format(self, data):
+		if data.startswith('~'):
+			self.data_special_format = True
+			address = data.split('|')[0]
+			address = address.split("~")[1]
+			# if address.count('/') >= 0:
+			self.file1 = address.split('/')[0]
+			if address.count('/') > 0:
+				self.file2 = address.split('/')[1]
+			if address.count('/') > 1:
+				self.file3 = address.split('/')[2]
+			if address.count('/') > 2:
+				self.file4 = address.split('/')[3]
+			if data.count('|') > 0:
+				self.function = data.split('|')[1]
+			if data.count('|') > 1:
+				self.instance_id = data.split('|')[2]
+			if data.count('|') > 2:
+				self.btn_data = data.split('|')[3]
+
+# BUTTON DATA SPECIAL FORMAT SPECIFICATIONS:
+# Special chars:
+# ~ - data field is in special format
+# | - global delimeter
+# / - file(class) path delimeter
+
+# data field parts:
+#   1 - path
+#   2 - function id
+#   3 - instance_id
+#   4 - button data
+
+# examples:
+# ~4/1/3|2|instance_id|yes
+
 
 
 

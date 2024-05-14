@@ -3,10 +3,14 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 
 class ContainerGUI:
+	address = '1/2/1'
+
 	app = None
 	chat = None
 	GUI = None
 	container = None
+
+	last_data = ''
 
 	types = ['Сухой', 'Обычный']
 	type = ''
@@ -15,37 +19,35 @@ class ContainerGUI:
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
-		self.GUI = Gui(app, chat)
+		self.GUI = Gui(app, chat, self.address)
 
 	def first_message(self, message):
-		self.context = 'first_message'
-		self.new_message(message)
+		self.show_top_menu()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
-		self.GUI.messages_append(message)
 		self.message = message
-		context = self.context
 
-		if context == 'first_message':
-			self.show_top_menu()
-		elif context == 'top_menu':
-			self.process_top_menu()
-		elif context == 'container':
-			self.process_container()
-		elif context == 'add_new_container':
-			self.process_add_new_container()
-		elif context == 'add_new_container_capacity':
-			self.process_add_new_container_capacity()
-		elif context == 'add_confirmation':
-			self.process_add_confirmation()
-		elif context == 'delete_confirmation':
-			self.process_delete_confirmation()
+		if message.data_special_format and (message.data == '' or message.data != self.last_data):
+			self.last_data = message.data
+			if message.function == '1':
+				self.process_top_menu()
+			elif message.function == '2':
+				self.process_container()
+			elif message.function == '3':
+				self.process_add_new_container()
+			elif message.function == '4':
+				self.process_add_new_container_capacity()
+			elif message.function == '5':
+				self.process_add_confirmation()
+			elif message.function == '6':
+				self.process_delete_confirmation()
+		if message.type == 'text':
+			self.GUI.messages_append(message)
 
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
-		self.context = 'top_menu'
 		if len(self.app.equipment.containers) > 0:
 			text = 'Все ящики:'
 		else:
@@ -55,78 +57,62 @@ class ContainerGUI:
 			buttons.append([container.id + ': ' + container.type, container.id]) 
 		buttons.append('Добавить')
 		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'])
+		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_container(self):
-		self.context = 'container'
 		text = f'Ящик номер {self.container.id}\nдата добавления: {self.container.date}\nтип: {self.container.type}\nемкость: {self.container.capacity} катушек'
-		buttons = []
-		buttons.append('Удалить')
-		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, ['Удалить', 'Назад'])
+		buttons = ['Удалить', 'Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 2, self.container.id)
 
 	def show_add_new_container(self):
-		self.context = 'add_new_container'
 		buttons = []
 		for type in self.types:
 			buttons.append(type)
-		self.GUI.tell_buttons('Выберите тип добавляемого ящика:', buttons, [])
+		self.GUI.tell_buttons('Выберите тип добавляемого ящика:', buttons, [], 3, 0)
 
 	def show_add_new_container_capacity(self):
-		self.context = 'add_new_container_capacity'
 		buttons = []
 		for capacity in range(0,10):
 			buttons.append(str(capacity))
-		self.GUI.tell_buttons('Выберите сколько катушек вмещает ящик:', buttons, [])
+		self.GUI.tell_buttons('Выберите сколько катушек вмещает ящик:', buttons, [], 4, 0)
 
 	def show_add_confirmation(self):
-		self.context = 'add_confirmation'
-		buttons = []
-		buttons.append('Подтверждаю')
-		buttons.append('Отменить добавление')
-		self.GUI.tell_buttons('Подтвердите добавление ящика', buttons, ['Подтверждаю', 'Отменить добавление'])
+		buttons = ['Подтверждаю', 'Отменить добавление']
+		self.GUI.tell_buttons('Подтвердите добавление ящика', buttons, buttons, 5, 0)
 
 	def show_delete_confirmation(self):
-		self.context = 'delete_confirmation'
-		buttons = []
-		buttons.append('Подтверждаю')
-		buttons.append('Отменить удаление')
-		self.GUI.tell_buttons('Подтвердите удаление ящика', buttons, ['Подтверждаю', 'Отменить удаление'])
+		buttons = ['Подтверждаю', 'Отменить удаление']
+		self.GUI.tell_buttons('Подтвердите удаление ящика', buttons, buttons, 6, 0)
 
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
-		self.context = ''
-		if self.message.data == 'Добавить':
+		if self.message.btn_data == 'Добавить':
 			self.show_add_new_container()
-		elif self.message.data == 'Назад':
+		elif self.message.btn_data == 'Назад':
 			self.app.chat.user.employee.show_equipment()
 		else:
 			for container in self.app.equipment.containers:
-				if self.message.data == container.id:
+				if self.message.btn_data == container.id:
 					self.container = container
 					self.show_container()
 
 	def process_container(self):
-		self.context = ''
-		if self.message.data == 'Удалить':
+		if self.message.btn_data == 'Удалить':
 			self.show_delete_confirmation()
-		elif self.message.data == 'Назад':
+		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 
 	def process_add_new_container(self):
-		self.context = ''
-		self.type = self.message.data
+		self.type = self.message.btn_data
 		self.show_add_new_container_capacity()
 
 	def process_add_new_container_capacity(self):
-		self.context = ''
-		self.capacity = self.message.data
+		self.capacity = self.message.btn_data
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
-		self.context = ''
-		if self.message.data == 'Подтверждаю':
+		if self.message.btn_data == 'Подтверждаю':
 			self.container = self.app.equipment.create_new_container(self.type, self.capacity)
 			self.GUI.tell(f'Создан новый ящик\nномер: {self.container.id},\nтип: {self.container.type},\nемкость: {self.container.capacity} катушек\n\nНе забудьте нанести номер на ящик.')
 		self.type = ''
@@ -134,8 +120,7 @@ class ContainerGUI:
 		self.show_top_menu()
 
 	def process_delete_confirmation(self):
-		self.context = ''
-		if self.message.data == 'Подтверждаю':
+		if self.message.btn_data == 'Подтверждаю':
 			self.GUI.tell(f'Ящик {self.container.id} удален')
 			self.app.equipment.remove_container(self.container.id)
 			self.container = None

@@ -6,10 +6,12 @@ class Gui:
 	messages = []
 	app = None
 	chat = None
+	address = ''
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 
 	def clear_chat(self):
 		self.remove_messages(self.messages)
@@ -62,8 +64,9 @@ class Gui:
 	def tell_id(self, id, text):
 		Message(self.app.bot.send_message(id, text))
 
-	def tell_document_buttons(self, document, caption, bts, strict):
-		buttons = self.prepare_buttons(bts, strict)
+	def tell_document_buttons(self, document, caption, bts, strict, function_id, object_id):
+		buttons = self.buttons_address(bts, function_id, object_id)
+		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption, reply_markup=buttons))
 		self.messages_append(message)
 
@@ -78,26 +81,45 @@ class Gui:
 		self.messages_append(message)
 		return message
 
-	def tell_photo_buttons(self, caption, photo, bts, strict):
+	def tell_photo_buttons(self, caption, photo, bts, strict, function_id, object_id):
 		if photo == '':
 			self.tell_buttons(caption, bts, strict)
-		buttons = self.prepare_buttons(bts, strict)
+		buttons = self.buttons_address(bts, function_id, object_id)
+		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_photo(self.chat.user_id, photo=photo, caption=caption, reply_markup=buttons))
 		self.messages_append(message)
 		return message
 
-	def tell_buttons(self, text, bts, strict):
-		buttons = self.prepare_buttons(bts, strict)
+	def tell_buttons(self, text, bts, strict, function_id, object_id):
+		buttons = self.buttons_address(bts, function_id, object_id)
+		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_message(self.chat.user_id, text, reply_markup=buttons))
 		self.messages_append(message)
 		return message
 
-	def tell_buttons_id(self, id, text, bts, strict):
-		buttons = self.prepare_buttons(bts, strict)
+	def tell_buttons_id(self, id, text, bts, strict, function_id, object_id):
+		buttons = self.buttons_address(bts, function_id, object_id)
+		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_message(id, text, reply_markup=buttons))
 		self.messages_append(message)
 		return message
 
+	def buttons_address(self, buttons, function_id, object_id):
+		new_buttons = []
+		for button in buttons:
+			btn = ['','']
+			btn[1] = '~' + self.address + '|' + str(function_id) + '|' + str(object_id) + '|'
+			if type(button) is list:
+				btn[0] = button[0]
+				if len(button) > 1:
+					btn[1] = btn[1] + str(button[1])
+				else:
+					btn[1] = btn[1] + button[0]
+			else:
+				btn[0] = button
+				btn[1] = btn[1] + button
+			new_buttons.append(btn)
+		return new_buttons
 
 	def prepare_buttons(self, bts_, strict_):
 		buttons = tbot.InlineKeyboardMarkup()

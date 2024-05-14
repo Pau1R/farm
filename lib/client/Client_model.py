@@ -5,6 +5,8 @@ from lib.Gui import Gui
 from lib.client.Texts import Texts
 
 class Client_model:
+	address = '1/1'
+
 	app = None
 	chat = None
 	order = None
@@ -14,7 +16,7 @@ class Client_model:
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
-		self.GUI = Gui(app, chat)
+		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(app)
 
 	def first_message(self, message):
