@@ -99,7 +99,7 @@ class ExtruderGUI:
 		if self.message.btn_data == 'Добавить':
 			self.show_add_new_extruder()
 		elif self.message.btn_data == 'Назад':
-			self.app.chat.user.employee.show_equipment()
+			self.app.chat.user.admin.show_equipment()
 		else:
 			for extruder in self.app.equipment.extruders:
 				if self.message.btn_data == extruder.id:

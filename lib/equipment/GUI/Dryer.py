@@ -116,7 +116,7 @@ class DryerGUI:
 		if self.message.btn_data == 'Добавить':
 			self.show_add_new_dryer()
 		elif self.message.btn_data == 'Назад':
-			self.app.chat.user.employee.show_equipment()
+			self.app.chat.user.admin.show_equipment()
 		else:
 			for dryer in self.app.equipment.dryers:
 				if self.message.btn_data == dryer.id:

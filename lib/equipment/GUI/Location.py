@@ -85,7 +85,7 @@ class LocationGUI:
 		if self.message.btn_data == 'Добавить':
 			self.show_add_new_location()
 		elif self.message.btn_data == 'Назад':
-			self.app.chat.user.employee.show_equipment()
+			self.app.chat.user.admin.show_equipment()
 		else:
 			for location in self.app.equipment.locations:
 				if self.message.btn_data == location.id:

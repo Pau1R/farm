@@ -132,7 +132,7 @@ class SpoolGUI:
 		if self.message.btn_data == 'Добавить':
 			self.show_add_new_spool()
 		elif self.message.btn_data == 'Назад':
-			self.app.chat.user.employee.show_equipment()
+			self.app.chat.user.admin.show_equipment()
 		else:
 			for spool in self.app.equipment.spools:
 				if self.message.btn_data == spool.id:

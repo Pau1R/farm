@@ -79,7 +79,7 @@ class PrinterGUI:
 		if self.message.btn_data == 'Добавить':
 			self.show_add_new_printer()
 		elif self.message.btn_data == 'Назад':
-			self.app.chat.user.employee.show_equipment()
+			self.app.chat.user.admin.show_equipment()
 		else:
 			for printer in self.app.equipment.printers:
 				if self.message.btn_data == printer.id:

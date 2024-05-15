@@ -310,11 +310,11 @@ class Database:
 		sql = self.cursor.fetchall()
 		printers = []
 		for printer in sql:
-			printers.append([str(printer[0]), printer[1], printer[2], printer[3]])
+			printers.append([str(printer[0]), printer[1], printer[2]])
 		return printers
 
 	def add_printer(self, printer):
-		self.cursor.execute('INSERT INTO printer VALUES (?,?,?,?)', (printer.id, date.today(), printer.name))
+		self.cursor.execute('INSERT INTO printer VALUES (?,?,?)', (printer.id, date.today(), printer.name))
 		self.db.commit()
 
 	def remove_printer(self, id):

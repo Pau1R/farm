@@ -82,7 +82,7 @@ class SurfaceGUI:
 		if self.message.btn_data == 'Добавить':
 			self.show_add_new_surface()
 		elif self.message.btn_data == 'Назад':
-			self.app.chat.user.employee.show_equipment()
+			self.app.chat.user.admin.show_equipment()
 		else:
 			for surface in self.app.equipment.surfaces:
 				if self.message.btn_data == surface.id:

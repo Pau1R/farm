@@ -12,6 +12,7 @@ class Chat:
     get_employed = False
     user = None
     context = ''
+    message_pause = None
 
     def __init__(self, app, user_id, isEmployee, created):
         self.app = app
@@ -29,14 +30,16 @@ class Chat:
         if self.user == None:
             self.create_user()
 
-        if self.context.startswith('~'):
-            message.data_special_format(self.context)
-            self.context = ''
         if message.file1 == '-1' and message.function == '1':
             self.process_warn_user()
-        elif message.type == 'button' and self.context.startswith('~'):
-            self.show_warn_user()
             return
+        elif self.context.startswith('~'):
+            if message.type == 'button':
+                self.show_warn_user()
+            else:
+                message.data_special_format(self.context)
+                self.context = ''
+                self.user.new_message(message)
         else:
             self.user.new_message(message)
 
@@ -54,6 +57,7 @@ class Chat:
         self.context = '~' + address + '|' + str(function) + '||'
 
     def show_warn_user(self):
+        self.message_pause = self.message
         text = 'Вы нажали на кнопку во время ожидания ввода данных. Продолжить действие или ввести данные?'
         buttons = ['Продолжить действие', 'Ввести данные']
         self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
@@ -61,4 +65,6 @@ class Chat:
     def process_warn_user(self):
         if self.message.btn_data == 'Продолжить действие':
             self.context = ''
-            self.new_message(self.message)
+            self.message.file1 = ''
+            self.new_message(self.message_pause)
+            self.message_pause = None
