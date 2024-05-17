@@ -26,9 +26,6 @@ class Client_color:
 		self.order = self.get_order(message.instance_id)
 		self.show_colors()
 
-		self.context = 'first_message'
-		self.new_message(message)
-
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.GUI.clear_order_chat(message.instance_id)
@@ -55,18 +52,18 @@ class Client_color:
 					colors.append(spool.color)
 		colors = list(dict.fromkeys(colors))
 		for color in colors:
-			buttons.append([color, str(self.message.order_id) + ',order_color,' + color])
+			buttons.append([color])
 
 		text = self.texts.price_text(int(self.message.order_id))
 		text += '\n\nВыберите цвет'
-		message = self.GUI.tell_buttons(text, buttons, buttons, 1, self.order.order_id)
+		message = self.GUI.tell_buttons(text, buttons, buttons, 1, self.order.order_id, 1, self.order.order_id)
 		message.general_clear = False
 		message.order_id = self.message.order_id
 
 	def show_color(self):
 		self.context = 'color'
-		buttons = [['Подтверждаю выбор цвета', str(self.message.order_id) + ',order_color,yes']]
-		buttons.append (['Назад', str(self.message.order_id) + ',order_color,no'])
+		buttons = [['Подтверждаю выбор цвета', 'yes']]
+		buttons.append ('Назад')
 		self.GUI.tell_photo_buttons(self.color.name, self.color.samplePhoto, buttons, buttons, 2, self.order.order_id)
 
 		# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
@@ -75,7 +72,8 @@ class Client_color:
 
 	def process_colors(self):
 		self.context = ''
-		name = self.message.data.split(",")[2]
+		# name = self.message.data.split(",")[2]
+		name = self.message.btn_data
 		for color in self.app.equipment.colors:
 			if color.name == name:
 				self.color = color
@@ -86,8 +84,9 @@ class Client_color:
 
 	def process_color(self):
 		self.context = ''
-		if self.message.data.split(",")[2] == 'yes':
-			self.chat.user.show_price(int(self.message.data.split(",")[0]))
+		if self.message.btn_data == 'yes':
+		# if self.message.data.split(",")[2] == 'yes':
+			self.chat.user.show_price(int(self.message.instance_id))
 			# self.GUI.tell('Благодарим ')
 			# move on to payment
 		else:

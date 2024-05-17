@@ -21,49 +21,52 @@ class Client_model:
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
-		self.context = 'first_message'
-		self.new_message(message)
+
+		self.show_name()
+		# self.process_file()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
-		self.GUI.messages_append(message)
 		self.message = message
-		context = self.context
 
-		if context == 'first_message':
-			# self.show_name()
-			self.process_file()
-		elif context == 'name':
-			self.process_name()
-		elif context == 'quantity':
-			self.process_quantity()
-		elif context == 'conditions':
-			self.process_conditions()
-		elif context == 'comment':
-			self.process_comment()
-		elif context == 'file':
-			self.process_file()
+		if message.data_special_format and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
+			self.last_data = message.data
+			if message.function == '1':
+				self.process_name()
+			elif message.function == '2':
+				self.process_quantity()
+			elif message.function == '3':
+				self.process_conditions()
+			elif message.function == '4':
+				self.process_comment()
+			elif message.function == '5':
+				self.process_file()
+		if message.type == 'text' or self.message.type == 'document':
+			self.GUI.messages_append(message)
 
 #---------------------------- SHOW ----------------------------
 
 	def show_name(self):
-		self.context = 'name'
+		self.chat.set_context(self.address, 1)
 		self.GUI.tell(self.texts.model_name)
 
 	def show_quantity(self):
-		self.context = 'quantity'
-		self.GUI.tell_buttons(self.texts.model_quantity, self.texts.model_quantity_buttons.copy(), ['1', '2'])
+		text = self.texts.model_quantity
+		buttons = self.texts.model_quantity_buttons.copy()
+		self.GUI.tell_buttons(text, buttons, ['1', '2'], 2, self.order.order_id)
 
 	def show_conditions(self):
-		self.context = 'conditions'
-		self.GUI.tell_buttons(self.texts.model_conditions, self.texts.model_conditions_buttons.copy(), [])
+		text = self.texts.model_conditions
+		buttons = self.texts.model_conditions_buttons.copy()
+		self.GUI.tell_buttons(text, buttons, [], 3, self.order.order_id)
 
 	def show_comment(self):
-		self.context = 'comment'
-		self.GUI.tell_buttons(self.texts.model_comment, ['Комментариев к заказу не имею'], [])
+		text = self.texts.model_comment
+		buttons = ['Комментариев к заказу не имею']
+		self.GUI.tell_buttons(text, buttons, [], 4, self.order.order_id)
 
 	def show_file(self):
-		self.context = 'file'
+		self.chat.set_context(self.address, 5)
 		self.GUI.tell(self.texts.file)
 
 	def show_extention_error(self):
@@ -71,39 +74,33 @@ class Client_model:
 		self.show_file()
 
 	def show_wait_for_designer(self):
-		self.context = 'wait_for_designer'
 		self.GUI.tell(self.texts.wait_for_designer)
 
 #---------------------------- PROCESS ----------------------------
 
 	def process_name(self):
-		self.context = ''
 		self.order.name = self.message.text
 		self.show_quantity()
 
 	def process_quantity(self):
-		self.context = ''
 		try:
-			self.order.quantity = int(self.message.data)
+			self.order.quantity = int(self.message.btn_data)
 			self.show_conditions()
 		except:
 			self.show_quantity()
 
 	def process_conditions(self):
-		self.context = ''
-		if self.message.data == '':
+		if self.message.btn_data == '':
 			self.show_conditions()
-		self.order.conditions = self.message.data
+		self.order.conditions = self.message.btn_data
 		self.show_comment()
 
 	def process_comment(self):
-		self.context = ''
-		if self.message.data != 'Комментариев к заказу не имею':
+		if self.message.btn_data != 'Комментариев к заказу не имею':
 			self.order.comment = self.message.text
 		self.show_file()
 
 	def process_file(self):
-		self.context = ''
 
 		self.message.file_name = 'hi.stl'
 		self.message.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
@@ -118,7 +115,7 @@ class Client_model:
 				self.order.status = 'validate'
 				self.order.user_id = self.app.chat.user_id
 				self.order.model_file = self.message.file_id
-				self.order.tell_designer()
+				# self.order.tell_designer()
 				self.app.orders.append(self.order)
 				self.app.db.create_order(self.order)
 				self.show_wait_for_designer()

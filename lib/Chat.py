@@ -38,6 +38,9 @@ class Chat:
                 self.show_warn_user()
             else:
                 self.special_format()
+        elif message.type == 'button':
+            self.message.data_to_special_format(self.message.data)
+            self.user.new_message(self.message)
         elif self.context.startswith('secret_message~'):
             self.special_format()
         else:

@@ -38,7 +38,7 @@ class Client:
 
 		self.order = Order(app, 1)
 		self.app.orders.append(self.order)
-		
+
 		self.client_model = Client_model(app, chat)
 		self.client_color = Client_color(app, chat)
 
@@ -49,7 +49,7 @@ class Client:
 		if message.text == '/start':
 			self.order.reset()
 			self.show_top_menu()
-		if message.data_special_format:
+		elif message.data_special_format:
 			if message.file2 == '' and (message.data == '' or message.data != self.last_data):
 				self.last_data = message.data
 				if message.function == '1':
@@ -168,3 +168,4 @@ class Client:
 # TODO:
 # - client color selection
 # - client process prepayment
+# - ignore old button presses
