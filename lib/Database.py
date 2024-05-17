@@ -201,7 +201,7 @@ class Database:
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
 
 		# self.cursor.execute('INSERT OR IGNORE INTO order_ VALUES (order_id, created)', (order.order_id, date.today()))
 		self.db.commit()

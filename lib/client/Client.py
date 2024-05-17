@@ -54,10 +54,14 @@ class Client:
 				self.last_data = message.data
 				if message.function == '1':
 					self.process_top_menu()
-				elif message.function == '2':
-					self.process_supports()
+				if message.function == '2':
+					self.process_order_menu()
 				elif message.function == '3':
+					self.process_supports()
+				elif message.function == '4':
 					self.process_price()
+				elif message.function == '5':
+					self.process_info()
 			elif message.file2 == '1':
 				self.client_model.new_message(message)
 			elif message.file2 == '2':
@@ -73,7 +77,11 @@ class Client:
 		if len(self.get_orders(['validated', 'prepayed'])) > 0:
 			buttons.append(['Мои заказы', 'orders'])
 		self.GUI.tell_buttons(self.texts.top_menu, buttons, [], 1, 0)
-		# TODO: add functionality
+
+	def show_order_menu(self):
+		buttons = self.texts.order_buttons.copy()
+		buttons.append('Назад')
+		self.GUI.tell_buttons(self.texts.order_menu, buttons, [], 2, 0)
 
 	def show_supports(self, order_id):
 		order = self.get_order(order_id)
@@ -81,7 +89,7 @@ class Client:
 		if order.support_time > 0:
 			text = self.texts.price_text(order_id)
 			text += '\n\nВы хотите убрать поддержки самостоятельно?'
-			message = self.GUI.tell_buttons(text, self.texts.supports_btns.copy(), [], 2, order_id)
+			message = self.GUI.tell_buttons(text, self.texts.supports_btns.copy(), [], 3, order_id)
 			message.general_clear = False
 			message.order_id = order_id
 		else:
@@ -113,19 +121,33 @@ class Client:
 		self.app.db.remove_order(my_order)
 		self.app.orders.remove(my_order)
 
+	def show_info(self):
+		buttons = ['Доступные цвета', 'Назад']
+		self.GUI.tell_buttons(self.texts.info_text, buttons, buttons, 5, 0)
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
+		self.chat.context = ''
 		if self.message.text == 'я_хочу_стать_сотрудником':
 			self.chat.get_employed = True
 			self.GUI.tell('Ждите подтверждения')
-		elif self.message.btn_data == 'farm model':
+
+		elif self.message.btn_data == 'order':
+			self.show_order_menu()
+		elif self.message.btn_data == 'info':
+			self.show_info()
+
+
+	def process_order_menu(self):
+		if self.message.btn_data == 'farm model':
 			self.GUI.tell('Здесь будут находится готовые модели')
 		elif self.message.btn_data == 'user model':
-			# self.menu = self.client_model
 			self.client_model.first_message(self.message)
 		elif self.message.btn_data == 'user drawing':
 			self.GUI.tell('Здесь вы можете загрузить свои чертежы или рисунки для создания по ним 3д модели.')
+		elif self.message.btn_data == 'Назад':
+			self.show_top_menu()
 
 	def process_supports(self):
 		order_id = self.message.instance_id
@@ -143,6 +165,10 @@ class Client:
 
 	def process_price(self):
 		i = ''
+
+	def process_info(self):
+		if self.message.btn_data == 'Назад':
+			self.show_top_menu()
 
 #---------------------------- LOGIC ----------------------------
 
