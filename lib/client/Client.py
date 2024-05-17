@@ -46,27 +46,7 @@ class Client:
 
 		if message.text == '/start':
 			self.order.reset()
-			# self.menu = None
 			self.show_top_menu()
-		elif message.data.count(',') > 1 and message.data.split(",")[2] == 'order_supports':
-			self.process_supports()
-		elif message.data.count(',') > 0 and message.data.split(",")[1] == 'order_color':
-			self.message.order_id = message.data.split(",")[0]
-			# self.client_color.new_message(self.message)
-		# elif self.menu == self.client_model:
-		# 	self.menu.new_message(message)
-		# elif self.menu == self.client_color:
-		# 	self.menu.new_message(message)
-		# else:
-		# 	self.GUI.messages_append(message)
-		# 	if context == 'top_menu':
-		# 		self.process_top_menu()
-		# 	if context == 'supports':
-		# 		self.process_supports()
-		# 	if context == 'price':
-		# 		self.process_price()
-
-
 		if message.data_special_format:
 			if message.file2 == '' and (message.data == '' or message.data != self.last_data):
 				self.last_data = message.data
@@ -80,22 +60,26 @@ class Client:
 				self.client_model.new_message(message)
 			elif message.file2 == '2':
 				self.client_color.new_message(message)
-		if message.type == 'text':
+		if message.type == 'text' and message.text != '/start':
 			self.GUI.messages_append(message)
 
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
-		self.GUI.tell_buttons(self.texts.top_menu, self.texts.top_menu_buttons.copy(), [], 1, 0)
+		self.chat.context = 'secret_message~' + self.address + '|1||'
+		buttons = self.texts.top_menu_buttons.copy()
+		if len(self.get_orders(['validated', 'prepayed'])) > 0:
+			buttons.append(['Мои заказы', 'orders'])
+		self.GUI.tell_buttons(self.texts.top_menu, buttons, [], 1, 0)
 		# TODO: add functionality
 
 	def show_supports(self, order_id):
 		order = self.get_order(order_id)
-		self.GUI.tell_permanent(f'Оценка вашей модели "{order.name}" завершена.')
+		self.GUI.tell_permanent(f'Оценка модели "{order.name}" завершена.')
 		if order.support_time > 0:
 			text = self.texts.price_text(order_id)
 			text += '\n\nВы хотите убрать поддержки самостоятельно?'
-			message = self.GUI.tell_buttons(text, self.texts.supports_btns(order_id), [], 2, order_id)
+			message = self.GUI.tell_buttons(text, self.texts.supports_btns.copy(), [], 2, order_id)
 			message.general_clear = False
 			message.order_id = order_id
 		else:
@@ -142,13 +126,13 @@ class Client:
 			self.GUI.tell('Здесь вы можете загрузить свои чертежы или рисунки для создания по ним 3д модели.')
 
 	def process_supports(self):
-		order_id = int(self.message.btn_data.split(",")[1])
+		order_id = self.message.instance_id
 		self.GUI.clear_order_chat(order_id)
 		my_order = self.get_order(order_id)
-		if self.message.btn_data.split(",")[0] == 'клиент':
-			my_order.support_remover = self.message.btn_data
-		elif self.message.btn_data.split(",")[0] == 'продавец':
-			my_order.support_remover = self.message.btn_data.split(",")[0]
+		if self.message.btn_data == 'client':
+			my_order.support_remover = 'client'
+		elif self.message.btn_data == 'seller':
+			my_order.support_remover = 'seller'
 			my_order.price += int(my_order.support_time * my_order.quantity * self.app.support_remove_price)
 		else:
 			self.show_supports(order_id)
@@ -170,6 +154,14 @@ class Client:
 			if order.order_id == order_id:
 				return order
 		return None
+
+	def get_orders(self, statuses):
+		orders = []
+		for order in self.app.orders:
+			if order.user_id == self.chat.user_id:
+				if order.status == statuses or (statuses == [] or order.status in statuses):
+					orders.append(order)
+		return orders
 
 # TODO:
 # - client color selection

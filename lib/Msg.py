@@ -49,7 +49,7 @@ class Message:
 		if hasattr(message, 'data'):
 			self.type = 'button'
 			self.data = message.data
-			self.data_special_format(message.data)
+			self.data_to_special_format(message.data)
 		else:
 			if hasattr(message, 'content_type'):
 				if message.content_type == 'document':
@@ -73,25 +73,24 @@ class Message:
 			if message.caption != None:
 				self.caption = message.caption.strip()
 
-	def data_special_format(self, data):
-		if data.startswith('~'):
-			self.data_special_format = True
-			address = data.split('|')[0]
-			address = address.split("~")[1]
-			# if address.count('/') >= 0:
-			self.file1 = address.split('/')[0]
-			if address.count('/') > 0:
-				self.file2 = address.split('/')[1]
-			if address.count('/') > 1:
-				self.file3 = address.split('/')[2]
-			if address.count('/') > 2:
-				self.file4 = address.split('/')[3]
-			if data.count('|') > 0:
-				self.function = data.split('|')[1]
-			if data.count('|') > 1:
-				self.instance_id = data.split('|')[2]
-			if data.count('|') > 2:
-				self.btn_data = data.split('|')[3]
+	def data_to_special_format(self, data):
+		self.data_special_format = True
+		address = data.split('|')[0]
+		address = address.split("~")[1]
+		# if address.count('/') >= 0:
+		self.file1 = address.split('/')[0]
+		if address.count('/') > 0:
+			self.file2 = address.split('/')[1]
+		if address.count('/') > 1:
+			self.file3 = address.split('/')[2]
+		if address.count('/') > 2:
+			self.file4 = address.split('/')[3]
+		if data.count('|') > 0:
+			self.function = data.split('|')[1]
+		if data.count('|') > 1:
+			self.instance_id = data.split('|')[2]
+		if data.count('|') > 2:
+			self.btn_data = data.split('|')[3]
 
 # BUTTON DATA SPECIAL FORMAT SPECIFICATIONS:
 # Special chars:

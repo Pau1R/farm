@@ -78,8 +78,7 @@ class Texts:
 				text += f'\n\nПредоплата внесена не полностью, заказ не принят в работу!'
 		return text
 
-	def supports_btns(self, order_id):
-		return [['Да, сам уберу', 'клиент,' + str(order_id) + ',order_supports'], ['Нет, уберите вы', 'продавец,' + str(order_id) + ',order_supports']]
+	supports_btns = [['Да, сам уберу', 'client'], ['Нет, уберите вы', 'seller']]
 
 	price_btns = [['Согласен, перейти к предоплате', 'confirm'], ['Отменить заказ', 'cancel']]
 	

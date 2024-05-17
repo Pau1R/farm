@@ -37,11 +37,16 @@ class Chat:
             if message.type == 'button':
                 self.show_warn_user()
             else:
-                message.data_special_format(self.context)
-                self.context = ''
-                self.user.new_message(message)
+                self.special_format()
+        elif self.context.startswith('secret_message~'):
+            self.special_format()
         else:
             self.user.new_message(message)
+
+    def special_format(self):
+        self.message.data_to_special_format(self.context)
+        self.context = ''
+        self.user.new_message(self.message)
 
     def create_user(self):
         if self.is_employee:
