@@ -75,7 +75,7 @@ class DryerGUI:
 		self.GUI.tell_buttons(text, buttons, ['Удалить', 'Назад'], 2, self.dryer.id)
 
 	def show_add_new_dryer(self):
-		self.app.chat.set_context(self.address, 3)
+		self.chat.set_context(self.address, 3)
 		self.GUI.tell('Введите название сушилки')
 
 	def show_add_new_dryer_capacity(self):
@@ -155,7 +155,7 @@ class DryerGUI:
 			text = f'Создана новая сушилка:\nномер: {self.dryer.id}\nназвание: {self.dryer.name}\n'
 			text += f'емкость: {self.dryer.capacity} катушки\nдиапазон температур: {self.dryer.minTemp}-{self.dryer.maxTemp}\n'
 			text += f'максимальное время таймера: {self.dryer.maxTime}\n\nНе забудьте нанести номер на сушилку.'
-			self.GUI.tell(text)
+			self.GUI.tell_permanent(text)
 		self.type = ''
 		self.capacity = 0
 		self.show_top_menu()

@@ -69,15 +69,15 @@ class ColorGUI:
 		self.GUI.tell_photo_buttons(text, self.color.samplePhoto, buttons, buttons, 2, 0)
 
 	def show_add_new_color(self):
-		self.app.chat.set_context(self.address, 3)
+		self.chat.set_context(self.address, 3)
 		self.GUI.tell('Введите название цвета')
 
 	def show_add_photo(self):
-		self.app.chat.set_context(self.address, 4)
+		self.chat.set_context(self.address, 4)
 		self.GUI.tell('Отправьте фото образца')
 
 	def show_edit_photo(self):
-		self.app.chat.set_context(self.address, 5)
+		self.chat.set_context(self.address, 5)
 		self.GUI.tell('Отправьте фото образца')
 
 	def show_add_confirmation(self):
@@ -128,7 +128,7 @@ class ColorGUI:
 		if self.message.btn_data == 'Подтверждаю':
 			self.color = self.app.equipment.create_new_color(self.name, self.samplePhoto)
 			text = f'Создан новый цвет: {self.color.name}'
-			self.GUI.tell(text)
+			self.GUI.tell_permanent(text)
 		self.name = ''
 		self.samplePhoto = ''
 		self.show_top_menu()

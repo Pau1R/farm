@@ -239,9 +239,9 @@ class Owner:
 			self.employee.is_employee = False
 			self.employee.user.roles = []
 			self.employee.user.name = ''
-			# self.db.delete_employee(self.employee.user_id)
 			self.app.db.remove_chat(self.employee)
 			self.GUI.tell_id(self.employee.user_id, 'Ваше сотрудничество окончено, всего хорошего')
+			self.app.chats.remove(self.employee)
 			self.employee = None
 			self.show_employees()
 		else:

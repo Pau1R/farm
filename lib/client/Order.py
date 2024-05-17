@@ -9,7 +9,17 @@ class Order:
 
 	user_id = ''
 	order_id = 1
-	status = ''
+
+	status = 'creating' # client: creating, validate, validated, rejected, prepayed
+	# who can change order status to another:
+	# - client:
+	#   - creating: validate
+	#   - validated
+	# - designer:
+	#   - validate
+	# - bot:
+	#   - validated: prepayed
+
 	name = ''
 	date = None
 
@@ -47,6 +57,7 @@ class Order:
 
 	def reset(self):
 		self.order_id = self.get_next_free_id(self.app.orders)
+		self.status = 'creating'
 
 	def get_next_free_id(self, list):
 		ids = []

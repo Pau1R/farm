@@ -94,7 +94,7 @@ class SpoolGUI:
 		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
 
 	def show_weight_input(self):
-		self.app.chat.set_context(self.address, 4)
+		self.chat.set_context(self.address, 4)
 		text = 'Введите целочисленное кол-во'
 		self.GUI.tell(text)
 
@@ -108,14 +108,14 @@ class SpoolGUI:
 		self.GUI.tell_buttons('Выберите вес катушки', self.texts.spool_weight.copy(), [], 7, 0)
 
 	def show_add_new_spool_price(self):
-		self.app.chat.set_context(self.address, 8)
+		self.chat.set_context(self.address, 8)
 		self.GUI.tell('Введите цену за катушку в rub')
 
 	def show_add_new_spool_dried(self):
 		self.GUI.tell_buttons('Катушка высушена?', ['Да', 'Нет'], ['Да', 'Нет'], 9, 0)
 
 	def show_add_new_spool_brand(self):
-		self.app.chat.set_context(self.address, 10)
+		self.chat.set_context(self.address, 10)
 		self.GUI.tell('Введите название бренда/магазина')
 
 	def show_add_confirmation(self):
@@ -203,7 +203,7 @@ class SpoolGUI:
 			self.spool = self.app.equipment.create_new_spool(self.type, self.diameter, self.weight, self.density, self.color, self.dried, self.brand, self.used)
 			text = f'Создана новая катушка:\nномер: {self.spool.id}\nтип: {self.spool.type}\nвес: {self.spool.weight} грамм\n'
 			text += f'цвет: {self.spool.color}\nвысушена: {self.spool.dried}\nбренд/магазин: {self.spool.brand}'
-			self.GUI.tell(text)
+			self.GUI.tell_permanent(text)
 		self.type = ''
 		self.color = ''
 		self.dried = ''

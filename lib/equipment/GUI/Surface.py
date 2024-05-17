@@ -103,7 +103,7 @@ class SurfaceGUI:
 		if self.message.btn_data == 'Подтверждаю':
 			self.surface = self.app.equipment.create_new_surface(self.type)
 			text = f'Создана новая поверхность:\nномер: {self.surface.id}\nтип: {self.surface.type}\n\nНе забудьте нанести номер на поверхность.'
-			self.GUI.tell(text)
+			self.GUI.tell_permanent(text)
 		self.type = ''
 		self.show_top_menu()
 

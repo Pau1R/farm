@@ -64,7 +64,7 @@ class LocationGUI:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
 	def show_add_new_location(self):
-		self.app.chat.set_context(self.address, 3)
+		self.chat.set_context(self.address, 3)
 		self.GUI.tell('Введите название локации')
 
 	def show_add_new_location_type(self):
@@ -111,7 +111,7 @@ class LocationGUI:
 			self.location = self.app.equipment.create_new_location(self.name, self.type)
 			text = f'Создана новая локация:\nномер: {self.location.id}\nназвание: {self.location.name}\n'
 			text += f'тип: {self.location.type}'
-			self.GUI.tell(text)
+			self.GUI.tell_permanent(text)
 		self.name = ''
 		self.type = 0
 		self.show_top_menu()

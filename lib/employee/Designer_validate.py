@@ -97,7 +97,7 @@ class Validate:
 			self.show_accept_weight()
 
 	def show_accept_weight(self):
-		self.app.chat.set_context(self.address, 5)
+		self.chat.set_context(self.address, 5)
 		self.GUI.tell('Введите вес стола в граммах')
 
 	def show_accept_supports(self):
@@ -125,7 +125,7 @@ class Validate:
 
 	def show_reject(self):
 		self.set_context(11)
-		self.app.chat.set_context(self.address, 11)
+		self.chat.set_context(self.address, 11)
 		self.GUI.tell('Напишите причину отказа')
 
 	# def show_finished_orders(self):

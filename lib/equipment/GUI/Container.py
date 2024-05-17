@@ -114,7 +114,7 @@ class ContainerGUI:
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.container = self.app.equipment.create_new_container(self.type, self.capacity)
-			self.GUI.tell(f'Создан новый ящик\nномер: {self.container.id},\nтип: {self.container.type},\nемкость: {self.container.capacity} катушек\n\nНе забудьте нанести номер на ящик.')
+			self.GUI.tell_permanent(f'Создан новый ящик\nномер: {self.container.id},\nтип: {self.container.type},\nемкость: {self.container.capacity} катушек\n\nНе забудьте нанести номер на ящик.')
 		self.type = ''
 		self.capacity = ''
 		self.show_top_menu()

@@ -20,7 +20,6 @@ class Texts:
 	top_menu_buttons.append(['Распечатать мою модель', 'user model'])
 	top_menu_buttons.append(['Создать и распечатать модель по моему чертежу', 'user drawing'])
 	top_menu_buttons.append(['Информация о студии', 'info'])
-	top_menu_buttons.append(['Текущие заказы', 'orders'])
 
 	model_name = 'Придумайте название для вашей модели'
 

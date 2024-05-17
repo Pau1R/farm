@@ -70,7 +70,7 @@ class ExtruderGUI:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.extruder.id)
 
 	def show_add_new_extruder(self):
-		self.app.chat.set_context(self.address, 3)
+		self.chat.set_context(self.address, 3)
 		self.GUI.tell('Введите название экструдера')
 
 	def show_add_new_extruder_maxTemp(self):
@@ -130,7 +130,7 @@ class ExtruderGUI:
 			text = f'Создан новый экструдер:\nномер: {self.extruder.id}\nназвание: {self.extruder.name}\n'
 			text += f'максимальная температура: {self.extruder.maxTemp}\nдиаметр сопла: {self.extruder.nozzleDiameter}'
 			text += f'\n\nНе забудьте нанести номер на экструдер.'
-			self.GUI.tell(text)
+			self.GUI.tell_permanent(text)
 		self.name = ''
 		self.maxTemp = 0
 		self.nozzleDiameter = 0

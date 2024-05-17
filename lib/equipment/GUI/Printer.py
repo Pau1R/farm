@@ -62,7 +62,7 @@ class PrinterGUI:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
 	def show_add_new_printer(self):
-		self.app.chat.set_context(self.address, 3)
+		self.chat.set_context(self.address, 3)
 		self.GUI.tell('Введите название принтера')
 
 	def show_add_confirmation(self):
@@ -100,7 +100,7 @@ class PrinterGUI:
 		if self.message.btn_data == 'Подтверждаю':
 			self.printer = self.app.equipment.create_new_printer(self.name)
 			text = f'Создан новый принтер:\nномер: {self.printer.id}\nназвание: {self.printer.name}\n'
-			self.GUI.tell(text)
+			self.GUI.tell_permanent(text)
 		self.name = ''
 		self.type = 0
 		self.show_top_menu()

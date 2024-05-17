@@ -54,7 +54,7 @@ class Delivery:
 		self.GUI.tell_buttons(self.texts.delivery_top_menu(self.chat.user.name), buttons, ['Назад'], 1, 0)
 
 	def show_order_query(self):
-		self.app.chat.set_context(self.address, 2)
+		self.chat.set_context(self.address, 2)
 		self.GUI.tell('Введите код получения заказа')
 
 	def show_issue_order(self):
@@ -75,7 +75,7 @@ class Delivery:
 			self.show_order_query()
 
 	def process_order_query(self):
-		code = self.message.btn_data # order recieving code
+		code = self.message.text # order recieving code
 		self.order = 5 # TODO: get order number from receiving code
 		self.price = 1000 # TODO: get order price
 		if self.price > 0: # if order is not paid

@@ -37,6 +37,8 @@ class Client:
 		self.GUI = Gui(app, chat, self.address)
 
 		self.order = Order(app, 1)
+		self.app.orders.append(self.order)
+		
 		self.client_model = Client_model(app, chat)
 		self.client_color = Client_color(app, chat)
 
