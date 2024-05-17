@@ -49,7 +49,9 @@ class Delivery:
 
 	def show_top_menu(self):
 		buttons = ['Выдать заказ']
-		self.GUI.tell_buttons(self.texts.delivery_top_menu(self.chat.user.name), buttons, [], 1, 0)
+		if len(self.chat.user.roles) > 1:
+			buttons.append('Назад')
+		self.GUI.tell_buttons(self.texts.delivery_top_menu(self.chat.user.name), buttons, ['Назад'], 1, 0)
 
 	def show_order_query(self):
 		self.app.chat.set_context(self.address, 2)
@@ -66,6 +68,9 @@ class Delivery:
 #---------------------------- PROCESS ----------------------------
 	
 	def process_top_menu(self):
+		if self.message.btn_data == 'Назад':
+			self.message.text = '/start'
+			self.chat.user.new_message(self.message)
 		if self.message.btn_data == 'Выдать заказ':
 			self.show_order_query()
 

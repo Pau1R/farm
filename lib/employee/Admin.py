@@ -89,6 +89,8 @@ class Admin:
 	def show_top_menu(self):
 		text = 'Здравствуйте, Администратор ' + self.chat.user.name
 		buttons = ['Заказы', 'Оборудование']
+		if len(self.chat.user.roles) > 1:
+			buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_orders(self):
@@ -104,6 +106,9 @@ class Admin:
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
+		if self.message.btn_data == 'Назад':
+			self.message.text = '/start'
+			self.chat.user.new_message(self.message)
 		if self.message.btn_data == 'Заказы':
 			self.show_orders()
 		elif self.message.btn_data == 'Оборудование':

@@ -48,8 +48,10 @@ class Designer:
 	def show_top_menu(self):
 		self.last_data = ''
 		text = self.texts.designer_top_menu_text(self.chat.user.name, len(self.app.orders))
-		buttons = self.texts.designer_top_menu_btns
-		self.GUI.tell_buttons(text, buttons, [], 1, 0)
+		buttons = self.texts.designer_top_menu_btns.copy()
+		if len(self.chat.user.roles) > 1:
+			buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 1, 0)
 
 	def show_orders_design(self):
 		self.last_data = ''
@@ -72,6 +74,9 @@ class Designer:
 #---------------------------- PROCESS ----------------------------
 	
 	def process_top_menu(self):
+		if self.message.btn_data == 'Назад':
+			self.message.text = '/start'
+			self.chat.user.new_message(self.message)
 		if self.message.btn_data == 'design':
 			self.show_orders_design()
 		if self.message.btn_data == 'validate':

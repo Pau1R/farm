@@ -23,7 +23,6 @@ class Employee:
 	
 	last_data = ''
 
-	employee = None
 	owner = None
 	admin = None
 	operator = None
@@ -67,17 +66,22 @@ class Employee:
 			self.GUI.messages_append(message)
 
 	def send_first_message(self, message):
+		employee = None
 		role = message.btn_data
 		if role == 'Владелец' in self.roles:
-			self.owner.first_message(message)
+			employee = self.owner
 		elif role == 'Администратор' in self.roles:
-			self.admin.first_message(message)
+			employee = self.admin
 		elif role == 'Оператор' in self.roles:
-			self.operator.first_message(message)
+			employee = self.operator
 		elif role == 'Дизайнер' in self.roles:
-			self.designer.first_message(message)
+			employee = self.designer
 		elif role == 'Выдача' in self.roles:
-			self.delivery.first_message(message)
+			employee = self.delivery
+
+		if employee != None:
+			employee.last_data = ''
+			employee.first_message(message)
 
 	def send_new_message(self, message):
 		if message.file2 == '1':

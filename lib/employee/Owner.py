@@ -72,10 +72,12 @@ class Owner:
 		self.context = ''
 		text = 'Здравствуйте, владелец ' + self.chat.user.name
 		buttons = ['Сотрудники', 'Статистика']
+		if len(self.chat.user.roles) > 1:
+			buttons.append('Назад')
 		for obj in self.app.chats:
 			if obj.get_employed:
 				buttons.append('Запросы')
-		self.GUI.tell_buttons(text, buttons, [], 1, 0)
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 1, 0)
 
 	def process_top_menu(self):
 		if self.message.btn_data == 'Сотрудники':
@@ -84,6 +86,9 @@ class Owner:
 			self.show_add_employees() # 'add_employees'
 		elif self.message.btn_data == 'Статистика':
 			self.show_farm_statistics()
+		elif self.message.btn_data == 'Назад':
+			self.message.text = '/start'
+			self.chat.user.new_message(self.message)
 
 #---------------------------- SHOW EMPLOYEES ----------------------------
 

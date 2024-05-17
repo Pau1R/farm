@@ -24,7 +24,7 @@ class Gui:
 				self.remove_message(message)
 
 	def remove_messages(self, messages):
-		for message in messages:
+		for message in messages.copy():
 			if message.data == '':
 				if message.general_clear:
 					self.remove_message(message)
