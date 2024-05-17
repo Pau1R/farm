@@ -136,12 +136,11 @@ class Validate:
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
-		if self.message.data == 'Назад':
-			self.app.chat.user.employee.menu = None
-			self.app.chat.user.employee.first_message(self.message)
+		if self.message.btn_data == 'Назад':
+			self.app.chat.user.designer.first_message(self.message)
 		else:
 			for order in self.app.orders:
-				# if int(self.message.data.split(":")[0]) == order.order_id:
+				# if int(self.message.btn_data.split(":")[0]) == order.order_id:
 				if int(self.message.btn_data) == order.order_id:
 					self.order = order
 					# self.show_validate()
@@ -156,24 +155,24 @@ class Validate:
 					self.process_accept_confirmation()
 
 	def process_validate(self):
-		if self.message.data == 'Назад':
+		if self.message.btn_data == 'Назад':
 			self.order = None
 			self.show_top_menu()
-		elif self.message.data == 'accept':
+		elif self.message.btn_data == 'accept':
 			self.show_accept()
-		elif self.message.data == 'reject':
+		elif self.message.btn_data == 'reject':
 			self.show_reject()
 
 			# TODO:
 			# - payment
 
 	def process_accept(self):
-		self.material = self.message.data
+		self.material = self.message.btn_data
 		self.show_accept_quantity()
 
 	def process_accept_quantity(self):
 		try:
-			self.table_quantity = int(self.message.data)
+			self.table_quantity = int(self.message.btn_data)
 			self.show_accept_weight()
 		except:
 			self.show_accept_quantity()
@@ -186,7 +185,7 @@ class Validate:
 			self.show_accept_weight()
 
 	def process_accept_supports(self):
-		if self.message.data == 'Да':
+		if self.message.btn_data == 'Да':
 			self.supports = True
 			self.show_accept_supports_time()
 		else:
@@ -195,27 +194,27 @@ class Validate:
 
 	def process_accept_supports_time(self):
 		try:
-			self.support_minutes = int(self.message.data)
+			self.support_minutes = int(self.message.btn_data)
 		except:
 			self.show_accept_supports_time()
 		self.show_accept_time()
 
 	def process_accept_time(self):
 		try:
-			self.table_hours = int(self.message.data)
+			self.table_hours = int(self.message.btn_data)
 			self.show_accept_time_minutes()
 		except:
 			self.show_accept_time()
 
 	def process_accept_time_minutes(self):
 		try:
-			self.table_minutes = int(self.message.data)
+			self.table_minutes = int(self.message.btn_data)
 			self.show_accept_confirmation()
 		except:
 			self.show_accept_time_minutes()
 
 	def process_accept_confirmation(self):
-		if self.message.data == 'Отмена':
+		if self.message.btn_data == 'Отмена':
 			self.show_validate()
 		else:
 			self.order.weight = self.table_weight / self.table_quantity
@@ -223,10 +222,9 @@ class Validate:
 			self.order.support_time = self.support_minutes
 			self.order.status = 'validated'
 			self.order.plastic_type = self.material
+			# self.app.db.update_order(self.order)
 			for chat in self.app.chats:
 				if chat.user_id == str(self.order.user_id):
-					# print('designer_validate.py GUI:', self.GUI, self.GUI.messages)
-					# print('designer_validate.py calling client chat:', chat)
 					chat.user.show_supports(self.order.order_id)
 			self.show_top_menu()
 

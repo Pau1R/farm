@@ -125,7 +125,7 @@ class Database:
 	def get_chats(self):
 		self.cursor.execute('SELECT * FROM chat')
 		for row in self.cursor.fetchall():
-			chat = Chat(self.app, str(row[0]), row[3], row[1])
+			chat = Chat(self.app, str(row[0]), bool(row[3]), row[1])
 			chat.user.name = row[2]
 			if row[3]: # employee
 				chat.user.roles = row[4].split(',')
@@ -148,8 +148,8 @@ class Database:
 		values += 'created = "' + str(chat.created) + '", '
 		values += 'name = "' + chat.user.name + '", '
 		values += 'isEmployee = "' + str(chat.is_employee) + '", '
-		chat.user.roles.append('')
 		if chat.is_employee:
+			chat.user.roles.append('')
 			while ("" in chat.user.roles):
    				chat.user.roles.remove("")
 			values += 'roles = "' + ','.join(chat.user.roles) + '" '

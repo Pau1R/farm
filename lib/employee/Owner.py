@@ -40,7 +40,7 @@ class Owner:
 
 		if context == 'first_message':
 			self.show_top_menu()
-		elif message.btn_special_format:	# process user button presses
+		elif message.data_special_format:	# process user button presses
 			if message.data != self.last_data:  # skip repeated button presses
 				if message.function == '1':
 					self.process_top_menu()
@@ -90,10 +90,9 @@ class Owner:
 	def show_employees(self):
 		buttons = []
 		for obj in self.app.chats:
-			print('is_employee', obj.is_employee)
 			if obj.is_employee:
 				self.employees.append(obj)
-				buttons.append([obj.user.role + ': ' + obj.user.name, obj.user_id])
+				buttons.append([obj.user.name, obj.user_id])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(self.texts.owner_employee_menu, buttons, ['Назад'], 5, 0)
 
@@ -104,10 +103,10 @@ class Owner:
 					self.employee = obj
 		self.employees = []
 		text = 'Имя: ' + self.employee.user.name + '\nРоли: ' + str(self.employee.user.roles.copy()) + '\nДата создания: ' + self.employee.created  # add additional info in future
-		buttons = ['Статистика', 'Удалить', 'Сделать владельцем вместо себя', 'Добавить роль', 'Удалить роль', 'Назад']
+		buttons = ['Статистика', 'Удалить', ['Сделать владельцем вместо себя', 'tranfer_ownership'], 'Добавить роль', 'Удалить роль', 'Назад']
 		if 'Владелец' in self.employee.user.roles:
 			buttons.remove('Удалить')
-			buttons.remove('Сделать владельцем вместо себя')
+			buttons.remove(['Сделать владельцем вместо себя', 'tranfer_ownership'])
 		if len([i for i in self.employee.user.roles if i not in 'Владелец']) == 4:
 			buttons.remove('Добавить роль')
 		elif len([i for i in self.employee.user.roles if i not in 'Владелец']) == 0:
@@ -170,7 +169,7 @@ class Owner:
 			self.show_employee_delete_confirmation()  # TODO: function untested, test
 		elif data == 'Статистика':
 			self.show_employee_statistics()
-		elif data == 'Сделать владельцем вместо себя': # TODO: add timeout before confirmation
+		elif data == 'tranfer_ownership': # TODO: add timeout before confirmation
 			self.show_employee_ownership_confirmation()
 		elif data == 'Добавить роль':
 			self.show_employee_roles(True)

@@ -75,6 +75,7 @@ class Designer:
 		if self.message.btn_data == 'design':
 			self.show_orders_design()
 		if self.message.btn_data == 'validate':
+			self.validate.last_data = ''
 			self.validate.first_message(self.message)
 		if self.message.btn_data == 'parametric':
 			self.show_orders_parametric()

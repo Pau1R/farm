@@ -52,6 +52,9 @@ class Chat:
     def become_employee(self):
         self.is_employee = True
         self.get_employed = False
+        name = self.user.name
+        self.create_user()
+        self.user.name = name
 
     def set_context(self, address, function):
         self.context = '~' + address + '|' + str(function) + '||'

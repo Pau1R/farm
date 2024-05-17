@@ -48,6 +48,7 @@ class Employee:
 			if len(self.roles) > 1:
 				self.GUI.tell_buttons('Выберите роль:', self.roles.copy(), [], 1, 0)
 			elif len(self.roles) == 1:
+				message.btn_data = self.roles[0]
 				self.send_first_message(message)
 			else:
 				self.GUI.tell('Вам не назначена роль')
