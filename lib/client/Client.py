@@ -7,6 +7,7 @@ from lib.client.Texts import Texts
 from lib.client.Order import Order
 from lib.client.Client_model import Client_model
 from lib.client.Client_color import Client_color
+from lib.client.Client_order import Client_order
 
 class Client:
 	address = '1'
@@ -28,7 +29,7 @@ class Client:
 	order_id = None
 
 	payId = ''
-	balance = 0.0
+	money_payed = 0.0
 
 	def __init__(self, app, chat):
 		self.app = app
@@ -61,6 +62,10 @@ class Client:
 				elif message.function == '4':
 					self.process_price()
 				elif message.function == '5':
+					self.process_orders()
+				elif message.function == '6':
+					self.process_order()
+				elif message.function == '7':
 					self.process_info()
 			elif message.file2 == '1':
 				self.client_model.new_message(message)
@@ -73,10 +78,10 @@ class Client:
 
 	def show_top_menu(self):
 		self.chat.context = 'secret_message~' + self.address + '|1||'
-		buttons = self.texts.top_menu_buttons.copy()
-		if len(self.get_orders(['validated', 'prepayed'])) > 0:
-			buttons.append(['Мои заказы', 'orders'])
-		self.GUI.tell_buttons(self.texts.top_menu, buttons, [], 1, 0)
+		buttons = [['Сделать заказ', 'order'], ['Информация о студии', 'info']]
+		if len(self.get_orders(['validate', 'validated', 'prepayed'])) > 0:
+			buttons.insert(1, ['Мои заказы', 'orders'])
+		self.GUI.tell_buttons(self.texts.top_menu, buttons, buttons, 1, 0)
 
 	def show_order_menu(self):
 		buttons = self.texts.order_buttons.copy()
@@ -121,9 +126,29 @@ class Client:
 		self.app.db.remove_order(my_order)
 		self.app.orders.remove(my_order)
 
+	def show_orders(self):
+		text = 'Мои заказы'
+		buttons = []
+		x = 1
+		for order in self.get_orders(['validate', 'validated', 'prepayed']):
+			buttons.append([order.name, order.order_id])
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
+
+	def show_order(self, order_id):
+		order = None
+		for order_ in self.app.orders:
+			if order_.order_id == order_id:
+				order = order_
+		if order == None:
+			self.show_orders()
+			return
+		buttons = ['Назад']
+		self.GUI.tell_buttons(self.texts.price_text(order_id), buttons, buttons, 6, 0)
+
 	def show_info(self):
 		buttons = ['Доступные цвета', 'Назад']
-		self.GUI.tell_buttons(self.texts.info_text, buttons, buttons, 5, 0)
+		self.GUI.tell_buttons(self.texts.info_text, buttons, buttons, 7, 0)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -137,6 +162,8 @@ class Client:
 			self.show_order_menu()
 		elif self.message.btn_data == 'info':
 			self.show_info()
+		elif self.message.btn_data == 'orders':
+			self.show_orders()
 
 
 	def process_order_menu(self):
@@ -165,6 +192,17 @@ class Client:
 
 	def process_price(self):
 		i = ''
+
+	def process_orders(self):
+		if self.message.btn_data == 'Назад':
+			self.show_top_menu()
+		else:
+			order_id = int(self.message.btn_data)
+			self.show_order(order_id)
+
+	def process_order(self):
+		if self.message.btn_data == 'Назад':
+			self.show_orders()
 
 	def process_info(self):
 		if self.message.btn_data == 'Назад':

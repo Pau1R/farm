@@ -3,6 +3,7 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Texts import Texts
+import time
 
 class Client_model:
 	address = '1/1'
@@ -74,7 +75,9 @@ class Client_model:
 		self.show_file()
 
 	def show_wait_for_designer(self):
-		self.GUI.tell(self.texts.wait_for_designer)
+		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
+		time.sleep(3)
+		self.chat.user.show_top_menu()
 
 #---------------------------- PROCESS ----------------------------
 
@@ -102,12 +105,12 @@ class Client_model:
 
 	def process_file(self):
 
-		self.message.file_name = 'hi.stl'
-		self.message.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
-		self.message.type = 'document'
-		self.order.name = 'название модели'
-		self.order.conditions = 'В доме'
-		self.order.quantity = 3
+		# self.message.file_name = 'hi.stl'
+		# self.message.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
+		# self.message.type = 'document'
+		# self.order.name = 'название модели'
+		# self.order.conditions = 'В доме'
+		# self.order.quantity = 3
 
 		if self.message.type == 'document':
 			extention = self.message.file_name.split(".")[-1]

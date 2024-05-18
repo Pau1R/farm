@@ -8,9 +8,6 @@ class Texts:
 
 	top_menu = 'Выберите действие'
 	order_menu = 'Выберите тип заказа'
-
-	top_menu_buttons = [['Сделать заказ', 'order']]
-	top_menu_buttons.append(['Информация о студии', 'info'])
 	
 	order_buttons = [['Выбрать готовую модель из каталога', 'farm model']]
 	order_buttons.append(['Распечатать мою модель', 'user model'])
@@ -50,8 +47,6 @@ class Texts:
 	supported_3d_extensions = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
 	file = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(supported_3d_extensions)
-
-	wait_for_designer = 'Ваш файл передан дизайнеру для оценки, ожидайте.'
 
 	def price_text(self, order_id):
 		order = None

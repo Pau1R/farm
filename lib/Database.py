@@ -30,7 +30,7 @@ class Database:
 			isEmployee LOGICAL,
 			roles TEXT,
 			payId TEXT,
-			balance TEXT"""
+			money_payed DECIMAL"""
 		container = """
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
@@ -133,14 +133,14 @@ class Database:
    					chat.user.roles.remove("")
 			else:
 				chat.user.payId = row[5]
-				chat.user.balance = row[6]
+				chat.user.money_payed = float(row[6])
 			self.app.chats.append(chat)
 
 	def create_chat(self, chat):
 		if chat.is_employee:
 			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,?,Null,Null)', (chat.user_id, date.today(), chat.user.name, chat.is_employee, ','.join(chat.user.roles)))
 		else:
-			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,Null,?,?)', (chat.user_id, date.today(), chat.user.name, chat.is_employee, chat.user.payId, chat.user.balance))
+			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,Null,?,?)', (chat.user_id, date.today(), chat.user.name, chat.is_employee, chat.user.payId, chat.user.money_payed))
 		self.db.commit()
 
 	def update_chat(self, chat):
@@ -155,7 +155,7 @@ class Database:
 			values += 'roles = "' + ','.join(chat.user.roles) + '" '
 		else:
 			values += 'payId = "' + chat.user.payId + '", '
-			values += 'balance = "' + chat.user.balance + '" '
+			values += 'money_payed = "' + str(chat.user.money_payed) + '" '
 		self.cursor.execute('UPDATE chat SET ' + values + ' WHERE user_id = ' + str(chat.user_id))
 		self.db.commit()
 

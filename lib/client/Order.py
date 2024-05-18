@@ -10,7 +10,7 @@ class Order:
 	user_id = ''
 	order_id = 1
 
-	status = 'creating' # client: creating, validate, validated, rejected, prepayed
+	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery
 	# who can change order status to another:
 	# - client:
 	#   - creating: validate
@@ -59,11 +59,12 @@ class Order:
 		self.order_id = self.get_next_free_id(self.app.orders)
 		self.status = 'creating'
 
-	def get_next_free_id(self, list):
+	def get_next_free_id(self, orders):
 		ids = []
-		for elem in list:
-			ids.append(int(elem.order_id))
+		for order in orders:
+			ids.append(int(order.order_id))
 		ids.sort()
+		ids = list(dict.fromkeys(ids))
 		id = 1
 		for elem in ids:
 			if elem == id:

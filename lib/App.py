@@ -21,6 +21,7 @@ class App:
 	# settings:
 	support_remove_price = 10
 	prepayment_percent = 0.3
+	prepayment_free_max = 5000
 	phone_number = '+79871234567'
 
 	# count = 0
@@ -75,6 +76,7 @@ class App:
 #	1 client_model
 #	2 client_color
 #	3 client_logic
+#   4 client_order
 # 1 Employee
 #	1 Owner
 #	2 Admin
