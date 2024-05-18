@@ -64,8 +64,9 @@ class Gui:
 	def tell_id(self, id, text):
 		Message(self.app.bot.send_message(id, text))
 
-	def tell_document_buttons(self, document, caption, bts, strict, function_id, object_id):
+	def tell_document_buttons(self, document, caption, bts, strict_, function_id, object_id):
 		buttons = self.buttons_address(bts, function_id, object_id)
+		strict = self.buttons_address(strict_, function_id, object_id)
 		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption, reply_markup=buttons))
 		self.messages_append(message)
@@ -81,31 +82,35 @@ class Gui:
 		self.messages_append(message)
 		return message
 
-	def tell_photo_buttons(self, caption, photo, bts, strict, function_id, object_id):
+	def tell_photo_buttons(self, caption, photo, bts, strict_, function_id, object_id):
 		if photo == '':
 			self.tell_buttons(caption, bts, strict)
 		buttons = self.buttons_address(bts, function_id, object_id)
+		strict = self.buttons_address(strict_, function_id, object_id)
 		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_photo(self.chat.user_id, photo=photo, caption=caption, reply_markup=buttons))
 		self.messages_append(message)
 		return message
 
-	def tell_buttons(self, text, bts, strict, function_id, object_id):
+	def tell_buttons(self, text, bts, strict_, function_id, object_id):
 		buttons = self.buttons_address(bts, function_id, object_id)
+		strict = self.buttons_address(strict_, function_id, object_id)
 		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_message(self.chat.user_id, text, reply_markup=buttons))
 		self.messages_append(message)
 		return message
 
-	def tell_buttons_id(self, id, text, bts, strict, function_id, object_id):
+	def tell_buttons_id(self, id, text, bts, strict_, function_id, object_id):
 		buttons = self.buttons_address(bts, function_id, object_id)
+		strict = self.buttons_address(strict_, function_id, object_id)
 		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_message(id, text, reply_markup=buttons))
 		self.messages_append(message)
 		return message
 
-	def buttons_address(self, buttons, function_id, object_id):
+	def buttons_address(self, buttons_, function_id, object_id):
 		new_buttons = []
+		buttons = buttons_.copy()
 		for button in buttons:
 			btn = ['','']
 			btn[1] = '~' + self.address + '|' + str(function_id) + '|' + str(object_id) + '|'
@@ -137,11 +142,15 @@ class Gui:
 					break
 				button = bts[0]     # get first element of bts
 
-				# count only button text length
+				# get text and data from button
+				button_data = ''
 				if type(button) is list:
 					button_text = button[0]
+					if len(button) > 1:
+						button_data = str(button[1])
 				else:
 					button_text = button
+				# count button text length
 				button_length = len(str(button_text))
 
 				# if at least one button is greater than the limit for each coloumn size then lower coloumn amount
@@ -166,9 +175,13 @@ class Gui:
 				flag = False
 				for entry in strict:
 					txt = entry
+					data = ''
 					if type(entry) is list:
 						txt = entry[0]
-					if button_text == txt:
+						if len(entry) > 1:
+							data = str(entry[1])
+					# if button_text == txt:
+					if button_text == txt and button_data == data:
 						if elem == 1:
 							new_row.append(button)
 							del bts[0]
