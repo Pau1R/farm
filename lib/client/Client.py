@@ -105,7 +105,7 @@ class Client:
 
 	# def show_price(self, order_id):
 	# 	order = self.get_order(order_id)
-	# 	order.prepayment_percent = self.app.prepayment_percent   # save current percentage to resolve conflicts
+	# 	order.prepayment_percent = self.app.settings.prepayment_percent   # save current percentage to resolve conflicts
 		
 	# 	# generate pay code
 	# 	used_codes = []
@@ -120,7 +120,7 @@ class Client:
 	# 	text += '\n\nДля внесения предоплаты сделайте перевод на карту сбербанка по номеру телефона указанному ниже. '
 	# 	text += f'В комментарии к переводу обязательно укажите код платежа: {order.pay_code}\n'
 	# 	self.GUI.tell(text)
-	# 	self.GUI.tell(self.app.phone_number)
+	# 	self.GUI.tell(self.app.settings.phone_number)
 	# 	self.GUI.tell('После зачисления средств вам прийдет уведомление о принятии заказа в работу.')
 
 	# def show_rejected(self, order_id, reason):
@@ -137,17 +137,6 @@ class Client:
 			buttons.append([order.name, order.order_id])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
-
-	# def show_order(self, order_id):
-		# order = None
-		# for order_ in self.app.orders:
-		# 	if order_.order_id == order_id:
-		# 		order = order_
-		# if order == None:
-		# 	self.show_orders()
-		# 	return
-		# buttons = ['Назад']
-		# self.GUI.tell_buttons(self.texts.price_text(order_id), buttons, buttons, 6, 0)
 
 	def show_info(self):
 		buttons = [['Доступные цвета и типы пластика', 'colors'], 'Назад']
@@ -179,36 +168,13 @@ class Client:
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 
-	# def process_supports(self):
-	# 	order_id = self.message.instance_id
-	# 	self.GUI.clear_order_chat(order_id)
-	# 	my_order = self.get_order(order_id)
-	# 	if self.message.btn_data == 'client':
-	# 		my_order.support_remover = 'client'
-	# 	elif self.message.btn_data == 'seller':
-	# 		my_order.support_remover = 'seller'
-	# 		my_order.price += int(my_order.support_time * my_order.quantity * self.app.support_remove_price)
-	# 	else:
-	# 		self.show_supports(order_id)
-	# 		return
-	# 	self.goto_color(order_id)
-
-	# def process_price(self):
-	# 	i = ''
-
 	def process_orders(self):
 		if self.message.btn_data == 'Назад':
 			self.show_top_menu()
 		else:
-			# order_id = int(self.message.btn_data)
-			# self.show_order(order_id)
 			self.message.instance_id = int(self.message.btn_data)
 			self.client_order.last_data = ''
 			self.client_order.first_message(self.message)
-
-	# def process_order(self):
-	# 	if self.message.btn_data == 'Назад':
-	# 		self.show_orders()
 
 	def process_info(self):
 		if self.message.btn_data == 'Назад':
@@ -218,10 +184,6 @@ class Client:
 			self.client_color.first_message(self.message)
 
 #---------------------------- LOGIC ----------------------------
-
-	# def goto_color(self, order_id):
-	# 	self.message.order_id = order_id
-	# 	self.client_color.first_message(self.message)
 
 	def get_order(self, order_id):
 		for order in self.app.orders:
@@ -238,6 +200,4 @@ class Client:
 		return orders
 
 # TODO:
-# - client color selection
 # - client process prepayment
-# - ignore old button presses

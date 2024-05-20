@@ -25,6 +25,7 @@ class Order:
 
 	plastic_type = ''
 	plastic_color = ''
+	printer_type = ''
 	layer_hight = 0.0
 	priority = 0
 	weight = 0
@@ -38,7 +39,7 @@ class Order:
 	start_time_estimate = None
 	end_time_estimate = None
 	
-	price_estimate = 0.0
+	# price_estimate = 0.0
 	price = 0.0
 	prepayed = 0.0
 	prepayment_percent = 0.3
@@ -94,27 +95,15 @@ class Order:
 	# 		if message.chat_id == id:
 	# 			self.GUI.remove_message(message)
 
-	def set_plastic_type(self, type):
-		self.plastic_type = type
+	def set_price(self):
+		if self.plastic_color != '':
+			for spool in self.app.equipment.spools:
+				if spool.color == self.order.plastic_color and spool.type == self.order.plastic_type:
+					gram_price = spool.price/spool.weight
+					break
+		else:
+			gram_price = self.app.equipment.spools_average_price(self.plastic_type)
 
-	def set_plastic_color(self, color):
-		self.plastic_color = color
-
-	def set_layer_hight(self, height):
-		self.layer_hight = layer_hight
-
-	def set_priority(self, priority):
-		self.priority = priority
-
-	def set_quantity(self, quantity):
-		self.quantity = quantity
-
-	def set_time_estimate(self, time):
-		start_time_estimate = ''
-		end_time_estimate = ''
-
-	def set_price_estimate(self, price):
-		self.price_estimate = price
-
-	def set_price(self, price):
-		self.price = price
+		plastic_price = self.weight * self.quantity * gram_price
+		time_price = (self.time / 60) * self.app.settings.printer_ender_3_s1_pro_hour_price # TODO: get price setting for printer type
+		self.price = int(plastic_price + time_price)

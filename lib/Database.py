@@ -74,6 +74,7 @@ class Database:
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
 			name TEXT,
+			shade TEXT,
 			samplePhoto TEXT"""
 		surface = """
 			id INTEGER PRIMARY KEY,
@@ -92,8 +93,8 @@ class Database:
 			priority INTEGER,
 			plastic_type TEXT,
 			plastic_color TEXT,
+			printer_type TEXT,
 			layer_hight DECIMAL,
-			price_estimate DECIMAL,
 			sketches TEXT,
 			assinged_designer_id TEXT,
 			weight DECIMAL,
@@ -105,6 +106,10 @@ class Database:
 			prepayment_percent DECIMAL,
 			conditions TEXT,
 			comment TEXT """
+		setting = """
+			id INTEGER PRIMARY KEY,
+			name TEXT,
+			value TEXT"""
 
 		create = 'CREATE TABLE IF NOT EXISTS '
 		
@@ -118,6 +123,7 @@ class Database:
 		self.cursor.execute(create + 'color (' + color + ')')
 		self.cursor.execute(create + 'surface (' + surface + ')')
 		self.cursor.execute(create + 'order_ (' + order + ')')
+		self.cursor.execute(create + 'setting (' + setting + ')')
 		self.db.commit()
 
 #---------------------------- CHAT ----------------------------
@@ -182,8 +188,8 @@ class Database:
 			order.priority = line[9]
 			order.plastic_type = line[10]
 			order.plastic_color = line[11]
-			order.layer_hight = line[12]
-			order.price_estimate = line[13]
+			order.printer_type = line[12]
+			order.layer_hight = line[13]
 			order.sketches = line[14]
 			order.assinged_designer_id = line[15]
 			order.weight = line[16]
@@ -218,8 +224,8 @@ class Database:
 		values += 'priority = "' + str(order.priority) + '", '
 		values += 'plastic_type = "' + order.plastic_type + '", '
 		values += 'plastic_color = "' + order.plastic_color + '", '
+		values += 'printer_type = "' + order.printer_type + '", '
 		values += 'layer_hight = "' + str(order.layer_hight) + '", '
-		values += 'price_estimate = "' + str(order.price_estimate) + '", '
 		values += 'sketches = "' + str(order.sketches) + '", '
 		values += 'assinged_designer_id = "' + order.assinged_designer_id + '", '
 		values += 'weight = "' + str(order.weight) + '", '
@@ -352,21 +358,22 @@ class Database:
 		self.db.commit()
 
 	def get_colors(self):
-		self.cursor.execute('SELECT id, created, name, samplePhoto FROM color')
+		self.cursor.execute('SELECT id, created, name, shade, samplePhoto FROM color')
 		sql = self.cursor.fetchall()
 		colors = []
 		for color in sql:
-			colors.append([str(color[0]), color[1], color[2], color[3]])
+			colors.append([str(color[0]), color[1], color[2], color[3], color[4]])
 		return colors
 
 	def add_color(self, color):
-		self.cursor.execute('INSERT INTO color VALUES (?,Null,Null,Null)', (color.id,))
+		self.cursor.execute('INSERT INTO color VALUES (?,Null,Null,Null,Null)', (color.id,))
 		self.db.commit()
 		self.update_color(color)
 
 	def update_color(self, color):
 		values = 'created = "' + str(color.date) + '", '
 		values += 'name = "' + color.name + '", '
+		values += 'shade = "' + color.shade + '", '
 		values += 'samplePhoto = "' + color.samplePhoto + '" '
 		self.cursor.execute('UPDATE color SET ' + values + ' WHERE id = ' + str(color.id))
 		self.db.commit()
@@ -389,4 +396,26 @@ class Database:
 
 	def remove_surface(self, id):
 		self.cursor.execute('DELETE FROM surface WHERE id=?', (id,))
+		self.db.commit()
+
+	def get_settings(self):
+		self.cursor.execute('SELECT name, value FROM setting')
+		sql = self.cursor.fetchall()
+		settings = {}
+		for setting in sql:
+			settings[setting[0]] = setting[1]
+		return settings
+
+	def add_setting(self, name, value):
+		self.cursor.execute('INSERT INTO setting VALUES (Null,?,Null)', (name,))
+		self.db.commit()
+		self.update_setting(name, value)
+
+	def update_setting(self, name, value):
+		values = 'value = "' + value + '" '
+		self.cursor.execute('UPDATE setting SET ' + values + ' WHERE name = ' + str(name))
+		self.db.commit()
+
+	def remove_setting(self, name):
+		self.cursor.execute('DELETE FROM setting WHERE name=?', (name,))
 		self.db.commit()

@@ -5,6 +5,7 @@ from datetime import date
 from lib.Msg import Message
 from lib.client.Order import Order
 from lib.Test import Test
+from lib.Settings import Settings
 import jsonpickle
 from datetime import date
 
@@ -13,19 +14,14 @@ class App:
 	conf = None
 	db = None
 	equipment = None
+	settings = None
 	orders = []
 
 	chats = []
 	chat = None
 
-	# settings:
-	support_remove_price = 10
-	prepayment_percent = 0.3
-	prepayment_free_max = 5000
-	phone_number = '+79871234567'
-
-	# count = 0
-	# last_check_date = None
+	count = 0
+	last_check_date = None
 
 	def __init__(self, bot, conf):
 		self.bot = bot
@@ -35,9 +31,10 @@ class App:
 		self.equipment.init(self.db)
 		self.db.get_chats()
 		self.db.get_orders()
+		self.settings = Settings(self)
 		# test = Test(self.db, self)
 
-	def new_message(self, message):                # find chat object and tell him to process incoming message
+	def new_message(self, message):
 		print('app.py new_message')
 		message = Message(message)
 		self.chat = None
@@ -46,11 +43,12 @@ class App:
 		for obj in self.chats:
 			if obj.user_id == user_id:
 				self.chat = obj
+				self.chat.last_access_date = date.today()
 		if self.chat == None:
 			self.chat = self.create_chat(message)
-		self.chat.new_message(message)                  # process message data
+		self.chat.new_message(message)
 
-		# self.remove_inactive_chats()
+		self.remove_inactive_chats()
 
 	def create_chat(self, message):
 		chat = Chat(self, message.user_id, False, date.today())
@@ -58,16 +56,23 @@ class App:
 		self.db.create_chat(chat)
 		return chat
 
-	def remove_inactive_chats(self):  # every 100 messages check if date has changed
+	def remove_inactive_chats(self):
 		if self.count < 100:  
 			self.count += 1
 			return
 		self.count = 0
 		today = date.today()
-		if today != self.last_check_date: # if data has changed check chats last activity date
+		if today != self.last_check_date: # run check once a day
 			self.last_check_date = today
 			for obj in self.chats:
-				if (today - obj.last_access_date).days >= 10: # if chat hasn't activity last 10 days, remove object
+				if not obj.is_employee:
+					period = (today - obj.last_access_date).days
+					if period < 30:
+						break
+					elif period < 60:
+						for order in self.orders:
+							if order.user_id == obj.user_id:
+								break
 					chats.remove(obj)
 
 
@@ -88,7 +93,11 @@ class App:
 #     6 spool
 #     7 color
 #     8 surface
+#	  9 settings
 #	3 Operator
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
+
+
+# TODO: App.py 1, Designer_validate.py 4, Client_color.py 1, create settings table, Order.py 1, Settings.py 1, SettingsGUI.py 

@@ -69,7 +69,6 @@ class Chat:
 
     def show_warn_user(self):
         self.message_pause = self.message
-        # text = 'Вы нажали на кнопку во время ожидания ввода данных. Продолжить действие или ввести данные?'
         text = 'Ожидается ввод данных, отменить нажатие кнопки?'
         buttons = ['Да, отменить, я хочу ввести данные', 'Нет, выполнить действие кнопки']
         self.GUI.tell_buttons(text, buttons, buttons, 1, 0)

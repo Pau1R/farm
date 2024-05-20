@@ -25,7 +25,9 @@ class Validate:
 	table_minutes = 1
 	supports = False
 	support_minutes = 0
+	printer_type = ''
 	material = ''
+	price = 0
 
 	def __init__(self, app, chat):
 		self.app = app
@@ -80,10 +82,13 @@ class Validate:
 		self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.order_id)
 
 	def show_accept(self):
+# TODO: display only available materials
+
 		if not (self.order.conditions == '' or self.order.conditions == None):
 			buttons = self.texts.spool_types
 			buttons.append('любой')
-			self.GUI.tell_buttons(f'Выберите тип материала. Условия эксплуатации: {self.order.conditions}', buttons, [], 3, self.order.order_id)
+			buttons.append(['Подходящего пластика нет', 'unavailable'])
+			self.GUI.tell_buttons(f'Выберите тип пластика. Условия эксплуатации: {self.order.conditions}', buttons, [], 3, self.order.order_id)
 		else:
 			self.show_accept_quantity()
 
@@ -106,7 +111,7 @@ class Validate:
 	def show_accept_supports_time(self):
 		text = 'Сколько нужно минут на удаление поддержек'
 		if self.order.quantity > 1:
-			text += ' с одной экземпляра'
+			text += ' с одного экземпляра'
 		self.GUI.tell_buttons(text + '?', ['0.5','1','2','3','5','10','15','20'], [], 7, self.order.order_id)
 
 	def show_accept_time(self):
@@ -118,6 +123,10 @@ class Validate:
 		text = 'Продолжительность печати.\n\nТеперь выберите сколько минут:'
 		buttons = self.texts.order_validate_accept_time_minutes_btns
 		self.GUI.tell_buttons(text, buttons, [], 9, self.order.order_id)
+
+	def show_select_printer_type(self):
+# TODO: select printer type
+		x = ''
 
 	def show_accept_confirmation(self):
 		buttons = ['Подтвердить', 'Отмена']
@@ -140,7 +149,6 @@ class Validate:
 			self.app.chat.user.designer.first_message(self.message)
 		else:
 			for order in self.app.orders:
-				# if int(self.message.btn_data.split(":")[0]) == order.order_id:
 				if int(self.message.btn_data) == order.order_id:
 					self.order = order
 					# self.show_validate()
@@ -163,12 +171,13 @@ class Validate:
 		elif self.message.btn_data == 'reject':
 			self.show_reject()
 
-			# TODO:
-			# - payment
-
 	def process_accept(self):
-		self.material = self.message.btn_data
-		self.show_accept_quantity()
+		if self.message.btn_data == 'unavailable':
+			# tell client that stock has ended
+			x = ''
+		else:
+			self.material = self.message.btn_data
+			self.show_accept_quantity()
 
 	def process_accept_quantity(self):
 		try:
@@ -213,6 +222,10 @@ class Validate:
 		except:
 			self.show_accept_time_minutes()
 
+	def process_select_printer_type(self):
+# TODO: save printer type
+		x = ''
+
 	def process_accept_confirmation(self):
 		if self.message.btn_data == 'Отмена':
 			self.show_validate()
@@ -222,10 +235,13 @@ class Validate:
 			self.order.support_time = self.support_minutes
 			self.order.status = 'validated'
 			self.order.plastic_type = self.material
-			# self.app.db.update_order(self.order)
+			self.order.printer_type = self.printer_type
+			self.order.price = self.price
+			self.order.set_price()
+			self.app.db.update_order(self.order)
 			for chat in self.app.chats:
 				if chat.user_id == str(self.order.user_id):
-					chat.user.show_supports(self.order.order_id)
+					chat.user.client_order.show_confirmed_by_designer(self.order)
 			self.show_top_menu()
 
 	def process_reject(self):

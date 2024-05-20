@@ -17,6 +17,7 @@ class ColorGUI:
 	last_data = ''
 
 	name = ''
+	shade = ''
 	samplePhoto = ''
 
 	def __init__(self, app, chat):
@@ -41,10 +42,12 @@ class ColorGUI:
 			elif message.function == '3':
 				self.process_add_new_color()
 			elif message.function == '4':
-				self.process_add_photo()
+				self.process_add_new_shade()
 			elif message.function == '5':
-				self.process_edit_photo()
+				self.process_add_photo()
 			elif message.function == '6':
+				self.process_edit_photo()
+			elif message.function == '7':
 				self.process_add_confirmation()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
@@ -70,19 +73,23 @@ class ColorGUI:
 
 	def show_add_new_color(self):
 		self.chat.set_context(self.address, 3)
-		self.GUI.tell('Введите название цвета')
+		self.GUI.tell('Введите название цвета (в следующем запросе - оттенок)')
+
+	def show_add_new_shade(self):
+		self.chat.set_context(self.address, 4)
+		self.GUI.tell_buttons('Введите название отенка', ['Оттенка нет'], [], 4, 0)
 
 	def show_add_photo(self):
-		self.chat.set_context(self.address, 4)
+		self.chat.set_context(self.address, 5)
 		self.GUI.tell('Отправьте фото образца')
 
 	def show_edit_photo(self):
-		self.chat.set_context(self.address, 5)
+		self.chat.set_context(self.address, 6)
 		self.GUI.tell('Отправьте фото образца')
 
 	def show_add_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить добавление']
-		self.GUI.tell_buttons('Подтвердите добавление цвета', buttons, ['Подтверждаю', 'Отменить добавление'], 6, 0)
+		self.GUI.tell_buttons('Подтвердите добавление цвета', buttons, ['Подтверждаю', 'Отменить добавление'], 7, 0)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -108,6 +115,11 @@ class ColorGUI:
 
 	def process_add_new_color(self):
 		self.name = self.message.text
+		self.show_add_new_shade()
+	
+	def process_add_new_shade(self):
+		if not self.message.btn_data == 'Оттенка нет':
+			self.shade = self.message.text
 		self.show_add_photo()
 
 	def process_add_photo(self):
@@ -126,7 +138,7 @@ class ColorGUI:
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
-			self.color = self.app.equipment.create_new_color(self.name, self.samplePhoto)
+			self.color = self.app.equipment.create_new_color(self.name, self.shade, self.samplePhoto)
 			text = f'Создан новый цвет: {self.color.name}'
 			self.GUI.tell_permanent(text)
 		self.name = ''

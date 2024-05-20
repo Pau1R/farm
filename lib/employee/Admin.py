@@ -12,6 +12,7 @@ from lib.equipment.GUI.Printer import PrinterGUI
 from lib.equipment.GUI.Spool import SpoolGUI
 from lib.equipment.GUI.Color import ColorGUI
 from lib.equipment.GUI.Surface import SurfaceGUI
+from lib.employee.SettingsGUI import SettingsGUI
 
 class Admin:
 	address = '1/2'
@@ -31,6 +32,7 @@ class Admin:
 	spoolGUI = None
 	colorGUI = None
 	surfaceGUI = None
+	settingsGUI = None
 
 	def __init__(self, app, chat):
 		self.app = app
@@ -46,6 +48,7 @@ class Admin:
 		self.spoolGUI = SpoolGUI(app, chat)
 		self.colorGUI = ColorGUI(app, chat)
 		self.surfaceGUI = SurfaceGUI(app, chat)
+		self.settingsGUI = SettingsGUI(app, chat)
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -63,6 +66,8 @@ class Admin:
 					self.process_orders()
 				elif message.function == '3':
 					self.process_equipment()
+				elif message.function == '4':
+					self.process_settings()
 			else:
 				self.last_data = ''
 			if message.file3 == '1':
@@ -81,6 +86,8 @@ class Admin:
 				self.colorGUI.new_message(message)
 			elif message.file3 == '8':
 				self.surfaceGUI.new_message(message)
+			elif message.file3 == '9':
+				self.settingsGUI.new_message(message)
 		if message.type == 'text':
 			self.GUI.messages_append(message)
 
@@ -88,7 +95,7 @@ class Admin:
 
 	def show_top_menu(self):
 		text = 'Здравствуйте, Администратор ' + self.chat.user.name
-		buttons = ['Заказы', 'Оборудование']
+		buttons = ['Заказы', 'Оборудование', 'Настройки']
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
@@ -113,6 +120,9 @@ class Admin:
 			self.show_orders()
 		elif self.message.btn_data == 'Оборудование':
 			self.show_equipment()
+		elif self.message.btn_data == 'Настройки':
+			self.settingsGUI.last_data = ''
+			self.settingsGUI.first_message(self.message)
 
 	def process_orders(self):
 		if self.message.btn_data == 'Назад':

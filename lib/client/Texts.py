@@ -76,7 +76,7 @@ class Texts:
 				text0 = f'\nСтоимость удаления поддержек нами'
 				if order.quantity > 1:
 					text0 += ' со всех экземпляров'
-				text += f'\n{text0}: {int(order.support_time * order.quantity * self.app.support_remove_price)} rub'
+				text += f'\n{text0}: {int(order.support_time * order.quantity * self.app.settings.support_remove_price)} rub'
 		if order.prepayed > 0:
 			text += f'Предоплата: внесено {order.prepayed} rub.\n'
 			if order.prepayed < order.prepayment_percent * order.price:
@@ -104,8 +104,6 @@ class Texts:
 		text += f'Для внесения предоплаты сделайте перевод на карту сбербанка по номеру телефона указанному ниже. В комментарии к переводу обязательно укажите ваш номер покупателя: {payer_id}\n'
 		text += 'После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
 		return text
-
-	payment_phone_number = '+71231234567'
 
 	prepayment_successful = 'Предоплата успешно внесена! Заказ принят в работу.\n\nОплатить полную стоимость заказа вы сможете наличными при получении заказа либо переводом.'
 

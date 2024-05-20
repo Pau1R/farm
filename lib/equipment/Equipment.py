@@ -54,7 +54,7 @@ class Equipment:
 			spool = Spool(self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9])
 			self.spools.append(spool)
 		for data in self.db.get_colors():
-			color = Color(self.db, data[0], data[1], data[2], data[3])
+			color = Color(self.db, data[0], data[1], data[2], data[3], data[4])
 			self.colors.append(color)
 		for data in self.db.get_surfaces():
 			surface = Surface(self.db, data[0], data[1], data[2])
@@ -209,9 +209,18 @@ class Equipment:
 			mini.update({spool.color: previous_weight + spool.weight})
 		return diction
 
-	def create_new_color(self, name, samplePhoto):
+	def spools_average_price(self, material):
+		price = 1
+		weight = 1
+		for spool in self.spools:
+			if material == 'Любой' or spool.type == material:
+				price += spool.price
+				weight += spool.weight
+		return int(price/weight)
+
+	def create_new_color(self, name, shade, samplePhoto):
 		id = self.get_next_free_id(self.colors)
-		color = Color(self.db, id, date.today(), name, samplePhoto)
+		color = Color(self.db, id, date.today(), name, shade, samplePhoto)
 		self.db.add_color(color)
 		self.colors.append(color)
 		return color

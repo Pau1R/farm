@@ -109,7 +109,7 @@ class SpoolGUI:
 
 	def show_add_new_spool_price(self):
 		self.chat.set_context(self.address, 8)
-		self.GUI.tell('Введите цену за катушку в rub')
+		self.GUI.tell('Введите цену за катушку в рублях')
 
 	def show_add_new_spool_dried(self):
 		self.GUI.tell_buttons('Катушка высушена?', ['Да', 'Нет'], ['Да', 'Нет'], 9, 0)
@@ -200,6 +200,7 @@ class SpoolGUI:
 		if self.message.btn_data == 'Подтверждаю':
 			self.diameter = self.texts.spool_diameter
 			self.density = self.texts.spool_densities[self.texts.spool_types.index(self.type)]
+			# TODO: add price to classes: spool, database, farm.db, equipment
 			self.spool = self.app.equipment.create_new_spool(self.type, self.diameter, self.weight, self.density, self.color, self.dried, self.brand, self.used)
 			text = f'Создана новая катушка:\nномер: {self.spool.id}\nтип: {self.spool.type}\nвес: {self.spool.weight} грамм\n'
 			text += f'цвет: {self.spool.color}\nвысушена: {self.spool.dried}\nбренд/магазин: {self.spool.brand}'

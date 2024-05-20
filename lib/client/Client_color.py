@@ -121,7 +121,6 @@ class Client_color:
 		buttons.append ('Назад')
 		self.GUI.tell_photo_buttons(color_.name, color_.samplePhoto, buttons, buttons, 2, order_id)
 
-		# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
 
 #---------------------------- PROCESS ----------------------------
 
@@ -141,7 +140,12 @@ class Client_color:
 		if data == 'Назад':
 			self.show_colors()
 		elif data.split('^')[0] == 'confirm':
-			self.order.plastic_color = data.split('^')[1]
+			# if color just disapered: self.show_colors() 
+			# else continue
+			# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
+			self.order.plastic_color = data.split('^')[1] # TODO: take in account color shade
+			self.order.set_price()
+			self.app.db.update_order(self.order)
 			self.chat.user.client_order.last_data = ''
 			self.chat.user.client_order.first_message(self.message)
 
