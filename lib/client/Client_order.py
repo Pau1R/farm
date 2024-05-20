@@ -15,6 +15,7 @@ class Client_order:
 	context = ''
 	texts = None
 	color = None
+	last_data = ''
 
 	order = None
 
@@ -45,7 +46,7 @@ class Client_order:
 			self.GUI.messages_append(message)
 
 	def set_order(self):
-		order_id = self.message.instance_id
+		order_id = int(self.message.instance_id)
 		for order in self.app.orders:
 			if order.order_id == order_id:
 				self.order = order
@@ -58,6 +59,7 @@ class Client_order:
 		settings_set = False
 		free_start = False
 		prepayed = True
+		status = ''
 
 		# set parameters
 		prepay_price = order.prepayment_percent * order.price
@@ -68,26 +70,36 @@ class Client_order:
 		elif order.prepayed < prepay_price:
 			prepayed = False
 
+		if order.status == 'validate':
+			status = 'Ожидание дизайнера'
+		elif order.status == 'validated':
+			status = 'Оформление'
+		elif order.status == 'prepayed':
+			status = 'Выполняется'
+
 		# set text
 		text = order.name + '\n\n'
 		text += f'Статус: {status}\n'
-		if settings_set:
-			text += 'С'
-		else:
-			text += 'Предварительная с'
-		text += f'тоимость: {order.price} rub\n'
+		if order.price > 0:
+			if settings_set:
+				text += 'С'
+			else:
+				text += 'Предварительная с'
+			text += f'тоимость: {order.price} rub\n'
 		if order.quantity > 1:
 			text += f'Кол-во экземпляров: {order.quantity}\n'
-		if order.quantity > 1:
-			text0 = 'Общий вес'
-		else:
-			text0 = 'Вес'
-		text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
-		text += f'Длительность печати'
-		if order.time > 119: # if 2 hours or more show only hours amount
-			text += f' (часов): {int(order.time/60)}'
-		else:
-			text += f': {int(order.time)} минут'
+		if order.weight > 0:
+			if order.quantity > 1:
+				text0 = 'Общий вес'
+			else:
+				text0 = 'Вес'
+			text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
+		if order.time > 0:
+			text += f'Длительность печати'
+			if order.time > 119: # if 2 hours or more show only hours amount
+				text += f' (часов): {int(order.time/60)}'
+			else:
+				text += f': {int(order.time)} минут'
 		if order.start_time_estimate != None:
 			text += f'\nДата готовности (примерно):' # TODO: {order.start_time_estimate}'
 		if order.support_remover != '':
@@ -100,10 +112,9 @@ class Client_order:
 
 		# set buttons
 		buttons = []
-		if order.status == 'validate':
-			status = 'Ожидание дизайнера'
-		elif order.status == 'validated':
-			status = 'Оформление'
+		# order.plastic_color = ''
+		# status = 'validated'
+		if status == 'validated':
 			if order.plastic_color == '':
 				buttons.append(['Выбрать цвет', 'color'])
 			elif order.support_remover == '':
@@ -116,15 +127,28 @@ class Client_order:
 					buttons.append(['Подтвердить и передать на выполнение', 'continue'])
 				else:
 					buttons.append(['Внести предоплату', 'prepay'])
-		elif order.status == 'prepayed':
-			status = 'Выполняется'
 
 		buttons.append(['Отменить заказ'])
 		buttons.append(['Назад'])
-		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
+		self.GUI.tell_buttons(text, buttons, buttons, 1, order.order_id)
 
 #---------------------------- PROCESS ----------------------------
 
-
+	def process_order(self):
+		data = self.message.btn_data
+		if data == 'color':
+			self.chat.user.client_color.last_data = ''
+			self.chat.user.client_color.first_message(self.message)
+		elif data == 'supports':
+			x = ''
+		elif data == 'continue':
+			x = ''
+		elif data == 'prepay':
+			x = ''
+		elif data == 'Отменить заказ':
+			x = ''
+		elif data == 'Назад':
+			self.chat.user.last_data = ''
+			self.chat.user.show_orders()
 
 #---------------------------- LOGIC ----------------------------
