@@ -82,7 +82,7 @@ class SettingsGUI:
 
 	def process_settings_money(self):
 		if self.message.btn_data == 'Назад':
-			self.show_toap_menu()
+			self.show_top_menu()
 		else:
 			self.show_setting(self.message.btn_data)
 

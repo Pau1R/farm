@@ -26,6 +26,7 @@ class Client:
 	menu = None
 	client_model = None
 	client_color = None
+	client_order = None
 	order_id = None
 
 	payId = ''
@@ -91,44 +92,6 @@ class Client:
 		buttons.append('Назад')
 		self.GUI.tell_buttons(self.texts.order_menu, buttons, [], 2, 0)
 
-	# def show_supports(self, order_id):
-	# 	order = self.get_order(order_id)
-	# 	self.GUI.tell_permanent(f'Оценка модели "{order.name}" завершена.')
-	# 	if order.support_time > 0:
-	# 		text = self.texts.price_text(order_id)
-	# 		text += '\n\nВы хотите убрать поддержки самостоятельно?'
-	# 		message = self.GUI.tell_buttons(text, self.texts.supports_btns.copy(), [], 3, order_id)
-	# 		message.general_clear = False
-	# 		message.order_id = order_id
-	# 	else:
-	# 		self.goto_color(order_id)
-
-	# def show_price(self, order_id):
-	# 	order = self.get_order(order_id)
-	# 	order.prepayment_percent = self.app.settings.prepayment_percent   # save current percentage to resolve conflicts
-		
-	# 	# generate pay code
-	# 	used_codes = []
-	# 	code = 0
-	# 	for order_ in self.app.orders:
-	# 		used_codes.append(order_.pay_code)
-	# 	while code in used_codes:
-	# 		code = random.randint(10, 99)
-	# 	order.pay_code = code
-
-	# 	text = self.texts.price_text(order_id)
-	# 	text += '\n\nДля внесения предоплаты сделайте перевод на карту сбербанка по номеру телефона указанному ниже. '
-	# 	text += f'В комментарии к переводу обязательно укажите код платежа: {order.pay_code}\n'
-	# 	self.GUI.tell(text)
-	# 	self.GUI.tell(self.app.settings.phone_number)
-	# 	self.GUI.tell('После зачисления средств вам прийдет уведомление о принятии заказа в работу.')
-
-	# def show_rejected(self, order_id, reason):
-	# 	my_order = self.get_order(order_id)
-	# 	self.GUI.tell(f'Ваша модель {my_order.name} не прошла проверку\nПричина: {reason}')
-	# 	self.app.db.remove_order(my_order)
-	# 	self.app.orders.remove(my_order)
-
 	def show_orders(self):
 		text = 'Мои заказы'
 		buttons = []
@@ -149,14 +112,12 @@ class Client:
 		if self.message.text == 'я_хочу_стать_сотрудником':
 			self.chat.get_employed = True
 			self.GUI.tell('Ждите подтверждения')
-
 		elif self.message.btn_data == 'order':
 			self.show_order_menu()
 		elif self.message.btn_data == 'info':
 			self.show_info()
 		elif self.message.btn_data == 'orders':
 			self.show_orders()
-
 
 	def process_order_menu(self):
 		if self.message.btn_data == 'farm model':
@@ -198,6 +159,3 @@ class Client:
 				if order.status == statuses or (statuses == [] or order.status in statuses):
 					orders.append(order)
 		return orders
-
-# TODO:
-# - client process prepayment

@@ -122,11 +122,10 @@ class Client_model:
 				self.app.orders.append(self.order)
 				self.app.db.create_order(self.order)
 				self.show_wait_for_designer()
+				for chat in self.app.chats:
+					if chat.is_employee and 'Дизайнер' in chat.user.roles:
+						chat.user.designer.validate.show_new_order(self.order)
 				return
 		self.show_extention_error()
 		
 		# self.GUI.tell_document('BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ', 'this is caption text')
-
-
-		# move on to selecting current settings
-		# generate buttons of available colors

@@ -10,7 +10,7 @@ class Order:
 	user_id = ''
 	order_id = 1
 
-	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery
+	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools
 	# who can change order status to another:
 	# - client:
 	#   - creating: validate
@@ -43,7 +43,7 @@ class Order:
 	price = 0.0
 	prepayed = 0.0
 	prepayment_percent = 30
-	pay_code = 0
+	pay_code = '' # TODO: add field to database table
 
 	sketches = []
 	model_file = ''
@@ -73,27 +73,6 @@ class Order:
 			else:
 				break
 		return id
-
-	# def tell_designer(self):
-	# 	for chat in self.app.chats:
-	# 		if chat.is_employee and chat.user.role == 'Дизайнер' and chat.user.active:
-	# 			text = 'Поступил заказ на оценку. Возьмете в работу?'
-	# 			bts = [['Да, возьму', 'assign_order,yes,' + str(self.order_id)], ['Нет, оставлю другому', 'assign_order,no,' + str(self.order_id)]]
-	# 			self.messages.append(self.GUI.tell_buttons_id(chat.user_id, text, bts, []))
-
-	# def assign_designer(self, id):
-	# 	if self.assinged_designer_id != '':
-	# 		return False
-	# 	self.assinged_designer_id = id
-	# 	# self.db.order_assign_designer(self.order_id, id)
-	# 	self.GUI.remove_messages(self.messages.copy())
-	# 	self.messages = []
-	# 	return True
-
-	# def remove_designer_query(self, id):
-	# 	for message in self.messages:
-	# 		if message.chat_id == id:
-	# 			self.GUI.remove_message(message)
 
 	def set_price(self):
 		if self.plastic_color != '':

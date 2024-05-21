@@ -43,8 +43,10 @@ class Client_order:
 			elif message.function == '2':
 				self.process_supports()
 			elif message.function == '3':
-				self.process_cancel_confirmation()
+				self.process_prepay()
 			elif message.function == '4':
+				self.process_cancel_confirmation()
+			elif message.function == '5':
 				self.process_confirmed_by_designer()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
@@ -67,7 +69,7 @@ class Client_order:
 
 		# set parameters
 		prepay_price = (order.prepayment_percent / 100) * order.price + 5
-		if order.plastic_color != '' and order.support_remover != '':
+		if order.plastic_color != '' and (order.support_remover != '' or order.support_time == 0):
 			settings_set = True
 		if order.price < int(self.app.settings.get('prepayment_free_max')) and order.price < (self.chat.user.money_payed / 2):
 			free_start = True
@@ -80,6 +82,8 @@ class Client_order:
 			status = 'Ожидание действий клиента'
 		elif order.status == 'prepayed':
 			status = 'Выполняется'
+		elif order.status == 'no_spools':
+			status = 'Приостановлен (отсутствует пластик)'
 
 		# set text
 		text = order.name + '\n\n'
@@ -125,7 +129,7 @@ class Client_order:
 		if order.status == 'validated':
 			if order.plastic_color == '':
 				buttons.append(['Выбрать цвет', 'color'])
-			elif order.support_remover == '':
+			elif order.support_remover == '' and order.support_time > 0:
 				buttons.append(['Выбрать кто уберет поддержки', 'supports'])
 			elif settings_set:
 				# Условия принятия заказа без предоплаты:
@@ -147,16 +151,50 @@ class Client_order:
 		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Магазин'], 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.order_id)
 
+	def show_prepay(self):
+		if self.order.pay_code == '':
+			used_codes = []
+			code = 0
+			code_upper = 99
+			if len(self.app.orders) > 80:
+				code_upper = 999
+			for order_ in self.app.orders:
+				used_codes.append(order_.pay_code)
+			while code in used_codes:
+				code = random.randint(10, code_upper)
+			self.order.pay_code = str(code)
+
+		text = 'Для внесения предоплаты сделайте перевод на карту сбербанка по указанным реквизитам. В комментарии обязательно укажите код платежа: '
+		text += self.order.pay_code
+		self.GUI.tell(text)
+		self.GUI.tell(self.app.settings.get('phone_number'))
+		self.GUI.tell(self.app.settings.get('card_number'))
+		time.sleep(3)
+		text = 'После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
+		buttons = [['Предоплату сделал', 'prepayed']]
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.order_id)
+
 	def show_cancel_confirmation(self):
 		text = 'Подтвердите отмену заказа'
 		buttons = [['Да, подтверждаю', 'confirm'], 'Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.order_id)
 
 	def show_confirmed_by_designer(self, order):
 		text = f'Оценка заказа {order.name} выполнена'
 		buttons = [['Перейти к заказу', 'now'], ['Перейти к заказу попозже', 'then']]
-		message = self.GUI.tell_buttons(text, buttons, buttons, 4, order.order_id)
+		message = self.GUI.tell_buttons(text, buttons, buttons, 5, order.order_id)
 		message.general_clear = False
+
+	def show_rejected_by_designer(self, order, reason):
+		text = f'Заказ {order.name} не прошел оценку. Причина: {reason}'
+		self.GUI.tell(text)
+
+	def show_material_unavailable(self, order):
+		text = f'Заказ {order.name}\n\n'
+		text += 'К сожалению в настоящее время на складе отсутствует нужный вам тип пластика. '
+		text += 'Мы вам сообщим когда он будет в наличии.'
+		self.GUI.tell(text)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -170,7 +208,7 @@ class Client_order:
 		elif data == 'continue':
 			x = ''
 		elif data == 'prepay':
-			x = ''
+			self.show_prepay()
 		elif data == 'Отменить заказ':
 			self.show_cancel_confirmation()
 		elif data == 'Назад':
@@ -186,6 +224,14 @@ class Client_order:
 		elif data == 'Магазин':
 			self.order.support_remover = 'Магазин'
 		self.app.db.update_order(self.order)
+		self.show_order()
+
+	def process_prepay(self):
+		data = self.message.btn_data
+		if data == 'prepayed':
+			x = '' # TODO: save info somewhere
+		elif data == 'Назад':
+			x = ''
 		self.show_order()
 
 	def process_cancel_confirmation(self):
