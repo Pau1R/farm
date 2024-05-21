@@ -56,10 +56,15 @@ class Database:
 			created DATETIME,
 			name TEXT,
 			type TEXT"""
+		printer_type = """
+			id INTEGER PRIMARY KEY,  
+			name TEXT,
+			hour_cost INTEGER"""
 		printer = """
 			id INTEGER PRIMARY KEY, 
 			created DATETIME, 
-			name TEXT"""
+			name TEXT,
+			type TEXT"""
 		spool = """
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
@@ -119,6 +124,7 @@ class Database:
 		self.cursor.execute(create + 'dryer (' + dryer + ')')
 		self.cursor.execute(create + 'extruder (' + extruder + ')')
 		self.cursor.execute(create + 'location (' + location + ')')
+		self.cursor.execute(create + 'printer_type (' + printer_type + ')')
 		self.cursor.execute(create + 'printer (' + printer + ')')
 		self.cursor.execute(create + 'spool (' + spool + ')')
 		self.cursor.execute(create + 'color (' + color + ')')
@@ -312,16 +318,32 @@ class Database:
 		self.cursor.execute('DELETE FROM location WHERE id=?', (id,))
 		self.db.commit()
 
+	def get_printer_types(self):
+		self.cursor.execute('SELECT id, name, hour_cost FROM printer_type')
+		sql = self.cursor.fetchall()
+		printer_types = []
+		for printer_type in sql:
+			printer_types.append([str(printer_type[0]), printer_type[1], printer_type[2]])
+		return printer_types
+
+	def add_printer_type(self, printer_type):
+		self.cursor.execute('INSERT INTO printer_type VALUES (?,?,?)', (printer_type.id, printer_type.name, printer_type.hour_cost))
+		self.db.commit()
+
+	def remove_printer_type(self, id):
+		self.cursor.execute('DELETE FROM printer_type WHERE id=?', (id,))
+		self.db.commit()
+
 	def get_printers(self):
-		self.cursor.execute('SELECT id, created, name FROM printer')
+		self.cursor.execute('SELECT id, created, name, type FROM printer')
 		sql = self.cursor.fetchall()
 		printers = []
 		for printer in sql:
-			printers.append([str(printer[0]), printer[1], printer[2]])
+			printers.append([str(printer[0]), printer[1], printer[2], printer[3]])
 		return printers
 
 	def add_printer(self, printer):
-		self.cursor.execute('INSERT INTO printer VALUES (?,?,?)', (printer.id, date.today(), printer.name))
+		self.cursor.execute('INSERT INTO printer VALUES (?,?,?,?)', (printer.id, date.today(), printer.name, printer.type_))
 		self.db.commit()
 
 	def remove_printer(self, id):

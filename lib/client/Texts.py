@@ -43,52 +43,8 @@ class Texts:
 
 	file = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(supported_3d_extensions)
 
-	def price_text(self, order_id):
-		order = None
-		for entry in self.app.orders:
-			if entry.order_id == order_id:
-				order = entry
-		if order == None:
-			return
-		text = f'Модель "{order.name}"\n\n'
-		if order.plastic_color == '':
-			text += f'Предварительная стоимость: {order.price} rub\n'
-		else:
-			text += f'Итоговая стоимость: {order.price} rub\n'
-		if order.quantity > 1:
-			text0 = 'Общий вес'
-		else:
-			text0 = 'Вес'
-		text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
-		if order.quantity > 1:
-			text += f'Кол-во экземпляров: {order.quantity}\n'
-		text += f'Время, необходимое для печати'
-		if order.time > 119:
-			text += f' (часов): {int(order.time/60)}'
-		else:
-			text += f': {int(order.time/60)} минут'
-		if order.start_time_estimate != None:
-			text += f'\nНачало печати (приблизительно): {order.start_time_estimate}'
-		if order.support_remover != '':
-			text += f'\nУдаление поддержек: {order.support_remover}'
-		else:
-			if order.support_time > 0:
-				text0 = f'\nСтоимость удаления поддержек нами'
-				if order.quantity > 1:
-					text0 += ' со всех экземпляров'
-				text += f'\n{text0}: {int(order.support_time * order.quantity * self.app.settings.support_remove_price)} rub'
-		if order.prepayed > 0:
-			text += f'Предоплата: внесено {order.prepayed} rub.\n'
-			if order.prepayed < order.prepayment_percent * order.price:
-				text += f'\n\nПредоплата внесена не полностью, заказ не принят в работу!'
-		return text
-
 	supports_btns = [['Да, сам уберу', 'client'], ['Нет, уберите вы', 'seller']]
-
-	price_btns = [['Согласен, перейти к предоплате', 'confirm'], ['Отменить заказ', 'cancel']]
-	
-	# available_materials = 'Пока ведется оценка вы можете ознакомиться с доступными материалами и определиться с цветом изделия.'
-	
+		
 	def confirm_prepayment(self, model, print, ready):
 		text = f'Предварительная стоимость заказа: {model + print} рублей\n'
 		if model != 0:

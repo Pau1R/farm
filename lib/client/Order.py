@@ -98,12 +98,15 @@ class Order:
 	def set_price(self):
 		if self.plastic_color != '':
 			for spool in self.app.equipment.spools:
-				if spool.color == self.order.plastic_color and spool.type == self.order.plastic_type:
+				if spool.color == self.plastic_color and spool.type == self.plastic_type:
 					gram_price = spool.price/spool.weight
 					break
 		else:
 			gram_price = self.app.equipment.spools_average_price(self.plastic_type)
 
 		plastic_price = self.weight * self.quantity * gram_price
-		time_price = (self.time / 60) * self.app.settings.printer_ender_3_s1_pro_hour_price # TODO: get price setting for printer type
+		for type_ in self.app.equipment.printer_types:
+			if type_.name == self.printer_type:
+				printer_hour_cost = type_.hour_cost
+		time_price = (self.time / 60) * printer_hour_cost
 		self.price = int(plastic_price + time_price)

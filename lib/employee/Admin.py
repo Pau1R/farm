@@ -8,6 +8,7 @@ from lib.equipment.GUI.Container import ContainerGUI
 from lib.equipment.GUI.Dryer import DryerGUI
 from lib.equipment.GUI.Extruder import ExtruderGUI
 from lib.equipment.GUI.Location import LocationGUI
+from lib.equipment.GUI.Printer_type import Printer_typeGUI
 from lib.equipment.GUI.Printer import PrinterGUI
 from lib.equipment.GUI.Spool import SpoolGUI
 from lib.equipment.GUI.Color import ColorGUI
@@ -28,6 +29,7 @@ class Admin:
 	dryerGUI = None
 	extruderGUI = None
 	locationGUI = None
+	printer_typeGUI = None
 	printerGUI = None
 	spoolGUI = None
 	colorGUI = None
@@ -44,6 +46,7 @@ class Admin:
 		self.dryerGUI = DryerGUI(app, chat)
 		self.extruderGUI = ExtruderGUI(app, chat)
 		self.locationGUI = LocationGUI(app, chat)
+		self.printer_typeGUI = Printer_typeGUI(app, chat)
 		self.printerGUI = PrinterGUI(app, chat)
 		self.spoolGUI = SpoolGUI(app, chat)
 		self.colorGUI = ColorGUI(app, chat)
@@ -88,6 +91,8 @@ class Admin:
 				self.surfaceGUI.new_message(message)
 			elif message.file3 == '9':
 				self.settingsGUI.new_message(message)
+			elif message.file3 == '10':
+				self.printer_typeGUI.new_message(message)
 		if message.type == 'text' and message.file3 == '':
 			self.GUI.messages_append(message)
 
@@ -141,6 +146,9 @@ class Admin:
 		elif self.message.btn_data == 'Локации':
 			self.locationGUI.last_data = ''
 			self.locationGUI.first_message(self.message)
+		elif self.message.btn_data == 'Типы принтеров':
+			self.printer_typeGUI.last_data = ''
+			self.printer_typeGUI.first_message(self.message)
 		elif self.message.btn_data == 'Принтеры':
 			self.printerGUI.last_data = ''
 			self.printerGUI.first_message(self.message)

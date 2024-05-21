@@ -100,4 +100,4 @@ class App:
 #	5 Delivery
 
 
-# TODO: App.py 1, Designer_validate.py 4, Client_color.py 1, create settings table, Order.py 1, Settings.py 1, SettingsGUI.py 
+# TODO: Designer_validate.py 2, Client_color.py 1, client_order prepayment, client wait for specific material

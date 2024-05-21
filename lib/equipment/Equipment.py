@@ -2,6 +2,7 @@ from lib.equipment.Container import Container
 from lib.equipment.Dryer import Dryer
 from lib.equipment.Extruder import Extruder
 from lib.equipment.Location import Location
+from lib.equipment.Printer_type import Printer_type
 from lib.equipment.Printer import Printer
 from lib.equipment.Spool import Spool
 from lib.equipment.Color import Color
@@ -17,6 +18,7 @@ class Equipment:
 	dryers = []
 	extruders = []
 	locations = []
+	printer_types = []
 	printers = []
 	spools = []
 	colors = []
@@ -47,8 +49,11 @@ class Equipment:
 		for data in self.db.get_locations():
 			location = Location(self.db, data[0], data[1], data[2], data[3])
 			self.locations.append(location)
+		for data in self.db.get_printer_types():
+			printer_type = Printer_type(self.db, data[0], data[1], data[2])
+			self.printer_types.append(printer_type)
 		for data in self.db.get_printers():
-			printer = Printer(self.db, data[0], data[1], data[2])
+			printer = Printer(self.db, data[0], data[1], data[2], data[3])
 			self.printers.append(printer)
 		for data in self.db.get_spools():
 			spool = Spool(self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9])
@@ -64,6 +69,7 @@ class Equipment:
 		self.sort_dryers()
 		self.sort_extruders()
 		self.sort_locations()
+		self.sort_printer_types()
 		self.sort_printers()
 		self.sort_spools()
 		self.sort_colors()
@@ -155,9 +161,26 @@ class Equipment:
 	def sort_locations(self):
 		self.locations.sort(key=self.get_object_id)
 
-	def create_new_printer(self, name):
+	def create_new_printer_type(self, name, hour_cost):
+		id = self.get_next_free_id(self.printer_types)
+		printer_type = Printer_type(self.db, id, name, hour_cost)
+		self.db.add_printer_type(printer_type)
+		self.printer_types.append(printer_type)
+		return printer_type
+
+	def remove_printer_type(self, id):
+		for printer_type in self.printer_types:
+			if printer_type.id == id:
+				self.db.remove_printer_type(id)
+				self.printer_types.remove(printer_type)
+				break
+
+	def sort_printer_types(self):
+		self.printer_types.sort(key=self.get_object_id)
+
+	def create_new_printer(self, name, type_):
 		id = self.get_next_free_id(self.printers)
-		printer = Printer(self.db, id, date.today(), name)
+		printer = Printer(self.db, id, date.today(), name, type_)
 		self.db.add_printer(printer)
 		self.printers.append(printer)
 		return printer
