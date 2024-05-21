@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 from lib.Chat import Chat
 from lib.client.Order import Order
+import time
 
 class Database:
 	cursor = None
@@ -107,8 +108,8 @@ class Database:
 			conditions TEXT,
 			comment TEXT """
 		setting = """
-			id INTEGER PRIMARY KEY,
-			name TEXT,
+			id INTEGER,
+			name TEXT PRIMARY KEY,
 			value TEXT"""
 
 		create = 'CREATE TABLE IF NOT EXISTS '
@@ -413,7 +414,8 @@ class Database:
 
 	def update_setting(self, name, value):
 		values = 'value = "' + value + '" '
-		self.cursor.execute('UPDATE setting SET ' + values + ' WHERE name = ' + str(name))
+		# self.cursor.execute('UPDATE setting SET ' + values + ' WHERE name =' + name)
+		self.cursor.execute('UPDATE setting SET ' + values + ' WHERE name = "' + name + '"')
 		self.db.commit()
 
 	def remove_setting(self, name):

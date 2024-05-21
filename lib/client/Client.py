@@ -74,7 +74,7 @@ class Client:
 				self.client_color.new_message(message)
 			elif message.file2 == '4':
 				self.client_order.new_message(message)
-		if message.type == 'text' and message.text != '/start':
+		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
 
 #---------------------------- SHOW ----------------------------

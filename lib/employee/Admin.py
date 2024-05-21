@@ -88,7 +88,7 @@ class Admin:
 				self.surfaceGUI.new_message(message)
 			elif message.file3 == '9':
 				self.settingsGUI.new_message(message)
-		if message.type == 'text':
+		if message.type == 'text' and message.file3 == '':
 			self.GUI.messages_append(message)
 
 #---------------------------- SHOW ----------------------------

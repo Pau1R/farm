@@ -66,10 +66,10 @@ class Client_order:
 		status = ''
 
 		# set parameters
-		prepay_price = order.prepayment_percent * order.price + 5
+		prepay_price = (order.prepayment_percent / 100) * order.price + 5
 		if order.plastic_color != '' and order.support_remover != '':
 			settings_set = True
-		if order.price < self.app.settings.prepayment_free_max and order.price < (self.chat.user.money_payed / 2):
+		if order.price < self.app.settings.get('prepayment_free_max') and order.price < (self.chat.user.money_payed / 2):
 			free_start = True
 		elif order.prepayed < prepay_price:
 			prepayed = False
@@ -142,7 +142,8 @@ class Client_order:
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на '
-		text += f'{int(self.order.support_time * self.order.quantity * self.app.settings.support_remove_price)} рублей'
+		setting = self.app.settings.get('support_remove_price')
+		text += f'{int(self.order.support_time * self.order.quantity * setting)} рублей'
 		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Магазин'], 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.order_id)
 
@@ -180,7 +181,8 @@ class Client_order:
 		data = self.message.btn_data
 		if data == 'Клиент':
 			self.order.support_remover = 'Клиент'
-			self.order.price -= int(self.order.support_time * self.order.quantity * self.app.settings.support_remove_price)
+			setting = self.app.settings.get('support_remove_price')
+			self.order.price -= int(self.order.support_time * self.order.quantity * setting)
 		elif data == 'Магазин':
 			self.order.support_remover = 'Магазин'
 		self.app.db.update_order(self.order)

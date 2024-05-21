@@ -62,7 +62,7 @@ class Employee:
 					self.send_first_message(message)
 			else: # pass message to child class
 				self.send_new_message(message)
-		if message.type == 'text' and message.text != '/start':
+		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
 
 	def send_first_message(self, message):
