@@ -241,9 +241,9 @@ class Equipment:
 				weight += spool.weight
 		return int(price/weight)
 
-	def create_new_color(self, name, shade, samplePhoto):
+	def create_new_color(self, name, parent, samplePhoto):
 		id = self.get_next_free_id(self.colors)
-		color = Color(self.db, id, date.today(), name, shade, samplePhoto)
+		color = Color(self.db, id, date.today(), name, parent, samplePhoto)
 		self.db.add_color(color)
 		self.colors.append(color)
 		return color

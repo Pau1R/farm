@@ -100,4 +100,4 @@ class App:
 #	5 Delivery
 
 
-# TODO: Designer_validate.py 2, Client_color.py 1, client_order prepayment, client wait for specific material
+# TODO: Designer_validate.py 2, Client_color.py 1, client_order prepayment, client wait for specific material, color.py finish sub_color logic

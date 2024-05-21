@@ -80,7 +80,7 @@ class Database:
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
 			name TEXT,
-			shade TEXT,
+			parent TEXT,
 			samplePhoto TEXT"""
 		surface = """
 			id INTEGER PRIMARY KEY,
@@ -381,7 +381,7 @@ class Database:
 		self.db.commit()
 
 	def get_colors(self):
-		self.cursor.execute('SELECT id, created, name, shade, samplePhoto FROM color')
+		self.cursor.execute('SELECT id, created, name, parent, samplePhoto FROM color')
 		sql = self.cursor.fetchall()
 		colors = []
 		for color in sql:
@@ -396,13 +396,13 @@ class Database:
 	def update_color(self, color):
 		values = 'created = "' + str(color.date) + '", '
 		values += 'name = "' + color.name + '", '
-		values += 'shade = "' + color.shade + '", '
+		values += 'parent = "' + color.parent + '", '
 		values += 'samplePhoto = "' + color.samplePhoto + '" '
 		self.cursor.execute('UPDATE color SET ' + values + ' WHERE id = ' + str(color.id))
 		self.db.commit()
 
-	def remove_color(self, id):
-		self.cursor.execute('DELETE FROM color WHERE id=?', (id,))
+	def remove_color(self, color):
+		self.cursor.execute('DELETE FROM color WHERE id=?', (color.id,))
 		self.db.commit()
 	
 	def get_surfaces(self):
