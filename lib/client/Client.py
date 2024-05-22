@@ -43,7 +43,7 @@ class Client:
 
 		self.client_model = Client_model(app, chat)
 		self.client_color = Client_color(app, chat)
-		self.client_order = Client_order(app, chat)
+		self.client_order = Client_order(app, chat, '1/4')
 
 	def new_message(self, message):
 		self.GUI.clear_chat()

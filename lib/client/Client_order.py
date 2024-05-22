@@ -22,10 +22,11 @@ class Client_order:
 
 	order = None
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
-		self.GUI = Gui(app, chat, self.address)
+		self.address = address
+		self.GUI = Gui(app, chat, address)
 		self.texts = Texts(app)
 
 	def first_message(self, message):
@@ -57,11 +58,16 @@ class Client_order:
 			self.GUI.messages_append(message)
 
 	def set_order(self):
-		order_id = int(self.message.instance_id)
-		for order in self.app.orders:
-			if order.order_id == order_id:
-				self.order = order
-				return
+		try:
+			order_id = int(self.message.instance_id)
+			for order in self.app.orders:
+				if order.order_id == order_id:
+					self.order = order
+					return
+		except:
+			if self.order_waiting != None:
+				self.order = self.order_waiting
+				self.order_waiting = None
 
 #---------------------------- SHOW ----------------------------
 
