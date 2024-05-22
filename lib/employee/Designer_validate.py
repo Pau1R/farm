@@ -150,9 +150,7 @@ class Validate:
 		self.GUI.tell_buttons('Подтвердите валидацию', buttons, [], 11, self.order.order_id)
 
 	def show_reject(self):
-		self.set_context(11)
-		self.chat.set_context(self.address, 12)
-		self.GUI.tell('Напишите причину отказа')
+		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 12, self.order.order_id)
 
 	def show_new_order(self, order):
 		self.GUI.tell('Поступил новый заказ: ' + order.name)
@@ -278,9 +276,13 @@ class Validate:
 			self.show_top_menu()
 
 	def process_reject(self):
+		if self.message.btn_data == 'none':
+			reason = ''
+		else:
+			reason = self.message.text
 		self.order.status = 'rejected'
 		user = get_user(self.order.user_id)
-		user.client_order.show_rejected_by_designer(self.order, self.message.text)
+		user.client_order.show_rejected_by_designer(self.order, reason)
 		self.app.orders.remove(self.order)
 		self.order == None
 		self.show_top_menu()

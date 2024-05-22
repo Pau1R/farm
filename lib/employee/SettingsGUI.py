@@ -59,6 +59,15 @@ class SettingsGUI:
 		param = 'phone_number'
 		text = 'Телефон для переводов: ' + self.app.settings.get(param)
 		buttons.append([text, param])
+		param = 'card_number'
+		text = 'Карточка для переводов: ' + self.app.settings.get(param)
+		buttons.append([text, param])
+		param = 'account_number'
+		text = 'Счет для переводов: ' + self.app.settings.get(param)
+		buttons.append([text, param])
+		param = 'transfer_receiver'
+		text = 'Получатель перевода: ' + self.app.settings.get(param)
+		buttons.append([text, param])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите настройку', buttons, buttons, 2, 0)
 

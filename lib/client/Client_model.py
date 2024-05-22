@@ -62,6 +62,7 @@ class Client_model:
 		self.GUI.tell_buttons(text, buttons, [], 3, self.order.order_id)
 
 	def show_comment(self):
+		# TODO: create posibility to input both text and buttons
 		text = self.texts.model_comment
 		buttons = ['Комментариев к заказу не имею']
 		self.GUI.tell_buttons(text, buttons, [], 4, self.order.order_id)

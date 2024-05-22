@@ -5,7 +5,10 @@ class Settings:
 	names = ['support_remove_price',
 		'prepayment_percent',
 		'prepayment_free_max',
-		'phone_number'] 
+		'phone_number',
+		'card_number', 
+		'account_number',
+		'transfer_receiver']
 
 	def __init__(self, app):
 		self.app = app

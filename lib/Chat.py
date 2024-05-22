@@ -70,11 +70,11 @@ class Chat:
     def show_warn_user(self):
         self.message_pause = self.message
         text = 'Ожидается ввод данных, отменить нажатие кнопки?'
-        buttons = ['Да, отменить, я хочу ввести данные', 'Нет, выполнить действие кнопки']
+        buttons = [['Да, отменить, я хочу ввести данные', 'stop'], ['Нет, выполнить действие кнопки', 'continue']]
         self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
     def process_warn_user(self):
-        if self.message.btn_data == 'Продолжить действие':
+        if self.message.btn_data == 'continue':
             self.context = ''
             self.message.file1 = ''
             self.new_message(self.message_pause)

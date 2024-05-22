@@ -14,6 +14,7 @@ from lib.equipment.GUI.Spool import SpoolGUI
 from lib.equipment.GUI.Color import ColorGUI
 from lib.equipment.GUI.Surface import SurfaceGUI
 from lib.employee.SettingsGUI import SettingsGUI
+from lib.client.Client_order import Client_order
 
 class Admin:
 	address = '1/2'
@@ -52,6 +53,8 @@ class Admin:
 		self.colorGUI = ColorGUI(app, chat)
 		self.surfaceGUI = SurfaceGUI(app, chat)
 		self.settingsGUI = SettingsGUI(app, chat)
+
+		self.client_order = Client_order(app, chat, '1/2/11')
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -93,6 +96,8 @@ class Admin:
 				self.settingsGUI.new_message(message)
 			elif message.file3 == '10':
 				self.printer_typeGUI.new_message(message)
+			elif message.file3 == '11':
+				self.client_order.new_message(message)
 		if message.type == 'text' and message.file3 == '':
 			self.GUI.messages_append(message)
 
@@ -106,9 +111,12 @@ class Admin:
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_orders(self):
+		text = 'Все активные заказы'
 		buttons = []
+		for order in self.app.orders:
+			buttons.append([f'{order.order_id}: {order.name}', order.order_id])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Заказы:', buttons, ['Назад'], 2, 0)
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
 
 	def show_equipment(self):
 		buttons = self.texts.admin_equipment.copy()
@@ -132,6 +140,10 @@ class Admin:
 	def process_orders(self):
 		if self.message.btn_data == 'Назад':
 			self.show_top_menu()
+		else:
+			self.message.instance_id = self.message.btn_data
+			self.client_order.last_data = ''
+			self.client_order.first_message(self.message)
 
 	def process_equipment(self):
 		if self.message.btn_data == 'Ящики':
@@ -163,4 +175,3 @@ class Admin:
 			self.surfaceGUI.first_message(self.message)
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
-			self.equipmentGUI = None

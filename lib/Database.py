@@ -108,6 +108,7 @@ class Database:
 			start_time_estimate DATETIME,
 			end_time_estimate DATETIME,
 			price DECIMAL,
+			pay_code TEXT,
 			prepayed DECIMAL,
 			prepayment_percent DECIMAL,
 			conditions TEXT,
@@ -207,14 +208,15 @@ class Database:
 				order.start_time_estimate = None
 			# order.end_time_estimate = line[19]
 			order.price = line[20]
-			order.prepayed = line[21]
-			order.prepayment_percent = line[22]
-			order.comment = line[23]
-			order.conditions = line[24]
+			order.pay_code = line[21]
+			order.prepayed = line[22]
+			order.prepayment_percent = line[23]
+			order.comment = line[24]
+			order.conditions = line[25]
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
 
 		# self.cursor.execute('INSERT OR IGNORE INTO order_ VALUES (order_id, created)', (order.order_id, date.today()))
 		self.db.commit()
@@ -240,6 +242,7 @@ class Database:
 		values += 'start_time_estimate = "' + str(order.start_time_estimate) + '", '
 		values += 'end_time_estimate = "' + str(order.end_time_estimate) + '", '
 		values += 'price = "' + str(order.price) + '", '
+		values += 'pay_code = "' + order.pay_code + '", '
 		values += 'prepayed = "' + str(order.prepayed) + '", '
 		values += 'prepayment_percent = "' + str(order.prepayment_percent) + '", '
 		values += 'conditions = "' + order.conditions + '", '

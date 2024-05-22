@@ -3,6 +3,8 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Texts import Texts
+import time
+import random
 
 class Client_order:
 	address = '1/4'
@@ -11,6 +13,7 @@ class Client_order:
 	chat = None
 	message = None
 	order = None
+	order_waiting = None
 	GUI = None
 	context = ''
 	texts = None
@@ -48,6 +51,8 @@ class Client_order:
 				self.process_cancel_confirmation()
 			elif message.function == '5':
 				self.process_confirmed_by_designer()
+			elif message.function == '6':
+				self.process_reject_reason()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
 
@@ -70,8 +75,16 @@ class Client_order:
 		# set parameters
 		prepay_price = (order.prepayment_percent / 100) * order.price + 5
 		if order.plastic_color != '' and (order.support_remover != '' or order.support_time == 0):
+			if order.prepayment_percent == 0:
+				order.prepayment_percent = int(self.app.settings.get('prepayment_percent'))
+				self.app.db.update_order(self.order)
 			settings_set = True
-		if order.price < int(self.app.settings.get('prepayment_free_max')) and order.price < (self.chat.user.money_payed / 2):
+
+		money_payed = 0
+		for chat in self.app.chats:
+			if chat.user_id == order.user_id:
+				money_payed = chat.user.money_payed
+		if order.price < int(self.app.settings.get('prepayment_free_max')) and order.price < (money_payed / 2):
 			free_start = True
 		elif order.prepayed < prepay_price:
 			prepayed = False
@@ -124,21 +137,25 @@ class Client_order:
 
 		# set buttons
 		buttons = []
-		# order.plastic_color = ''
-		# status = 'validated'
-		if order.status == 'validated':
-			if order.plastic_color == '':
-				buttons.append(['Выбрать цвет', 'color'])
-			elif order.support_remover == '' and order.support_time > 0:
-				buttons.append(['Выбрать кто уберет поддержки', 'supports'])
-			elif settings_set:
-				# Условия принятия заказа без предоплаты:
-				# 1) Стоимость заказа меньше лимита
-				# 2) Стоимость заказа меньше половины стоимости выполненных заказов
-				if free_start:
-					buttons.append(['Подтвердить и передать на выполнение', 'continue'])
-				else:
-					buttons.append(['Внести предоплату', 'prepay'])
+		if not self.is_admin():
+			# order.plastic_color = ''
+			# status = 'validated'
+			if order.status == 'validated':
+				if order.plastic_color == '':
+					buttons.append(['Выбрать цвет', 'color'])
+				elif order.support_remover == '' and order.support_time > 0:
+					buttons.append(['Выбрать кто уберет поддержки', 'supports'])
+				elif settings_set:
+					# Условия принятия заказа без предоплаты:
+					# 1) Стоимость заказа меньше лимита
+					# 2) Стоимость заказа меньше половины стоимости выполненных заказов
+					if free_start:
+						buttons.append(['Подтвердить и передать на выполнение', 'continue'])
+					else:
+						if prepayed:
+							buttons.append(['Оплатить полностью', 'pay'])
+						else:
+							buttons.append(['Внести предоплату', 'pay'])
 
 		buttons.append(['Отменить заказ'])
 		buttons.append(['Назад'])
@@ -152,8 +169,9 @@ class Client_order:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.order_id)
 
 	def show_prepay(self):
-		if self.order.pay_code == '':
-			used_codes = []
+		order = self.order
+		if order.pay_code == '':
+			used_codes = [0]
 			code = 0
 			code_upper = 99
 			if len(self.app.orders) > 80:
@@ -162,18 +180,26 @@ class Client_order:
 				used_codes.append(order_.pay_code)
 			while code in used_codes:
 				code = random.randint(10, code_upper)
-			self.order.pay_code = str(code)
+			order.pay_code = str(code)
+			self.app.db.update_order(order)
 
-		text = 'Для внесения предоплаты сделайте перевод на карту сбербанка по указанным реквизитам. В комментарии обязательно укажите код платежа: '
-		text += self.order.pay_code
+		prepay_price = (order.prepayment_percent / 100) * order.price + 5
+		if order.prepayed >= prepay_price:
+			price = order.price - order.prepayed
+		else:
+			price = prepay_price - order.prepayed
+		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру телефона, карточки или счета, указанных ниже. В комментарии обязательно укажите код заказа: '
+		text += order.pay_code
 		self.GUI.tell(text)
+		self.GUI.tell('Сумма перевода: ' + str(int(price)))
+		self.GUI.tell('Получатель перевода: ' + self.app.settings.get('transfer_receiver'))
 		self.GUI.tell(self.app.settings.get('phone_number'))
 		self.GUI.tell(self.app.settings.get('card_number'))
-		time.sleep(3)
-		text = 'После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
+		self.GUI.tell(self.app.settings.get('account_number'))
+		text = 'Для зачисления средств может понадобиться несколько минут. После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
 		buttons = [['Предоплату сделал', 'prepayed']]
 		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, buttons, 3, order.order_id)
 
 	def show_cancel_confirmation(self):
 		text = 'Подтвердите отмену заказа'
@@ -188,6 +214,18 @@ class Client_order:
 
 	def show_rejected_by_designer(self, order, reason):
 		text = f'Заказ {order.name} не прошел оценку. Причина: {reason}'
+		self.GUI.tell(text)
+
+	def show_reject_reason(self):
+		self.order_waiting = self.order
+		self.chat.set_context(self.address, 6)
+		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 6, self.order.order_id)
+
+	def show_rejected_by_admin(self, order, reason):
+		text = ''
+		if reason != '':
+			text = f' по причине: {reason}'
+		text = f'Заказ {order.name} отменен администратором' + text
 		self.GUI.tell(text)
 
 	def show_material_unavailable(self, order):
@@ -207,13 +245,20 @@ class Client_order:
 			self.show_supports()
 		elif data == 'continue':
 			x = ''
-		elif data == 'prepay':
+		elif data == 'pay':
 			self.show_prepay()
 		elif data == 'Отменить заказ':
-			self.show_cancel_confirmation()
+			if self.is_admin():
+				self.show_reject_reason()
+			else:
+				self.show_cancel_confirmation()
 		elif data == 'Назад':
-			self.chat.user.last_data = ''
-			self.chat.user.show_orders()
+			if self.is_admin():
+				self.chat.user.admin.last_data = ''
+				self.chat.user.admin.show_orders()
+			else:
+				self.chat.user.last_data = ''
+				self.chat.user.show_orders()
 
 	def process_supports(self):
 		data = self.message.btn_data
@@ -234,13 +279,25 @@ class Client_order:
 			x = ''
 		self.show_order()
 
+	def process_reject_reason(self):
+		if self.message.btn_data == 'none':
+			self.reject_reason = ''
+		else:
+			self.reject_reason = self.message.text
+		self.show_cancel_confirmation()
+
 	def process_cancel_confirmation(self):
 		if self.message.btn_data == 'confirm':
+			if self.is_admin():
+				for chat in self.app.chats:
+					if chat.user_id == self.order.user_id:
+						chat.user.client_order.show_rejected_by_admin(self.order, self.reject_reason)
+						self.reject_reason = ''
 			self.app.orders.remove(self.order)
 			self.app.db.remove_order(self.order)
 			self.order = None
 			self.chat.user.last_data = ''
-			self.chat.user.show_orders()
+			self.chat.user.admin.show_orders()
 # TODO: if user canceled order after validation add him a penalty score
 			return
 		self.show_order()
@@ -250,3 +307,6 @@ class Client_order:
 			self.show_order()
 
 #---------------------------- LOGIC ----------------------------
+
+	def is_admin(self):
+		return self.chat.is_employee and 'Администратор' in self.chat.user.roles

@@ -42,7 +42,7 @@ class Order:
 	# price_estimate = 0.0
 	price = 0.0
 	prepayed = 0.0
-	prepayment_percent = 30
+	prepayment_percent = 0
 	pay_code = '' # TODO: add field to database table
 
 	sketches = []
