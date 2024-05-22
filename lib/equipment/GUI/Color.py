@@ -74,7 +74,7 @@ class ColorGUI:
 		if self.color.parent == '':
 			text = f'Цвет: {self.color.name}\n'
 		else:
-			text = f'Цвет: {self.color.parent}\nОттенок: {self.color.name}\n'
+			text = f'Оттенок: {self.color.name}\nЦвет: {self.color.parent}\n'
 		text += f'Дата добавления: {self.color.date}'
 		buttons = ['Поменять картинку']
 		if self.color.parent == '':
@@ -98,13 +98,19 @@ class ColorGUI:
 		self.GUI.tell(text)
 
 	def show_sub_colors(self):
+		if self.color.parent != '':
+			for color in self.colors:
+				if color.name == self.color.parent:
+					self.color = color
 		buttons = []
 		for color in self.colors:
 			if color.parent == self.color.name:
 				buttons.append(color.name)
+		if buttons == []:
+			self.show_color()
 		buttons.append('Добавить оттенок')
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Выберите оттенок', buttons, buttons, 4, self.color.name)
+		self.GUI.tell_buttons(f'Оттенки цвета {self.color.name}:', buttons, buttons, 4, self.color.name)
 
 	def show_add_photo(self):
 		self.chat.set_context(self.address, 5)
@@ -116,11 +122,19 @@ class ColorGUI:
 
 	def show_add_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить добавление']
-		self.GUI.tell_buttons('Подтвердите добавление цвета', buttons, buttons, 7, 0)
+		if self.parent == '':
+			text = 'цвета'
+		else:
+			text = 'оттенка'
+		self.GUI.tell_buttons('Подтвердите добавление ' + text, buttons, buttons, 7, 0)
 
 	def show_delete_confirmation(self):
 		buttons = ['Подтверждаю', 'Назад']
-		self.GUI.tell_buttons('Подтвердите удаление цвета', buttons, buttons, 8, 0)
+		if self.parent == '':
+			text = 'цвета'
+		else:
+			text = 'оттенка'
+		self.GUI.tell_buttons('Подтвердите удаление ' + text, buttons, buttons, 8, 0)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -141,9 +155,12 @@ class ColorGUI:
 		if data == 'Поменять картинку':
 			self.show_edit_photo()
 		if data == 'Оттенки':
+			self.parent = self.color.name
+			print('Оттенки self.parent', self.parent)
 			self.show_sub_colors()
 		if data == 'Добавить оттенок':
 			self.parent = self.message.instance_id
+			print('Добавить оттенок self.parent', self.parent)
 			self.show_add_new_color()
 		elif data == 'Удалить':
 			self.show_delete_confirmation()
@@ -158,18 +175,16 @@ class ColorGUI:
 		if data == 'Добавить оттенок':
 			self.show_add_new_color()
 		elif data == 'Назад':
-			# self.parent = ''
-			# for color in self.colors:
-			# 	if color.name == self.color.parent:
-			# 		self.color = color
+			for color in self.colors:
+				if color.name == self.parent:
+					self.color = color
+			print('process_sub_colors self.parent', self.parent)
+			self.parent = ''
 			self.show_color()
-					# return
-			# self.show_top_menu()
 		else:
 			for color in self.colors:
 				if color.name == data and color.parent == self.message.instance_id:
 					self.color = color
-					self.parent = color.parent
 					self.show_color()
 
 	def process_add_new_color(self):
@@ -193,11 +208,17 @@ class ColorGUI:
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.color = self.app.equipment.create_new_color(self.name, self.parent, self.samplePhoto)
-			text = f'Создан новый цвет: {self.color.name}'
-			self.GUI.tell_permanent(text)
+			if self.parent == '':
+				text = f'цвет: {self.color.name}'
+			else:
+				text = f'оттенок цвета {self.color.parent}: {self.color.name}'
+			self.GUI.tell_permanent('Создан новый ' + text)
 		self.name = ''
 		self.samplePhoto = ''
-		self.show_top_menu()
+		if self.parent == '':
+			self.show_top_menu()
+		else:
+			self.show_sub_colors()
 
 	def process_delete_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':

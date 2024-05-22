@@ -59,6 +59,7 @@ class Message:
 				elif message.content_type == 'photo':
 					self.type = 'photo'
 					self.file_id = str(message.json['photo'][3]['file_id'])
+# TODO: process all file types, i.e. png
 				elif message.content_type == 'video':
 					self.type = 'video'
 					self.file_id = str(message.video.file_id)
