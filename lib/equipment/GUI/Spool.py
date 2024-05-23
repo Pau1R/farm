@@ -18,10 +18,11 @@ class SpoolGUI:
 
 	type = ''
 	weight = 0
-	color = ''
+	color_id = ''
 	dried = ''
 	brand = ''
 	used = 0
+	price = 0
 
 	change_weight_type = ''
 
@@ -76,17 +77,27 @@ class SpoolGUI:
 			text = 'Катушки отсутствуют'
 		buttons = []
 		for spool in self.app.equipment.spools:
-			buttons.append([f'{spool.id}: {spool.color} {spool.type}', spool.id]) 
+			buttons.append([f'{spool.type} ({spool.id}) {spool.color_name()}', spool.id])
+		buttons.sort(key=self.get_first_elem)
 		buttons.extend(['Добавить', 'Назад'])
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_spool(self):
-		text = f'Номер катушки: {self.spool.id}\nДата добавления: {self.spool.date}\n'
-		text += f'Тип: {self.spool.type}\nДиаметр: {self.spool.diameter} mm\n'
-		text += f'Вес: {self.spool.weight} грамм\nПлотность: {self.spool.density} г/см3\nЦвет: {self.spool.color}\n'
-		text += f'Сухая: {self.spool.dried}\nМагазин/бренд: {self.spool.brand}\nИспользовано: {self.spool.used} грамм'
+		text = f'Номер катушки: {self.spool.id}\n'
+		text += f'Тип: {self.spool.type}\n'
+		text += f'Цвет: {self.spool.color_name()}\n'
+		text += f'Цена: {self.spool.price} рублей\n'
+		text += f'Вес: {self.spool.weight} грамм\n'
+		text += f'Использовано: {self.spool.used} грамм\n'
+		text += f'Сухая: {self.spool.dried}\n'
+		text += f'Магазин/бренд: {self.spool.brand}\n'
+		text += f'Дата добавления: {self.spool.date}\n'
+		text += f'Диаметр: {self.spool.diameter} mm\n'
+		text += f'Плотность: {self.spool.density} г/см3\n'
 		buttons = ['Изменить вес', 'Удалить', 'Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
+
+		self.GUI.tell_photo_buttons(text, self.spool.color_photo(), buttons, buttons, 2, self.spool.id)
+		# self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
 	def show_change_weight(self):
 		text = 'Выберите действие'
@@ -102,7 +113,16 @@ class SpoolGUI:
 		self.GUI.tell_buttons('Выберите тип пластика', self.texts.spool_types.copy(), [], 5, 0)
 
 	def show_add_new_spool_color(self):
-		self.GUI.tell_buttons('Выберите цвет пластика', self.texts.spool_colors.copy(), [], 6, 0)
+		buttons = []
+		for color in self.app.equipment.colors:
+			if color.parent_id == 0:
+				buttons.append([color.name, color.id])
+			else:
+				for col in self.app.equipment.colors:
+					if col.id == color.parent_id:
+						buttons.append([col.name + '-' + color.name.lower(), color.id])
+		buttons.sort(key=self.get_first_elem)
+		self.GUI.tell_buttons('Выберите цвет пластика', buttons, [], 6, 0)
 
 	def show_add_new_spool_weight(self):
 		self.GUI.tell_buttons('Выберите вес катушки', self.texts.spool_weight.copy(), [], 7, 0)
@@ -174,7 +194,7 @@ class SpoolGUI:
 		self.show_add_new_spool_color()
 
 	def process_add_new_spool_color(self):
-		self.color = self.message.btn_data
+		self.color_id = int(self.message.btn_data)
 		self.show_add_new_spool_weight()
 
 	def process_add_new_spool_weight(self):
@@ -200,13 +220,18 @@ class SpoolGUI:
 		if self.message.btn_data == 'Подтверждаю':
 			self.diameter = self.texts.spool_diameter
 			self.density = self.texts.spool_densities[self.texts.spool_types.index(self.type)]
-			# TODO: add price to classes: spool, database, farm.db, equipment
-			self.spool = self.app.equipment.create_new_spool(self.type, self.diameter, self.weight, self.density, self.color, self.dried, self.brand, self.used)
-			text = f'Создана новая катушка:\nномер: {self.spool.id}\nтип: {self.spool.type}\nвес: {self.spool.weight} грамм\n'
-			text += f'цвет: {self.spool.color}\nвысушена: {self.spool.dried}\nбренд/магазин: {self.spool.brand}'
+			self.spool = self.app.equipment.create_new_spool(self.type, self.diameter, self.weight, self.density, self.color_id, self.dried, self.brand, self.used, self.price)
+			text = f'Создана новая катушка:\n'
+			text += f'Номер: {self.spool.id}\n'
+			text += f'Тип: {self.spool.type}\n'
+			text += f'Цвет: {self.spool.color_name()}\n'
+			text += f'Цена: {self.spool.price} рублей\n'
+			text += f'Вес: {self.spool.weight} грамм\n'
+			text += f'Высушена: {self.spool.dried}\n'
+			text += f'Бренд/магазин: {self.spool.brand}'
 			self.GUI.tell_permanent(text)
 		self.type = ''
-		self.color = ''
+		self.color_id = 0
 		self.dried = ''
 		self.brand = ''
 		self.price = 0
@@ -222,3 +247,8 @@ class SpoolGUI:
 			self.app.equipment.remove_spool(self.spool.id)
 			self.spool = None
 		self.show_top_menu()
+
+#---------------------------- LOGIC ----------------------------
+
+	def get_first_elem(self, element):
+		return element[0]
