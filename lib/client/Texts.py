@@ -37,8 +37,6 @@ class Texts:
 	model_conditions = 'В каких условиях будет эксплуатироваться модель?'
 	model_conditions_buttons = ['в доме', 'на улице', 'в автомобиле', 'не знаю']
 
-	model_comment = 'Напишите комментарий'
-
 	supported_3d_extensions = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
 	file = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(supported_3d_extensions)

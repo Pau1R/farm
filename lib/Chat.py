@@ -34,7 +34,10 @@ class Chat:
             self.process_warn_user()
             return
         elif self.context.startswith('~'):
-            if message.type == 'button':
+            data = self.message.data.split('|')
+            context = self.context.split('|')
+            # if not (data[0] == context[0] and data[1] == context[1]):
+            if message.type == 'button' and not (data[0] == context[0] and data[1] == context[1]):
                 self.show_warn_user()
             else:
                 self.special_format()
