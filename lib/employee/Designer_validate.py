@@ -80,8 +80,8 @@ class Validate:
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_validate(self):
-		text = self.texts.designer_order_validate_text(self.order) # дизайнер слайсит модель и оценивает пригодность к печати. На 1 стол не более 900 грамм веса
-		buttons = [['Принять модель', 'accept'], ['Отказать','reject'], ['Назад']] # 'Модель не рассчитана на 3д печать'
+		text = self.texts.designer_order_validate_text(self.order)
+		buttons = [['Принять модель', 'accept'], ['Отказать','reject'], ['Назад']]
 		self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.order_id)
 
 	def show_accept(self):
@@ -207,7 +207,7 @@ class Validate:
 
 	def process_material_unavailable(self):
 		if self.message.btn_data == 'inform':
-			user = get_user(self.order.user_id)
+			user = self.get_user(self.order.user_id)
 			user.client_order.show_material_unavailable(self.order)
 		else:
 			self.show_validate()
@@ -268,7 +268,7 @@ class Validate:
 			self.order.price = self.price
 			self.order.set_price()
 			self.app.db.update_order(self.order)
-			user = get_user(self.order.user_id)
+			user = self.get_user(self.order.user_id)
 			user.client_order.show_confirmed_by_designer(self.order)
 			# for chat in self.app.chats:
 			# 	if chat.user_id == str(self.order.user_id):
@@ -281,7 +281,7 @@ class Validate:
 		else:
 			reason = self.message.text
 		self.order.status = 'rejected'
-		user = get_user(self.order.user_id)
+		user = self.get_user(self.order.user_id)
 		user.client_order.show_rejected_by_designer(self.order, reason)
 		self.app.orders.remove(self.order)
 		self.order == None

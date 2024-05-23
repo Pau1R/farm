@@ -72,7 +72,7 @@ class Database:
 			diameter DECIMAL,
 			weight TEXT,
 			density DECIMAL,
-			color TEXT,
+			color_id TEXT,
 			dried TEXT,
 			brand TEXT,
 			used TEXT"""
@@ -80,7 +80,7 @@ class Database:
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
 			name TEXT,
-			parent TEXT,
+			parent_id INTEGER,
 			samplePhoto TEXT"""
 		surface = """
 			id INTEGER PRIMARY KEY,
@@ -98,7 +98,7 @@ class Database:
 			model_file TEXT,
 			priority INTEGER,
 			plastic_type TEXT,
-			plastic_color TEXT,
+			color_id INTEGER,
 			printer_type TEXT,
 			layer_hight DECIMAL,
 			sketches TEXT,
@@ -133,6 +133,11 @@ class Database:
 		self.cursor.execute(create + 'order_ (' + order + ')')
 		self.cursor.execute(create + 'setting (' + setting + ')')
 		self.db.commit()
+
+#---------------------------- LOGIC ----------------------------
+
+	def string_to_date(self, date):
+		return datetime.strptime(date, '%Y-%m-%d').date()
 
 #---------------------------- CHAT ----------------------------
 
@@ -185,7 +190,7 @@ class Database:
 		orders = []
 		for line in sql:
 			order = Order(self.app, line[0])
-			order.created = line[1]
+			order.created = self.string_to_date(line[1])
 			order.name = line[2]
 			order.status = line[3]
 			order.quantity = line[4]
@@ -195,7 +200,7 @@ class Database:
 			order.model_file = line[8]
 			order.priority = line[9]
 			order.plastic_type = line[10]
-			order.plastic_color = line[11]
+			order.color_id = int(line[11])
 			order.printer_type = line[12]
 			order.layer_hight = line[13]
 			order.sketches = line[14]
@@ -232,7 +237,7 @@ class Database:
 		values += 'model_file = "' + order.model_file + '", '
 		values += 'priority = "' + str(order.priority) + '", '
 		values += 'plastic_type = "' + order.plastic_type + '", '
-		values += 'plastic_color = "' + order.plastic_color + '", '
+		values += 'color_id = "' + str(order.color_id) + '", '
 		values += 'printer_type = "' + order.printer_type + '", '
 		values += 'layer_hight = "' + str(order.layer_hight) + '", '
 		values += 'sketches = "' + str(order.sketches) + '", '
@@ -261,7 +266,7 @@ class Database:
 		sql = self.cursor.fetchall()
 		containers = []
 		for container in sql:
-			containers.append([str(container[0]), container[1], container[2], container[3]])
+			containers.append([str(container[0]), self.string_to_date(container[1]), container[2], container[3]])
 		return containers
 
 	def add_container(self, container):
@@ -278,7 +283,7 @@ class Database:
 		sql = self.cursor.fetchall()
 		dryers = []
 		for dryer in sql:
-			dryers.append([str(dryer[0]), dryer[1], dryer[2], dryer[3], dryer[4], dryer[5], dryer[6]])
+			dryers.append([str(dryer[0]), self.string_to_date(dryer[1]), dryer[2], dryer[3], dryer[4], dryer[5], dryer[6]])
 		return dryers
 
 	def add_dryer(self, dryer):
@@ -294,7 +299,7 @@ class Database:
 		sql = self.cursor.fetchall()
 		extruders = []
 		for extruder in sql:
-			extruders.append([str(extruder[0]), extruder[1], extruder[2], extruder[3], extruder[4]])
+			extruders.append([str(extruder[0]), self.string_to_date(extruder[1]), extruder[2], extruder[3], extruder[4]])
 		return extruders
 
 	def add_extruder(self, extruder):
@@ -310,7 +315,7 @@ class Database:
 		sql = self.cursor.fetchall()
 		locations = []
 		for location in sql:
-			locations.append([str(location[0]), location[1], location[2], location[3]])
+			locations.append([str(location[0]), self.string_to_date(location[1]), location[2], location[3]])
 		return locations
 
 	def add_location(self, location):
@@ -342,7 +347,7 @@ class Database:
 		sql = self.cursor.fetchall()
 		printers = []
 		for printer in sql:
-			printers.append([str(printer[0]), printer[1], printer[2], printer[3]])
+			printers.append([str(printer[0]), self.string_to_date(printer[1]), printer[2], printer[3]])
 		return printers
 
 	def add_printer(self, printer):
@@ -354,15 +359,15 @@ class Database:
 		self.db.commit()
 
 	def get_spools(self):
-		self.cursor.execute('SELECT id, created, type, diameter, weight, density, color, dried, brand, used FROM spool')
+		self.cursor.execute('SELECT id, created, type, diameter, weight, density, color_id, dried, brand, used, price FROM spool')
 		sql = self.cursor.fetchall()
 		spools = []
 		for spool in sql:
-			spools.append([str(spool[0]), spool[1], spool[2], float(spool[3]), int(spool[4]), float(spool[5]), spool[6], spool[7], spool[8], int(spool[9])])
+			spools.append([str(spool[0]), self.string_to_date(spool[1]), spool[2], float(spool[3]), int(spool[4]), float(spool[5]), int(spool[6]), spool[7], spool[8], int(spool[9]), int(spool[10])])
 		return spools
 
 	def add_spool(self, spool):
-		self.cursor.execute('INSERT INTO spool VALUES (?,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (spool.id,))
+		self.cursor.execute('INSERT INTO spool VALUES (?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (spool.id,))
 		self.db.commit()
 		self.update_spool(spool)
 
@@ -372,10 +377,11 @@ class Database:
 		values += 'diameter = "' + str(spool.diameter) + '", '
 		values += 'weight = "' + str(spool.weight) + '", '
 		values += 'density = "' + str(spool.density) + '", '
-		values += 'color = "' + spool.color + '", '
+		values += 'color_id = "' + str(spool.color_id) + '", '
 		values += 'dried = "' + str(spool.dried) + '", '
 		values += 'brand = "' + spool.brand + '", '
-		values += 'used = "' + str(spool.used) + '" '
+		values += 'used = "' + str(spool.used) + '", '
+		values += 'price = "' + str(spool.price) + '" '
 		self.cursor.execute('UPDATE spool SET ' + values + ' WHERE id = ' + str(spool.id))
 		self.db.commit()
 
@@ -384,11 +390,11 @@ class Database:
 		self.db.commit()
 
 	def get_colors(self):
-		self.cursor.execute('SELECT id, created, name, parent, samplePhoto FROM color')
+		self.cursor.execute('SELECT id, created, name, parent_id, samplePhoto FROM color')
 		sql = self.cursor.fetchall()
 		colors = []
 		for color in sql:
-			colors.append([str(color[0]), color[1], color[2], color[3], color[4]])
+			colors.append([color[0], self.string_to_date(color[1]), color[2], color[3], color[4]])
 		return colors
 
 	def add_color(self, color):
@@ -399,7 +405,7 @@ class Database:
 	def update_color(self, color):
 		values = 'created = "' + str(color.date) + '", '
 		values += 'name = "' + color.name + '", '
-		values += 'parent = "' + color.parent + '", '
+		values += 'parent_id = "' + str(color.parent_id) + '", '
 		values += 'samplePhoto = "' + color.samplePhoto + '" '
 		self.cursor.execute('UPDATE color SET ' + values + ' WHERE id = ' + str(color.id))
 		self.db.commit()

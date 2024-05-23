@@ -24,7 +24,7 @@ class Order:
 	date = None
 
 	plastic_type = ''
-	plastic_color = ''
+	color_id = 0
 	printer_type = ''
 	layer_hight = 0.0
 	priority = 0
@@ -75,9 +75,9 @@ class Order:
 		return id
 
 	def set_price(self):
-		if self.plastic_color != '':
+		if self.color_id != 0:
 			for spool in self.app.equipment.spools:
-				if spool.color == self.plastic_color and spool.type == self.plastic_type:
+				if spool.color_id == self.color_id and spool.type == self.plastic_type:
 					gram_price = spool.price/spool.weight
 					break
 		else:

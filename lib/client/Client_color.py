@@ -68,41 +68,44 @@ class Client_color:
 		filament = {}
 		for spool in self.app.equipment.spools:
 			if spool.type not in filament:
-				filament[spool.type] = {spool.color: ''} # add spool type
+				filament[spool.type] = {spool.color_id: ''} # add spool type
 			else:
-				if spool.color not in filament[spool.type]: # add spool color
+				if spool.color_id not in filament[spool.type]: # add spool color
 					col = filament[spool.type].copy()
-					col.update({spool.color: ''})
+					col.update({spool.color_id: ''})
 			col = filament[spool.type] # add spool weight
-			if spool.color in col:
-				total_weight = col[spool.color]
+			if spool.color_id in col:
+				total_weight = col[spool.color_id]
 				if total_weight == '':
 					total_weight = 0
 			weight = spool.weight - spool.used - spool.booked
 			if weight > 15:
-				col.update({spool.color: total_weight + spool.weight})
+				col.update({spool.color_id: total_weight + spool.weight})
 
 		# convert filament to buttons
 		buttons = []
 		for type_ in filament:
 			if type(filament[type_]) is dict:
-				colors = filament[type_]
-				for color in colors:
+				color_ids = filament[type_]
+				for color_id in color_ids:
 					# show all colors
 					if all_colors:
-						if colors[color] != '':
-							weight = int(colors[color])/1000
+						if color_ids[color_id] != '':
+							weight = int(color_ids[color_id])/1000
 							if int(weight) == weight:
 								weight = int(weight)
-							txt = color + ' ' + type_ + ': ' + str(weight) + 'кг'
-							buttons.append([txt, color])
+							txt = f'{type_} {self.get_color_name(color_id)}: {str(weight)}кг'
+							buttons.append([txt, color_id])
 					# show colors available for order
 					else:
 						if order.plastic_type == 'Любой' or (type_ == order.plastic_type):
-							buttons.append(color)
-
+							for color in self.app.equipment.colors:
+								if color.id == color_id:
+									buttons.append(self.get_color_name(color.id), color.id)
+									break
 		if not all_colors:
 			buttons = list(dict.fromkeys(buttons))
+		buttons.sort(key=self.get_elem_from_list)
 
 		if False: # TODO: if there are ordered spools:
 			buttons.append(['Ожидаются поставки', 'pending'])
@@ -111,18 +114,24 @@ class Client_color:
 		self.GUI.tell_buttons(text, buttons, buttons, 1, order_id)
 
 	def show_color(self):
-		color_ = None
-		for color in self.app.equipment.colors:
-			if color.name == self.message.btn_data:
-				color_ = color
+		color = None
+		for color_ in self.app.equipment.colors:
+			if color_.id == int(self.message.btn_data):
+				color = color_
 		buttons = []
 		if self.order == None:
 			order_id = 0
 		else:
-			buttons.append(['Подтвердить выбор цвета', 'confirm^' + color_.name])
+			buttons.append(['Подтвердить выбор цвета', 'confirm^' + str(color.id)])
 			order_id = self.message.instance_id
 		buttons.append ('Назад')
-		self.GUI.tell_photo_buttons(color_.name, color_.samplePhoto, buttons, buttons, 2, order_id)
+		if color.parent_id == 0:
+			name = color.name
+		else:
+			for col in self.app.equipment.colors:
+				if col.id == color.parent_id:
+					name = col.name + '-' + color.name.lower()
+		self.GUI.tell_photo_buttons(name, color.samplePhoto, buttons, buttons, 2, order_id)
 
 	def show_ordered(self):
 		x = '' # TODO: code this stuff
@@ -156,7 +165,7 @@ class Client_color:
 			# if color just disappeared: self.show_colors()
 			# else continue
 			# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
-			self.order.plastic_color = data.split('^')[1] # TODO: take in account color shade
+			self.order.color_id = data.split('^')[1] # TODO: take in account color shade
 			self.order.set_price()
 			self.app.db.update_order(self.order)
 			self.chat.user.client_order.last_data = ''
@@ -170,3 +179,16 @@ class Client_color:
 				return order
 		return None
 
+	def get_color_name(self, id):
+		colors = self.app.equipment.colors
+		for color in colors:
+			if color.id == int(id):
+				if color.parent_id == 0:
+					return color.name
+				else:
+					for col in colors:
+						if col.id == color.parent_id:
+							return col.name + '-' + color.name
+
+	def get_elem_from_list(self, lst):
+		return lst[0]

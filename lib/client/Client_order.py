@@ -73,14 +73,12 @@ class Client_order:
 
 	def show_order(self):
 		order = self.order
-		settings_set = False
-		free_start = False
-		prepayed = True
 		status = ''
 
 		# set parameters
+		settings_set = False
 		prepay_price = (order.prepayment_percent / 100) * order.price + 5
-		if order.plastic_color != '' and (order.support_remover != '' or order.support_time == 0):
+		if order.color_id != 0 and (order.support_remover != '' or order.support_time == 0):
 			if order.prepayment_percent == 0:
 				order.prepayment_percent = int(self.app.settings.get('prepayment_percent'))
 				self.app.db.update_order(self.order)
@@ -90,10 +88,22 @@ class Client_order:
 		for chat in self.app.chats:
 			if chat.user_id == order.user_id:
 				money_payed = chat.user.money_payed
+		
+		free_start = False
+		prepayed = True
 		if order.price < int(self.app.settings.get('prepayment_free_max')) and order.price < (money_payed / 2):
 			free_start = True
 		elif order.prepayed < prepay_price:
 			prepayed = False
+
+		for color_ in self.app.equipment.colors:
+			if color_.id == order.color_id:
+				if color_.parent_id == 0:
+					color = color_.name
+				else:
+					for col in self.app.equipment.colors:
+						if col.id == color_.parent_id:
+							color = col.name + '-' + color_.name
 
 		if order.status == 'validate':
 			status = 'Ожидание дизайнера'
@@ -123,8 +133,8 @@ class Client_order:
 			text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
 		if order.plastic_type != '':
 			text += f'Тип материала: {order.plastic_type.lower()}\n'
-		if order.plastic_color != '':
-			text += f'Цвет изделия: {order.plastic_color.lower()}\n'
+		if order.color_id != 0:
+			text += f'Цвет изделия: {color.lower()}\n'
 		if order.time > 0:
 			text += f'Длительность печати'
 			if order.time > 119: # if 2 hours or more show only hours amount
@@ -144,10 +154,10 @@ class Client_order:
 		# set buttons
 		buttons = []
 		if not self.is_admin():
-			# order.plastic_color = ''
+			# order.color_id = ''
 			# status = 'validated'
 			if order.status == 'validated':
-				if order.plastic_color == '':
+				if order.color_id == 0:
 					buttons.append(['Выбрать цвет', 'color'])
 				elif order.support_remover == '' and order.support_time > 0:
 					buttons.append(['Выбрать кто уберет поддержки', 'supports'])

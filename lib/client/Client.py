@@ -96,7 +96,9 @@ class Client:
 		text = 'Мои заказы'
 		buttons = []
 		x = 1
-		for order in self.get_orders(['validate', 'validated', 'prepayed']):
+		orders = self.get_orders(['validate', 'validated', 'prepayed'])
+		orders.sort(key=self.get_object_date)
+		for order in orders:
 			buttons.append([order.name, order.order_id])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
@@ -159,3 +161,6 @@ class Client:
 				if order.status == statuses or (statuses == [] or order.status in statuses):
 					orders.append(order)
 		return orders
+
+	def get_object_date(self, object):
+		return object.created

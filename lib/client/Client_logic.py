@@ -17,11 +17,11 @@ class Client_logic:
 			if not (order.plastic_type == '' or order.plastic_type == None):
 				mini = spools[order.plastic_type]
 				weight = 0
-				if order.plastic_color in mini:
-					weight = mini[order.plastic_color]
-				mini[order.plastic_color] = weight - order.weight
+				if order.color_id in mini:
+					weight = mini[order.color_id]
+				mini[order.color_id] = weight - order.weight
 				if order.weight >= weight:
-					del mini[order.plastic_color]
+					del mini[order.color_id]
 				if spools[order.plastic_type] == {}:
 					del spools[order.plastic_type]
 

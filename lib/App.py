@@ -28,7 +28,7 @@ class App:
 		self.conf = conf
 		self.equipment = Equipment()
 		self.db = Database(self)
-		self.equipment.init(self.db)
+		self.equipment.init(self, self.db)
 		self.db.get_chats()
 		self.db.get_orders()
 		self.settings = Settings(self)
@@ -100,4 +100,6 @@ class App:
 #	5 Delivery
 
 
-# TODO: Designer_validate.py 2, Client_color.py 1, client_order prepayment, client wait for specific material, color.py finish sub_color logic
+# TODO: Designer_validate.py 2, Client_color.py 1, client_order.py, client wait for specific material
+
+# preordered spools
