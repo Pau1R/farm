@@ -16,8 +16,10 @@ class Spool:
 	booked = 0
 	used = 0
 	price = 0
+	status = ''
+	delivery_date_estimate: date
 
-	def __init__(self, app, db, id, created, type, diameter, weight, density, color_id, dried, brand, used, price):
+	def __init__(self, app, db, id, created, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate):
 		self.app = app
 		self.db = db
 		self.id = id
@@ -31,6 +33,8 @@ class Spool:
 		self.brand = brand
 		self.used = int(used)
 		self.price = price
+		self.status = status
+		self.delivery_date_estimate = delivery_date_estimate
 
 	def available_weight(self):
 		return self.weight - self.used

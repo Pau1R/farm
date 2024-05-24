@@ -75,7 +75,10 @@ class Database:
 			color_id TEXT,
 			dried TEXT,
 			brand TEXT,
-			used TEXT"""
+			used TEXT,
+			price INTEGER,
+			status TEXT,
+			delivery_date_estimate DATETIME"""
 		color = """
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
@@ -137,7 +140,10 @@ class Database:
 #---------------------------- LOGIC ----------------------------
 
 	def string_to_date(self, date):
-		return datetime.strptime(date, '%Y-%m-%d').date()
+		if date == '' or date == 'None':
+			return None
+		else:
+			return datetime.strptime(date, '%Y-%m-%d').date()
 
 #---------------------------- CHAT ----------------------------
 
@@ -359,15 +365,15 @@ class Database:
 		self.db.commit()
 
 	def get_spools(self):
-		self.cursor.execute('SELECT id, created, type, diameter, weight, density, color_id, dried, brand, used, price FROM spool')
+		self.cursor.execute('SELECT id, created, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate FROM spool')
 		sql = self.cursor.fetchall()
 		spools = []
 		for spool in sql:
-			spools.append([str(spool[0]), self.string_to_date(spool[1]), spool[2], float(spool[3]), int(spool[4]), float(spool[5]), int(spool[6]), spool[7], spool[8], int(spool[9]), int(spool[10])])
+			spools.append([str(spool[0]), self.string_to_date(spool[1]), spool[2], float(spool[3]), int(spool[4]), float(spool[5]), int(spool[6]), spool[7], spool[8], int(spool[9]), int(spool[10]), spool[11], self.string_to_date(spool[12])])
 		return spools
 
 	def add_spool(self, spool):
-		self.cursor.execute('INSERT INTO spool VALUES (?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (spool.id,))
+		self.cursor.execute('INSERT INTO spool VALUES (?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (spool.id,))
 		self.db.commit()
 		self.update_spool(spool)
 
@@ -381,7 +387,9 @@ class Database:
 		values += 'dried = "' + str(spool.dried) + '", '
 		values += 'brand = "' + spool.brand + '", '
 		values += 'used = "' + str(spool.used) + '", '
-		values += 'price = "' + str(spool.price) + '" '
+		values += 'price = "' + str(spool.price) + '", '
+		values += 'status = "' + str(spool.status) + '", '
+		values += 'delivery_date_estimate = "' + str(spool.delivery_date_estimate) + '" '
 		self.cursor.execute('UPDATE spool SET ' + values + ' WHERE id = ' + str(spool.id))
 		self.db.commit()
 

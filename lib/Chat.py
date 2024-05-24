@@ -36,7 +36,6 @@ class Chat:
         elif self.context.startswith('~'):
             data = self.message.data.split('|')
             context = self.context.split('|')
-            # if not (data[0] == context[0] and data[1] == context[1]):
             if message.type == 'button' and not (data[0] == context[0] and data[1] == context[1]):
                 self.show_warn_user()
             else:

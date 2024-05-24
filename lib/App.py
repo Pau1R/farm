@@ -56,7 +56,7 @@ class App:
 		self.db.create_chat(chat)
 		return chat
 
-	def remove_inactive_chats(self):
+	def remove_inactive_chats(self):  # TODO: also remove forgotten and unpaid orders
 		if self.count < 100:  
 			self.count += 1
 			return
@@ -102,4 +102,4 @@ class App:
 
 # TODO: Designer_validate.py 2, Client_color.py 1, client_order.py, client wait for specific material
 
-# preordered spools
+# preordered spools: status: ordered, in_stock; delivery_date_estimate

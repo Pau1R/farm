@@ -4,6 +4,7 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 from lib.Texts import Texts
 from datetime import date
+from datetime import timedelta
 
 class SpoolGUI:
 	address = '1/2/6'
@@ -23,9 +24,11 @@ class SpoolGUI:
 	brand = ''
 	used = 0
 	price = 0
+	status = ''
+	delivery_date_estimate = None
 
 	change_weight_type = ''
-
+ 
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
@@ -65,6 +68,10 @@ class SpoolGUI:
 				self.process_add_confirmation()
 			if message.function == '12':
 				self.process_delete_confirmation()
+			if message.function == '13':
+				self.process_ordered()
+			if message.function == '14':
+				self.process_add_delivery_date()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
 
@@ -77,9 +84,10 @@ class SpoolGUI:
 			text = 'Катушки отсутствуют'
 		buttons = []
 		for spool in self.app.equipment.spools:
-			buttons.append([f'{spool.type} ({spool.id}) {spool.color_name()}', spool.id])
+			if spool.status == 'stock':
+				buttons.append([f'{spool.type} ({spool.id}) {spool.color_name()}', spool.id])
 		buttons.sort(key=self.get_first_elem)
-		buttons.extend(['Добавить', 'Назад'])
+		buttons.extend(['Добавить', ['Катушки, ожидаемые к поставке', 'ordered'], 'Назад'])
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_spool(self):
@@ -89,15 +97,20 @@ class SpoolGUI:
 		text += f'Цена: {self.spool.price} рублей\n'
 		text += f'Вес: {self.spool.weight} грамм\n'
 		text += f'Использовано: {self.spool.used} грамм\n'
-		text += f'Сухая: {self.spool.dried}\n'
+		if not self.spool.status == 'ordered':
+			text += f'Сухая: {self.spool.dried}\n'
 		text += f'Магазин/бренд: {self.spool.brand}\n'
 		text += f'Дата добавления: {self.spool.date}\n'
+		if self.spool.status == 'ordered':
+			text += f'Дата поставки: {self.spool.delivery_date_estimate}\n'
 		text += f'Диаметр: {self.spool.diameter} mm\n'
 		text += f'Плотность: {self.spool.density} г/см3\n'
-		buttons = ['Изменить вес', 'Удалить', 'Назад']
+		buttons = []
+		if self.spool.status == 'ordered':
+			buttons.append(['Катушка прибыла на склад', 'delivered']) # TODO: process delivered spool
+		buttons.extend(['Изменить вес', 'Удалить', 'Назад'])
 
 		self.GUI.tell_photo_buttons(text, self.spool.color_photo(), buttons, buttons, 2, self.spool.id)
-		# self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
 	def show_change_weight(self):
 		text = 'Выберите действие'
@@ -132,6 +145,10 @@ class SpoolGUI:
 		self.GUI.tell('Введите цену за катушку в рублях')
 
 	def show_add_new_spool_dried(self):
+		if self.status == 'ordered':
+			self.dried = 'Нет'
+			self.show_add_new_spool_brand()
+			return
 		self.GUI.tell_buttons('Катушка высушена?', ['Да', 'Нет'], ['Да', 'Нет'], 9, 0)
 
 	def show_add_new_spool_brand(self):
@@ -146,26 +163,54 @@ class SpoolGUI:
 		buttons = ['Подтверждаю', 'Отменить удаление']
 		self.GUI.tell_buttons('Подтвердите удаление катушки', buttons, buttons, 12, 0)
 
+	def show_ordered(self):
+		text = 'Заказанных катушек нет'
+		for spool in self.app.equipment.spools:
+			if spool.status == 'ordered':
+				text = 'Катушки, ожидаемые к поставке:'
+		buttons = []
+		for spool in self.app.equipment.spools:
+			if spool.status == 'ordered':
+				buttons.append([f'{spool.type} ({spool.id}) {spool.color_name()} {spool.delivery_date_estimate}', spool.id])
+		buttons.sort(key=self.get_first_elem)
+		buttons.extend(['Добавить', 'Назад'])
+		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 13, 0)
+
+	def show_add_delivery_date(self):
+		buttons = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20']
+		self.GUI.tell_buttons('Через сколько дней ожидается поставка', buttons, [], 14, 0)
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
 		if self.message.btn_data == 'Добавить':
-			self.show_add_new_spool()
+			self.status = 'stock'
+			self.show_add_new_spool() # TODO: add spools amount query
+		elif self.message.btn_data == 'ordered':
+			self.show_ordered()
 		elif self.message.btn_data == 'Назад':
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for spool in self.app.equipment.spools:
-				if self.message.btn_data == spool.id:
+				if spool.id == self.message.btn_data :
 					self.spool = spool
 					self.show_spool()
 
 	def process_spool(self):
-		if self.message.btn_data == 'Изменить вес':
+		data = self.message.btn_data
+		if data == 'delivered':
+			self.spool.status = 'stock'
+			self.app.db.update_spool(self.spool)
+			self.show_ordered()
+		elif data == 'Изменить вес':
 			self.show_change_weight()
-		elif self.message.btn_data == 'Удалить':
+		elif data == 'Удалить':
 			self.show_delete_confirmation()
-		elif self.message.btn_data == 'Назад':
-			self.show_top_menu()
+		elif data == 'Назад':
+			if self.spool.status == 'ordered':
+				self.show_ordered()
+			else:
+				self.show_top_menu()
 
 	def process_change_weight(self):
 		self.change_weight_type = self.message.btn_data
@@ -214,22 +259,26 @@ class SpoolGUI:
 
 	def process_add_new_spool_brand(self):
 		self.brand = self.message.text
-		self.show_add_confirmation()
+		if self.status == 'ordered':
+			self.show_add_delivery_date()
+		else:
+			self.show_add_confirmation()
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.diameter = self.texts.spool_diameter
 			self.density = self.texts.spool_densities[self.texts.spool_types.index(self.type)]
-			self.spool = self.app.equipment.create_new_spool(self.type, self.diameter, self.weight, self.density, self.color_id, self.dried, self.brand, self.used, self.price)
-			text = f'Создана новая катушка:\n'
-			text += f'Номер: {self.spool.id}\n'
-			text += f'Тип: {self.spool.type}\n'
-			text += f'Цвет: {self.spool.color_name()}\n'
-			text += f'Цена: {self.spool.price} рублей\n'
-			text += f'Вес: {self.spool.weight} грамм\n'
-			text += f'Высушена: {self.spool.dried}\n'
-			text += f'Бренд/магазин: {self.spool.brand}'
-			self.GUI.tell_permanent(text)
+			self.spool = self.app.equipment.create_new_spool(self.type, self.diameter, self.weight, self.density, self.color_id, self.dried, self.brand, self.used, self.price, self.status, self.delivery_date_estimate)
+			self.show_spool()
+			# text = f'Создана новая катушка:\n'
+			# text += f'Номер: {self.spool.id}\n'
+			# text += f'Тип: {self.spool.type}\n'
+			# text += f'Цвет: {self.spool.color_name()}\n'
+			# text += f'Цена: {self.spool.price} рублей\n'
+			# text += f'Вес: {self.spool.weight} грамм\n'
+			# text += f'Высушена: {self.spool.dried}\n'
+			# text += f'Бренд/магазин: {self.spool.brand}'
+			# self.GUI.tell_permanent(text)
 		self.type = ''
 		self.color_id = 0
 		self.dried = ''
@@ -239,14 +288,43 @@ class SpoolGUI:
 		self.weight = 0
 		self.density = 0.0
 		self.date = date.today()
-		self.show_top_menu()
+		self.delivery_date_estimate = None
+		# if self.status == 'ordered':
+		# 	self.show_ordered()
+		# else:
+		# 	self.show_top_menu()
+		self.status = ''
 
 	def process_delete_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.GUI.tell(f'Катушка {self.spool.id} удалена')
 			self.app.equipment.remove_spool(self.spool.id)
+			if self.spool.status == 'ordered':
+				self.show_ordered()
+			else:
+				self.show_top_menu()
 			self.spool = None
-		self.show_top_menu()
+		if self.spool != None and self.spool.status == 'ordered':
+			self.show_ordered()
+		else:
+			self.show_top_menu()
+
+	def process_ordered(self):
+		if self.message.btn_data == 'Добавить':
+			self.status = 'ordered'
+			self.show_add_new_spool()
+		elif self.message.btn_data == 'Назад':
+			self.show_top_menu()
+		else:
+			for spool in self.app.equipment.spools:
+				if spool.id == self.message.btn_data:
+					self.spool = spool
+					self.show_spool()
+
+	def process_add_delivery_date(self):
+		days = int(self.message.btn_data)
+		self.delivery_date_estimate = date.today() + timedelta(days = days) # add days to current date
+		self.show_add_confirmation()
 
 #---------------------------- LOGIC ----------------------------
 

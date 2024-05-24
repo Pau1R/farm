@@ -58,7 +58,7 @@ class Equipment:
 			printer = Printer(self.db, data[0], data[1], data[2], data[3])
 			self.printers.append(printer)
 		for data in self.db.get_spools():
-			spool = Spool(self.app, self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10])
+			spool = Spool(self.app, self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11], data[12])
 			self.spools.append(spool)
 		for data in self.db.get_colors():
 			color = Color(self.db, data[0], data[1], data[2], data[3], data[4])
@@ -197,9 +197,9 @@ class Equipment:
 	def sort_printers(self):
 		self.printers.sort(key=self.get_object_id)
 
-	def create_new_spool(self, type, diameter, weight, density, color_id, dried, brand, used, price):
+	def create_new_spool(self, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate):
 		id = self.get_next_free_id(self.spools)
-		spool = Spool(self.app, self.db, id, date.today(), type, diameter, weight, density, color_id, dried, brand, used, price)
+		spool = Spool(self.app, self.db, id, date.today(), type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate)
 		self.db.add_spool(spool)
 		self.spools.append(spool)
 		return spool
