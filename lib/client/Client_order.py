@@ -175,7 +175,7 @@ class Client_order:
 
 		buttons.append(['Отменить заказ'])
 		buttons.append(['Назад'])
-		self.GUI.tell_buttons(text, buttons, buttons, 1, order.order_id)
+		self.GUI.tell_buttons(text, buttons, buttons, 1, order.order_id) # TODO: show uploaded file
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на '
@@ -227,9 +227,12 @@ class Client_order:
 		buttons = [['Перейти к заказу', 'now'], ['Перейти к заказу попозже', 'then']]
 		message = self.GUI.tell_buttons(text, buttons, buttons, 5, order.order_id)
 		message.general_clear = False
+		message.order_id = order.order_id
 
 	def show_rejected_by_designer(self, order, reason):
-		text = f'Заказ {order.name} не прошел оценку. Причина: {reason}'
+		text = f'Заказ {order.name} не прошел оценку.'
+		if reason != '':
+			text +=  f'Причина: {reason}'
 		self.GUI.tell(text)
 
 	def show_reject_reason(self):
@@ -313,7 +316,7 @@ class Client_order:
 			self.app.db.remove_order(self.order)
 			self.order = None
 			self.chat.user.last_data = ''
-			self.chat.user.admin.show_orders()
+			self.chat.user.show_orders()
 # TODO: if user canceled order after validation add him a penalty score
 			return
 		self.show_order()

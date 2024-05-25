@@ -50,6 +50,7 @@ class Client:
 		self.message = message
 
 		if message.text == '/start':
+			self.last_data = ''
 			self.order.reset()
 			self.show_top_menu()
 		elif message.data_special_format:

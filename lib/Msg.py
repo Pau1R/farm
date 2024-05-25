@@ -9,7 +9,7 @@ class Message:
 	file_id = ''
 	file_name = ''
 	data = ''
-	order_id = ''
+	order_id = 0
 	general_clear = True
 
 	data_special_format = False

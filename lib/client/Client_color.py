@@ -16,6 +16,7 @@ class Client_color:
 	colors = {}
 
 	last_data = ''
+	pending = False
 
 	def __init__(self, app, chat):
 		self.app = app
@@ -67,6 +68,10 @@ class Client_color:
 		# prepare all filament
 		filament = {}
 		for spool in self.app.equipment.spools:
+			if self.pending and spool.status == 'stock':
+				continue
+			elif spool.status == 'pending':
+				continue
 			if spool.type not in filament:
 				filament[spool.type] = {spool.color_id: ''} # add spool type
 			else:
@@ -101,15 +106,22 @@ class Client_color:
 						if order.plastic_type == 'Любой' or (type_ == order.plastic_type):
 							for color in self.app.equipment.colors:
 								if color.id == color_id:
-									buttons.append(self.get_color_name(color.id), color.id)
+									buttons.append([self.get_color_name(color.id), color.id])
 									break
-		if not all_colors:
-			buttons = list(dict.fromkeys(buttons))
+		# if not all_colors:
+		# 	buttons = list(dict.fromkeys(buttons))
 		buttons.sort(key=self.get_elem_from_list)
 
-		if False: # TODO: if there are ordered spools:
-			buttons.append(['Ожидаются поставки', 'pending'])
-		buttons.append(['Хочу другой цвет', 'other_color']) # TODO: make it possible to preorder plastic of specific color
+		activate = False
+		for spool in self.app.equipment.spools:
+			if spool.status == 'ordered':
+				if all_colors:
+					activate = True
+				elif order.plastic_type == 'Любой' or (spool.type == order.plastic_type): # process limited spool types
+					activate = True
+		if not self.pending and activate:
+			buttons.append(['Ожидающие поставки', 'pending'])
+		# buttons.append(['Хочу другой цвет', 'other_color']) # TODO: make it possible to preorder plastic of specific color
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, order_id)
 
@@ -118,6 +130,7 @@ class Client_color:
 		for color_ in self.app.equipment.colors:
 			if color_.id == int(self.message.btn_data):
 				color = color_
+				break
 		buttons = []
 		if self.order == None:
 			order_id = 0
@@ -133,25 +146,25 @@ class Client_color:
 					name = col.name + '-' + color.name.lower()
 		self.GUI.tell_photo_buttons(name, color.samplePhoto, buttons, buttons, 2, order_id)
 
-	def show_ordered(self):
-		x = '' # TODO: code this stuff
-
-	def show_other_color(self):
-		x = '' # TODO: code this stuff
-
 #---------------------------- PROCESS ----------------------------
 
 	def process_colors(self):
 		data = self.message.btn_data
 		if data == 'Назад':
-			if self.order == None:
+			if self.pending:
+				self.pending = False
+				self.show_colors()
+			elif self.order == None:
 				self.chat.user.last_data = ''
 				self.chat.user.show_info()
 			else:
 				self.chat.user.client_order.last_data = ''
 				self.chat.user.client_order.first_message(self.message)
+			self.last_data = ''
 		elif data == 'pending':
-			self.show_ordered()
+			self.pending = True
+			self.show_colors()
+			# self.show_ordered()
 		elif data == 'other_color':
 			self.show_other_color()
 		else:
@@ -162,10 +175,10 @@ class Client_color:
 		if data == 'Назад':
 			self.show_colors()
 		elif data.split('^')[0] == 'confirm':
-			# if color just disappeared: self.show_colors()
-			# else continue
-			# бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
-			self.order.color_id = data.split('^')[1] # TODO: take in account color shade
+			color_id = int(data.split('^')[1])
+			# TODO: if color just disappeared: self.show_colors()
+			# TODO: бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
+			self.order.color_id = color_id
 			self.order.set_price()
 			self.app.db.update_order(self.order)
 			self.chat.user.client_order.last_data = ''

@@ -38,7 +38,6 @@ class Validate:
 	def first_message(self, message):
 		self.show_top_menu()
 
-# TODO: process client order cancelation while entering validation data
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.message = message
@@ -95,22 +94,10 @@ class Validate:
 		for spool in self.app.equipment.spools:
 			button = spool.type
 			if button not in buttons:
-				buttons.append(button) # TODO: show preordered spools also
-		if buttons == []:
-			self.show_material_unavailable()
-			return
-		else:
-			text = f'Выберите тип пластика. Условия эксплуатации: {self.order.conditions}'
-			buttons.append('любой')
-			buttons.append(['Подходящего пластика нет', 'unavailable'])
-		self.GUI.tell_buttons(text, buttons, [], 4, self.order.order_id)
-
-	# TODO: this function should probably be deleted, need to rethink
-	def show_material_unavailable(self):
-		text = 'Нет нужного типа пластика. Если поставка не ожидается нужно сообщить клиенту' # TODO: create ordered_spools. look there and ask client if he wants to wait. 
-		buttons = []
-		buttons.append(['Сообщить клиенту', 'inform'])
-		buttons.append(['Продолжить валидацию', 'delay'])
+				buttons.append(button)
+		text = f'Выберите тип пластика. Условия эксплуатации: {self.order.conditions}'
+		buttons.append('любой')
+		buttons.append(['Подходящего пластика нет', 'unavailable'])
 		self.GUI.tell_buttons(text, buttons, [], 4, self.order.order_id)
 
 	def show_accept_quantity(self):
@@ -198,19 +185,11 @@ class Validate:
 	def process_accept_plastic_type(self):
 		if self.message.btn_data == 'unavailable':
 			self.order.status = 'no_spools'
-			self.show_material_unavailable()
 		elif self.message.btn_data == 'любой':
 			x = '' # TODO: smth
 		else:
 			self.material = self.message.btn_data
 		self.show_accept_quantity()
-
-	def process_material_unavailable(self):
-		if self.message.btn_data == 'inform':
-			user = self.get_user(self.order.user_id)
-			user.client_order.show_material_unavailable(self.order)
-		else:
-			self.show_validate()
 
 	def process_accept_quantity(self):
 		try:
@@ -262,17 +241,17 @@ class Validate:
 			self.order.weight = self.table_weight / self.table_quantity
 			self.order.time = (self.table_hours * 60) + self.table_minutes
 			self.order.support_time = self.support_minutes
-			self.order.status = 'validated'
 			self.order.plastic_type = self.material
 			self.order.printer_type = self.printer_type
 			self.order.price = self.price
 			self.order.set_price()
-			self.app.db.update_order(self.order)
 			user = self.get_user(self.order.user_id)
-			user.client_order.show_confirmed_by_designer(self.order)
-			# for chat in self.app.chats:
-			# 	if chat.user_id == str(self.order.user_id):
-			# 		chat.user.client_order.show_confirmed_by_designer(self.order)
+			if self.order.status == 'no_spools':
+				user.client_order.show_material_unavailable(self.order)
+			else:
+				self.order.status = 'validated'
+				user.client_order.show_confirmed_by_designer(self.order)
+			self.app.db.update_order(self.order)
 			self.show_top_menu()
 
 	def process_reject(self):
@@ -286,9 +265,6 @@ class Validate:
 		self.app.orders.remove(self.order)
 		self.order == None
 		self.show_top_menu()
-		# for chat in self.app.chats:
-		# 	if chat.user_id == self.order.user_id:
-		# 		chat.user.show_rejected(self.order.order_id, self.message.text)
 
 #---------------------------- LOGIC ----------------------------
 

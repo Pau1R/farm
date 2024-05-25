@@ -8,6 +8,7 @@ from lib.Test import Test
 from lib.Settings import Settings
 import jsonpickle
 from datetime import date
+from lib.Functions import Functions
 
 class App:
 	bot = None
@@ -16,10 +17,10 @@ class App:
 	equipment = None
 	settings = None
 	orders = []
+	functions = Functions()
 
 	chats = []
 	chat = None
-
 	count = 0
 	last_check_date = None
 
@@ -100,6 +101,6 @@ class App:
 #	5 Delivery
 
 
-# TODO: Designer_validate.py 2, Client_color.py 1, client_order.py, client wait for specific material
+# TODO: Designer_validate.py 1, Client_color.py 1, client_order.py, client wait for specific material
 
 # preordered spools: status: ordered, in_stock; delivery_date_estimate

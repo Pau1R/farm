@@ -43,7 +43,7 @@ class Order:
 	price = 0.0
 	prepayed = 0.0
 	prepayment_percent = 0
-	pay_code = '' # TODO: add field to database table
+	pay_code = ''
 
 	sketches = []
 	model_file = ''
@@ -87,5 +87,6 @@ class Order:
 		for type_ in self.app.equipment.printer_types:
 			if type_.name == self.printer_type:
 				printer_hour_cost = type_.hour_cost
+				break
 		time_price = (self.time / 60) * printer_hour_cost
 		self.price = int(plastic_price + time_price)

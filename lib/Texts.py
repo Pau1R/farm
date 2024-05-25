@@ -84,6 +84,8 @@ class Texts:
 
 	def designer_orders_validate_btns(self, orders, chat):
 		buttons = []
+		orders = orders.copy()
+		# TODO: sort orders by date
 		for order in orders:
 			if order.status == 'validate' and (order.assinged_designer_id == chat.user_id or order.assinged_designer_id == ''):
 				buttons.append([str(order.order_id) + ': ' + order.name, order.order_id])
