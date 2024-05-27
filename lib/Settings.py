@@ -8,7 +8,9 @@ class Settings:
 		'phone_number',
 		'card_number', 
 		'account_number',
-		'transfer_receiver']
+		'transfer_receiver',
+		'plastic_types',
+		'basic_plastic_types']
 		# TODO: add new setting for plastic types
 
 	def __init__(self, app):

@@ -90,3 +90,8 @@ class Order:
 				break
 		time_price = (self.time / 60) * printer_hour_cost
 		self.price = int(plastic_price + time_price)
+
+	def reserve_plastic(self): # TODO: бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
+
+
+	def remove_reserve(self):

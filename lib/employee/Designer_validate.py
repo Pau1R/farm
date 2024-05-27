@@ -96,7 +96,7 @@ class Validate:
 			if button not in buttons:
 				buttons.append(button)
 		text = f'Выберите тип пластика. Условия эксплуатации: {self.order.conditions}'
-		buttons.append('любой')
+		buttons.append(['любой базовый', 'any'])
 		buttons.append(['Подходящего пластика нет', 'unavailable'])
 		self.GUI.tell_buttons(text, buttons, [], 4, self.order.order_id)
 
@@ -163,7 +163,7 @@ class Validate:
 					# self.table_hours = 4
 					# self.table_minutes = 10
 					# self.support_minutes = 1
-					# self.material = 'Любой'
+					# self.material = 'any'
 					# self.material = 'PLA'
 					# self.process_accept_confirmation()
 
@@ -185,8 +185,8 @@ class Validate:
 	def process_accept_plastic_type(self):
 		if self.message.btn_data == 'unavailable':
 			self.order.status = 'no_spools'
-		elif self.message.btn_data == 'любой':
-			x = '' # TODO: smth
+		elif self.message.btn_data == 'any':
+			self.material = 'any'
 		else:
 			self.material = self.message.btn_data
 		self.show_accept_quantity()

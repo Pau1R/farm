@@ -175,7 +175,7 @@ class Client_order:
 
 		buttons.append(['Отменить заказ'])
 		buttons.append(['Назад'])
-		self.GUI.tell_buttons(text, buttons, buttons, 1, order.order_id) # TODO: show uploaded file
+		self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.order_id)
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на '

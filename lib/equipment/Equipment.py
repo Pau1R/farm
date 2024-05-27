@@ -61,7 +61,7 @@ class Equipment:
 			spool = Spool(self.app, self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11], data[12])
 			self.spools.append(spool)
 		for data in self.db.get_colors():
-			color = Color(self.db, data[0], data[1], data[2], data[3], data[4])
+			color = Color(self.app, self.db, data[0], data[1], data[2], data[3], data[4])
 			self.colors.append(color)
 		for data in self.db.get_surfaces():
 			surface = Surface(self.db, data[0], data[1], data[2])
@@ -238,14 +238,14 @@ class Equipment:
 		price = 1
 		weight = 1
 		for spool in self.spools:
-			if material == 'Любой' or spool.type == material:
+			if material == 'any' or spool.type == material:
 				price += spool.price
 				weight += spool.weight
 		return int(price/weight)
 
 	def create_new_color(self, name, parent, samplePhoto):
 		id = int(self.get_next_free_id(self.colors))
-		color = Color(self.db, id, date.today(), name, parent, samplePhoto)
+		color = Color(self.app, self.db, id, date.today(), name, parent, samplePhoto)
 		self.db.add_color(color)
 		self.colors.append(color)
 		return color

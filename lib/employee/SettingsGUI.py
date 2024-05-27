@@ -14,6 +14,8 @@ class SettingsGUI:
 	name = ''
 	value = ''
 
+	context = ''
+
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
@@ -31,7 +33,7 @@ class SettingsGUI:
 			if message.function == '1':
 				self.process_top_menu()
 			elif message.function == '2':
-				self.process_settings_money()
+				self.process_settings()
 			elif message.function == '3':
 				self.process_setting()
 			elif message.function == '4':
@@ -42,10 +44,11 @@ class SettingsGUI:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
-		buttons = [['Финансы', 'money'], 'Назад']
+		buttons = [['Финансы', 'money'], ['Другие настройки', 'plastic_types'], 'Назад']
 		self.GUI.tell_buttons('Выберите категорию', buttons, ['Назад'], 1, 0)
 
 	def show_settings_money(self):
+		self.context = 'settings_money'
 		buttons = []
 		param = 'support_remove_price'
 		text = 'Стоимость одной минуты удаления поддержек: ' + self.app.settings.get(param) + ' рублей'
@@ -71,6 +74,18 @@ class SettingsGUI:
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите настройку', buttons, buttons, 2, 0)
 
+	def show_settings_other(self):
+		self.context = 'settings_other'
+		buttons = []
+		param = 'plastic_types'
+		text = 'Используемые типы материалов: ' + self.app.settings.get(param)
+		buttons.append([text, param])
+		param = 'basic_plastic_types'
+		text = 'Базовые типы материалов: ' + self.app.settings.get(param)
+		buttons.append([text, param])
+		buttons.append('Назад')
+		self.GUI.tell_buttons('Выберите настройку', buttons, buttons, 2, 0)
+
 	def show_setting(self, name):
 		self.chat.set_context(self.address, 3)
 		self.name = name
@@ -88,8 +103,10 @@ class SettingsGUI:
 			self.app.chat.user.admin.show_top_menu()
 		elif self.message.btn_data == 'money':
 			self.show_settings_money()
+		elif self.message.btn_data == 'plastic_types':
+			self.show_settings_other()
 
-	def process_settings_money(self):
+	def process_settings(self):
 		if self.message.btn_data == 'Назад':
 			self.show_top_menu()
 		else:
@@ -104,6 +121,9 @@ class SettingsGUI:
 			self.app.settings.set(self.name, self.value)
 			self.name = ''
 			self.value = ''
-		self.show_settings_money()
+		if self.context == 'settings_money':
+			self.show_settings_money()
+		elif self.context == 'settings_other':
+			self.show_settings_other()
 
 		

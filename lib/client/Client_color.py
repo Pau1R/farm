@@ -27,7 +27,10 @@ class Client_color:
 	def first_message(self, message):
 		self.message = message
 		self.set_order()
-		self.show_colors()
+		if self.order == None:
+			self.show_colors()
+		else:
+			self.show_order_colors()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -40,6 +43,12 @@ class Client_color:
 			if message.function == '1':
 				self.process_colors()
 			elif message.function == '2':
+				self.process_colors_ordered()
+			elif message.function == '3':
+				self.process_order_colors()
+			elif message.function == '4':
+				self.process_order_colors_ordered()
+			elif message.function == '5':
 				self.process_color()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
@@ -55,130 +64,130 @@ class Client_color:
 #---------------------------- SHOW ----------------------------
 
 	def show_colors(self):
-		order = self.order
-		if order == None:
-			text = 'Наличие'
-			order_id = 0
-			all_colors = True
-		else:
-			text = 'Выберите цвет'
-			order_id = order.order_id
-			all_colors = False
-
-		# prepare all filament
-		filament = {}
-		for spool in self.app.equipment.spools:
-			if self.pending and spool.status == 'stock':
-				continue
-			elif spool.status == 'pending':
-				continue
-			if spool.type not in filament:
-				filament[spool.type] = {spool.color_id: ''} # add spool type
-			else:
-				if spool.color_id not in filament[spool.type]: # add spool color
-					col = filament[spool.type].copy()
-					col.update({spool.color_id: ''})
-			col = filament[spool.type] # add spool weight
-			if spool.color_id in col:
-				total_weight = col[spool.color_id]
-				if total_weight == '':
-					total_weight = 0
-			weight = spool.weight - spool.used - spool.booked
-			if weight > 15:
-				col.update({spool.color_id: total_weight + spool.weight})
-
-		# convert filament to buttons
-		buttons = []
-		for type_ in filament:
-			if type(filament[type_]) is dict:
-				color_ids = filament[type_]
-				for color_id in color_ids:
-					# show all colors
-					if all_colors:
-						if color_ids[color_id] != '':
-							weight = int(color_ids[color_id])/1000
-							if int(weight) == weight:
-								weight = int(weight)
-							txt = f'{type_} {self.get_color_name(color_id)}: {str(weight)}кг'
-							buttons.append([txt, color_id])
-					# show colors available for order
-					else:
-						if order.plastic_type == 'Любой' or (type_ == order.plastic_type):
-							for color in self.app.equipment.colors:
-								if color.id == color_id:
-									buttons.append([self.get_color_name(color.id), color.id])
-									break
-		# if not all_colors:
-		# 	buttons = list(dict.fromkeys(buttons))
-		buttons.sort(key=self.get_elem_from_list)
-
-		activate = False
-		for spool in self.app.equipment.spools:
-			if spool.status == 'ordered':
-				if all_colors:
-					activate = True
-				elif order.plastic_type == 'Любой' or (spool.type == order.plastic_type): # process limited spool types
-					activate = True
-		if not self.pending and activate:
-			buttons.append(['Ожидающие поставки', 'pending'])
-		# buttons.append(['Хочу другой цвет', 'other_color']) # TODO: make it possible to preorder plastic of specific color
+		filament = self.get_filament('stock', 'all', 0)
+		buttons = self.convert_to_buttons(filament, 'long', False, 0)
+		if self.get_filament('ordered', 'all', 0) != {}:
+			buttons.append(['Ожидающие поставки', 'ordered'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, buttons, 1, order_id)
+		text = 'В наличии'
+		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
-	def show_color(self):
-		color = None
-		for color_ in self.app.equipment.colors:
-			if color_.id == int(self.message.btn_data):
-				color = color_
-				break
+	def show_colors_ordered(self):
+		filament = self.get_filament('ordered', 'all', 0)
+		buttons = self.convert_to_buttons(filament, 'long', True, 0)
+		buttons.append('Назад')
+		text = 'Цвета, ожидаемые к поставке'
+		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
+
+	def show_order_colors(self):
+		min_weight = self.order.weight
+		if min_weight > 100:
+			min_weight = 100
+		filament = self.get_filament('stock', self.order.plastic_type, min_weight)
+		filament = self.trim_filament(filament, self.order)
+		ordered = self.get_filament('ordered', self.order.plastic_type, min_weight)
+		ordered = self.trim_filament(ordered, self.order)
+		buttons = self.convert_to_buttons(filament, 'short', False, min_weight)
+		if self.subtract_dictionaries(ordered, filament) != {}:
+			buttons.append(['Ожидающие поставки', 'ordered'])
+		buttons.append('Назад')
+		text = 'Выберите цвет'
+		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.order_id)
+
+	def show_order_colors_ordered(self):
+		min_weight = self.order.weight
+		if min_weight > 100:
+			min_weight = 100
+		ordered = self.get_filament('ordered', self.order.plastic_type, min_weight)
+		ordered = self.trim_filament(ordered, self.order)
+		stock = self.get_filament('stock', self.order.plastic_type, min_weight)
+		stock = self.trim_filament(stock, self.order)
+		ordered = self.subtract_dictionaries(ordered, stock)
+		buttons = self.convert_to_buttons(ordered, 'short', True, min_weight)
+		buttons.append('Назад')
+		text = 'Цвета, ожидаемые к поставке'
+		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.order_id)
+
+	def show_color(self, color_id, context_id):
+		color = self.get_color(self.message.btn_data)
+		text = color.get_color_name()
 		buttons = []
-		if self.order == None:
-			order_id = 0
-		else:
-			buttons.append(['Подтвердить выбор цвета', 'confirm^' + str(color.id)])
-			order_id = self.message.instance_id
-		buttons.append ('Назад')
-		if color.parent_id == 0:
-			name = color.name
-		else:
-			for col in self.app.equipment.colors:
-				if col.id == color.parent_id:
-					name = col.name + '-' + color.name.lower()
-		self.GUI.tell_photo_buttons(name, color.samplePhoto, buttons, buttons, 2, order_id)
+		order_id = 0
+		if self.order != None:
+			buttons.append(['Подтвердить выбор цвета', 'confirm^' + str(color.id) + '^' + str(context_id)])
+			order_id = self.order.order_id
+		buttons.append (['Назад', 'Назад^^' + str(context_id)])
+		self.GUI.tell_photo_buttons(text, color.samplePhoto, buttons, buttons, 5, order_id)
 
 #---------------------------- PROCESS ----------------------------
 
 	def process_colors(self):
 		data = self.message.btn_data
 		if data == 'Назад':
-			if self.pending:
-				self.pending = False
-				self.show_colors()
-			elif self.order == None:
-				self.chat.user.last_data = ''
-				self.chat.user.show_info()
-			else:
-				self.chat.user.client_order.last_data = ''
-				self.chat.user.client_order.first_message(self.message)
-			self.last_data = ''
-		elif data == 'pending':
-			self.pending = True
-			self.show_colors()
-			# self.show_ordered()
-		elif data == 'other_color':
-			self.show_other_color()
+			self.chat.user.last_data = ''
+			self.chat.user.show_info()
+		elif data == 'ordered':
+			self.show_colors_ordered()
 		else:
-			self.show_color()
+			self.show_color(data, 1)
 
-	def process_color(self):
+	def process_colors_ordered(self):
 		data = self.message.btn_data
 		if data == 'Назад':
 			self.show_colors()
+		else:
+			self.show_color(data, 2)
+
+	def process_order_colors(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.chat.user.client_order.last_data = ''
+			self.chat.user.client_order.first_message(self.message)
+		elif data == 'ordered':
+			self.show_order_colors_ordered()
+		else:
+			self.show_color(data, 3)
+
+	def process_order_colors_ordered(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_order_colors()
+		else:
+			self.show_color(data, 4)
+
+	def process_color(self):
+		data = self.message.btn_data
+		context = int(data.split('^')[2])
+		if data.split('^')[0] == 'Назад':
+			if context == 1:
+				self.show_colors()
+			elif context == 2:
+				self.show_colors_ordered()
+			elif context == 3:
+				self.show_order_colors()
+			elif context == 4:
+				self.show_order_colors_ordered()
 		elif data.split('^')[0] == 'confirm':
 			color_id = int(data.split('^')[1])
-			# TODO: if color just disappeared: self.show_colors()
-			# TODO: бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
+			min_weight = self.order.weight * self.order.quantity
+			if min_weight > 100:
+				min_weight = 100
+			if context == 3:
+				stock = self.get_filament('stock', self.order.plastic_type, min_weight)
+				stock = self.trim_filament(stock, self.order)
+				type_ = self.order.plastic_type
+				if not (type_ in stock and color_id in stock.get(type_, {})):
+					self.show_order_colors()
+					return
+			if context == 4:
+				ordered = self.get_filament('ordered', self.order.plastic_type, min_weight)
+				ordered = self.trim_filament(ordered, self.order)
+				type_ = self.order.plastic_type
+				if not (type_ in ordered and color_id in ordered.get(type_, {})):
+					self.show_order_colors_ordered()
+					return
 			self.order.color_id = color_id
+			self.order.reserve_plastic()
 			self.order.set_price()
 			self.app.db.update_order(self.order)
 			self.chat.user.client_order.last_data = ''
@@ -188,9 +197,15 @@ class Client_color:
 
 	def get_order(self, order_id):
 		for order in self.app.orders:
-			if order.order_id == order_id:
+			if order.order_id == int(order_id):
 				return order
 		return None
+
+	def get_color(self, id):
+		colors = self.app.equipment.colors
+		for color in colors:
+			if color.id == int(id):
+				return color
 
 	def get_color_name(self, id):
 		colors = self.app.equipment.colors
@@ -201,7 +216,90 @@ class Client_color:
 				else:
 					for col in colors:
 						if col.id == color.parent_id:
-							return col.name + '-' + color.name
+							return col.name + '-' + color.name.lower()
 
 	def get_elem_from_list(self, lst):
 		return lst[0]
+
+	def get_filament(self, status, type, min_weight):
+		filament = {}
+		for spool in self.app.equipment.spools:
+			# exclude by status:
+			if spool.status != status:
+				continue
+			# exclude by type
+			if type == 'any':
+				types = self.app.settings.get('basic_plastic_types').split(',')
+				if not spool.type in types:
+					continue
+			elif spool.type != type:
+				if type != 'all':
+					continue
+
+			# add spool to dictionary
+			if spool.type not in filament:
+				filament[spool.type] = {spool.color_id: ''} # add spool type
+			else:
+				if spool.color_id not in filament[spool.type]: # add spool color
+					col = filament[spool.type].copy()
+					col.update({spool.color_id: ''})
+			col = filament[spool.type]
+			if spool.color_id in col:
+				total_weight = col[spool.color_id]
+				if total_weight == '':
+					total_weight = 0
+			if self.is_enough_weight(spool, min_weight):
+				col.update({spool.color_id: total_weight + spool.weight}) # create or add spool weight
+		filament = {key: {k: v for k, v in value.items() if v} for key, value in filament.items()}
+		return filament  # {'PETG': {1: 998, 5: 4500, 7: 1000, 2: 1000}, 'PLA': {6: 9000}, 'PC': {1: 4000}, 'ABS': {6: 1000}, 'TPE': {9: 900}}
+
+	def trim_filament(self, filament, order):
+		weight = order.weight * order.quantity + 15
+		type_ = [order.plastic_type]
+		if type_[0] == 'any':
+			type_ = self.app.settings.get('basic_plastic_types').split(',')
+		for t in type_:
+		    if t in filament:
+		        filament[t] = {k: v for k, v in filament[t].items() if v > weight}
+		return filament
+
+	def convert_to_buttons(self, filament, name_format, include_date, min_weight):
+		filament = filament.copy()
+		buttons = []
+		for type_ in filament:
+			if type(filament[type_]) is dict:
+				color_ids = filament[type_]
+				for color_id in color_ids:
+					if name_format == 'short':
+						text = self.get_color_name(color_id)
+					elif name_format == 'long':
+						weight = int(color_ids[color_id])/1000 # convert weight to kg
+						if int(weight) == weight: 			   # if weight is integer then remove decimal point
+							weight = int(weight)
+						text = f'{type_} {self.get_color_name(color_id)}: {str(weight)}кг'
+					if include_date:
+						for spool in self.app.equipment.spools:
+							if spool.type == type_ and spool.color_id == color_id and self.is_enough_weight(spool, min_weight):
+								date = self.app.functions.russian_date(spool.delivery_date_estimate)
+								text += f' ({date})'
+								break
+					buttons.append([text, color_id])
+		buttons.sort(key=self.get_elem_from_list)
+		return buttons
+
+	def is_enough_weight(self, spool, min_weight):
+		weight = spool.weight - spool.used - spool.booked - 15  # remove 15 gramms from spool in case of weight accuracy error
+		if weight > min_weight:
+			return True
+
+	def subtract_dictionaries(self, dict2, dict1):
+		result = {}
+		for key, subdict2 in dict2.items():
+			if key not in dict1:
+				result[key] = subdict2
+			else:
+				# Filter out keys present in dict1[key]
+				filtered_subdict2 = {k: v for k, v in subdict2.items() if k not in dict1[key]}
+				if filtered_subdict2:
+					result[key] = filtered_subdict2
+		return result

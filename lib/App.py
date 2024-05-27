@@ -74,7 +74,7 @@ class App:
 						for order in self.orders:
 							if order.user_id == obj.user_id:
 								break
-					chats.remove(obj)
+					self.chats.remove(obj)
 
 
 # app structure for buttons:
@@ -101,6 +101,4 @@ class App:
 #	5 Delivery
 
 
-# TODO: Designer_validate.py 1, Client_color.py 1, client_order.py, client wait for specific material
-
-# preordered spools: status: ordered, in_stock; delivery_date_estimate
+# TODO: client_order.py, client wait for specific material

@@ -16,6 +16,8 @@ class Functions:
 		12:'декабря'}
 
 	def russian_date(self, date):
+		if date == None:
+			return ''
 		return str(date.day) + ' ' + self.months[date.month]
 
 functions = Functions()
