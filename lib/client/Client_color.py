@@ -18,11 +18,14 @@ class Client_color:
 	last_data = ''
 	pending = False
 
+	spool_logic = None
+
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(app)
+		self.spool_logic = app.equipment.spool_logic
 
 	def first_message(self, message):
 		self.message = message
@@ -64,49 +67,67 @@ class Client_color:
 #---------------------------- SHOW ----------------------------
 
 	def show_colors(self):
-		filament = self.get_filament('stock', 'all', 0)
-		buttons = self.convert_to_buttons(filament, 'long', False, 0)
-		if self.get_filament('ordered', 'all', 0) != {}:
+		buttons = self.spool_logic.get_all_buttons('stock')
+		if self.spool_logic.is_ordered():
 			buttons.append(['Ожидающие поставки', 'ordered'])
 		buttons.append('Назад')
-		text = 'В наличии'
-		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
+		self.GUI.tell_buttons('В наличии', buttons, buttons, 1, 0)
+
+
+		# filament = self.get_filament('stock', 'all', 0)
+		# buttons = self.convert_to_buttons(filament, 'long', False, 0)
+		# if self.get_filament('ordered', 'all', 0) != {}:
+		# 	buttons.append(['Ожидающие поставки', 'ordered'])
+		# buttons.append('Назад')
+		# text = 'В наличии'
+		# self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_colors_ordered(self):
-		filament = self.get_filament('ordered', 'all', 0)
-		buttons = self.convert_to_buttons(filament, 'long', True, 0)
+		buttons = self.spool_logic.get_all_buttons('ordered')
 		buttons.append('Назад')
-		text = 'Цвета, ожидаемые к поставке'
-		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
+		self.GUI.tell_buttons('Цвета, ожидаемые к поставке', buttons, buttons, 2, 0)
+
+
+		# filament = self.get_filament('ordered', 'all', 0)
+		# buttons = self.convert_to_buttons(filament, 'long', True, 0)
+		# buttons.append('Назад')
+		# text = 'Цвета, ожидаемые к поставке'
+		# self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
 	def show_order_colors(self):
-		min_weight = self.order.weight
-		if min_weight > 100:
-			min_weight = 100
-		filament = self.get_filament('stock', self.order.plastic_type, min_weight)
-		filament = self.trim_filament(filament, self.order)
-		ordered = self.get_filament('ordered', self.order.plastic_type, min_weight)
-		ordered = self.trim_filament(ordered, self.order)
-		buttons = self.convert_to_buttons(filament, 'short', False, min_weight)
-		if self.subtract_dictionaries(ordered, filament) != {}:
+		buttons = self.spool_logic.get_in_stock_buttons(self.order.plastic_type)
+		if self.spool_logic.is_ordered(self.order.plastic_type):
 			buttons.append(['Ожидающие поставки', 'ordered'])
 		buttons.append('Назад')
-		text = 'Выберите цвет'
-		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.order_id)
+		self.GUI.tell_buttons('Выберите цвет', buttons, buttons, 3, self.order.order_id)
+
+		# filament = self.get_filament('stock', self.order.plastic_type, self.order.min_weight())
+		# filament = self.trim_filament(filament, self.order)
+		# ordered = self.get_filament('ordered', self.order.plastic_type, min_weight)
+		# ordered = self.trim_filament(ordered, self.order)
+		# buttons = self.convert_to_buttons(filament, 'short', False, min_weight)
+		# if self.subtract_dictionaries(ordered, filament) != {}:
+		# 	buttons.append(['Ожидающие поставки', 'ordered'])
+		# buttons.append('Назад')
+		# text = 'Выберите цвет'
+		# self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.order_id)
 
 	def show_order_colors_ordered(self):
-		min_weight = self.order.weight
-		if min_weight > 100:
-			min_weight = 100
-		ordered = self.get_filament('ordered', self.order.plastic_type, min_weight)
-		ordered = self.trim_filament(ordered, self.order)
-		stock = self.get_filament('stock', self.order.plastic_type, min_weight)
-		stock = self.trim_filament(stock, self.order)
-		ordered = self.subtract_dictionaries(ordered, stock)
-		buttons = self.convert_to_buttons(ordered, 'short', True, min_weight)
+		buttons = self.spool_logic.get_ordered_buttons(self.order.plastic_type)
 		buttons.append('Назад')
 		text = 'Цвета, ожидаемые к поставке'
 		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.order_id)
+
+
+		# ordered = self.get_filament('ordered', self.order.plastic_type, self.order.min_weight())
+		# ordered = self.trim_filament(ordered, self.order)
+		# stock = self.get_filament('stock', self.order.plastic_type, min_weight)
+		# stock = self.trim_filament(stock, self.order)
+		# ordered = self.subtract_dictionaries(ordered, stock)
+		# buttons = self.convert_to_buttons(ordered, 'short', True, min_weight)
+		# buttons.append('Назад')
+		# text = 'Цвета, ожидаемые к поставке'
+		# self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.order_id)
 
 	def show_color(self, color_id, context_id):
 		color = self.get_color(self.message.btn_data)
@@ -169,18 +190,15 @@ class Client_color:
 				self.show_order_colors_ordered()
 		elif data.split('^')[0] == 'confirm':
 			color_id = int(data.split('^')[1])
-			min_weight = self.order.weight * self.order.quantity
-			if min_weight > 100:
-				min_weight = 100
 			if context == 3:
-				stock = self.get_filament('stock', self.order.plastic_type, min_weight)
+				stock = self.get_filament('stock', self.order.plastic_type, self.order.min_weight())
 				stock = self.trim_filament(stock, self.order)
 				type_ = self.order.plastic_type
 				if not (type_ in stock and color_id in stock.get(type_, {})):
 					self.show_order_colors()
 					return
 			if context == 4:
-				ordered = self.get_filament('ordered', self.order.plastic_type, min_weight)
+				ordered = self.get_filament('ordered', self.order.plastic_type, self.order.min_weight())
 				ordered = self.trim_filament(ordered, self.order)
 				type_ = self.order.plastic_type
 				if not (type_ in ordered and color_id in ordered.get(type_, {})):
@@ -250,7 +268,7 @@ class Client_color:
 					total_weight = 0
 			if self.is_enough_weight(spool, min_weight):
 				col.update({spool.color_id: total_weight + spool.weight}) # create or add spool weight
-		filament = {key: {k: v for k, v in value.items() if v} for key, value in filament.items()}
+		filament = {key: {k: v for k, v in value.items() if v} for key, value in filament.items()} # remove empty values
 		return filament  # {'PETG': {1: 998, 5: 4500, 7: 1000, 2: 1000}, 'PLA': {6: 9000}, 'PC': {1: 4000}, 'ABS': {6: 1000}, 'TPE': {9: 900}}
 
 	def trim_filament(self, filament, order):

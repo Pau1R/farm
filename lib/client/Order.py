@@ -45,6 +45,8 @@ class Order:
 	prepayment_percent = 0
 	pay_code = ''
 
+	booked = []
+
 	sketches = []
 	model_file = ''
 
@@ -54,6 +56,7 @@ class Order:
 		self.app = app
 		self.order_id = order_id
 		self.date = date.today()
+		self.spools = self.app.equipment.spools
 		# self.GUI = Gui(app, app.chat)
 
 	def reset(self):
@@ -75,23 +78,33 @@ class Order:
 		return id
 
 	def set_price(self):
-		if self.color_id != 0:
-			for spool in self.app.equipment.spools:
-				if spool.color_id == self.color_id and spool.type == self.plastic_type:
-					gram_price = spool.price/spool.weight
-					break
-		else:
-			gram_price = self.app.equipment.spools_average_price(self.plastic_type)
-
-		plastic_price = self.weight * self.quantity * gram_price
-		for type_ in self.app.equipment.printer_types:
-			if type_.name == self.printer_type:
-				printer_hour_cost = type_.hour_cost
-				break
-		time_price = (self.time / 60) * printer_hour_cost
+		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic
+		plastic_price = self.weight * self.quantity * gram_price  										# total plastic price for order
+		print_cost = self.app.equipment.print_cost(self.printer_type)  									# cost of one hour for printer
+		time_price = (self.time / 60) * print_cost														# cost of all printer working time
 		self.price = int(plastic_price + time_price)
 
-	def reserve_plastic(self): # TODO: бронь пластика на 20 минут при нажатии на кнопку цвета. Снятие брони при отображении списка цветов и при отказе от предоплаты. Если предоплата выполнена, бронь остается
-
+	def reserve_plastic(self): # TODO: бронь пластика на 20 минут (проверять при поступлении new_message) при нажатии выборе цвета. Снятие брони при отказе от предоплаты. Если предоплата выполнена, бронь остается
+		self.booked = self.app.equipment.spool_logic.book(self.type, self.color_id, self.weight, self.quantity)
+		self.app.db.update_order(self)
 
 	def remove_reserve(self):
+		x = ''
+
+	def min_weight(self): # minimum weight of one spool
+		if self.weight < 300:
+			limit = self.weight
+		else:
+			limit = 300
+		total_weight = self.weight * self.quantity
+		if total_weight < 300:
+			limit = total_weight
+		return limit
+
+	def plastic_types(self):
+		if self.type == 'any':
+			return self.app.settings.get('basic_plastic_types').split(',')
+		return [self.type]
+
+	def get_object_date(self, element):
+		return element.date

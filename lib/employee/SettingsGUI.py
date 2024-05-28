@@ -81,7 +81,7 @@ class SettingsGUI:
 		text = 'Используемые типы материалов: ' + self.app.settings.get(param)
 		buttons.append([text, param])
 		param = 'basic_plastic_types'
-		text = 'Базовые типы материалов: ' + self.app.settings.get(param)
+		text = 'Базовые типы материалов (последовательность указывает очередность назначения): ' + self.app.settings.get(param)
 		buttons.append([text, param])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите настройку', buttons, buttons, 2, 0)

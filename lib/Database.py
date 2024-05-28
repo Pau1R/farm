@@ -5,6 +5,7 @@ import os
 from lib.Chat import Chat
 from lib.client.Order import Order
 import time
+import ast
 
 class Database:
 	cursor = None
@@ -212,22 +213,23 @@ class Database:
 			order.sketches = line[14]
 			order.assinged_designer_id = line[15]
 			order.weight = line[16]
-			order.time = line[17]
+			order.booked = ast.literal_eval(line[17])
+			order.time = line[18]
 			try:
-				order.start_time_estimate = datetime.strptime(line[18], '%m/%d/%y %H:%M:%S')
+				order.start_time_estimate = datetime.strptime(line[19], '%m/%d/%y %H:%M:%S')
 			except:
 				order.start_time_estimate = None
-			# order.end_time_estimate = line[19]
-			order.price = line[20]
-			order.pay_code = line[21]
-			order.prepayed = line[22]
-			order.prepayment_percent = line[23]
-			order.comment = line[24]
-			order.conditions = line[25]
+			# order.end_time_estimate = line[20]
+			order.price = line[21]
+			order.pay_code = line[22]
+			order.prepayed = line[23]
+			order.prepayment_percent = line[24]
+			order.comment = line[25]
+			order.conditions = line[26]
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
 
 		# self.cursor.execute('INSERT OR IGNORE INTO order_ VALUES (order_id, created)', (order.order_id, date.today()))
 		self.db.commit()
@@ -249,6 +251,7 @@ class Database:
 		values += 'sketches = "' + str(order.sketches) + '", '
 		values += 'assinged_designer_id = "' + order.assinged_designer_id + '", '
 		values += 'weight = "' + str(order.weight) + '", '
+		values += 'booked = "' + str(order.booked) + '", '
 		values += 'time = "' + str(order.time) + '", '
 		values += 'start_time_estimate = "' + str(order.start_time_estimate) + '", '
 		values += 'end_time_estimate = "' + str(order.end_time_estimate) + '", '

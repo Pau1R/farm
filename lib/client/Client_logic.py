@@ -12,7 +12,7 @@ class Client_logic:
 		self.texts = Texts(app)
 
 	def available_materials(self):
-		spools = self.equipment.available_spools()
+		spools = self.equipment.spool_logic.available_spools()
 		for order in self.orders:
 			if not (order.plastic_type == '' or order.plastic_type == None):
 				mini = spools[order.plastic_type]
@@ -20,8 +20,7 @@ class Client_logic:
 				if order.color_id in mini:
 					weight = mini[order.color_id]
 				mini[order.color_id] = weight - order.weight
-				if order.weight >= weight:
-					del mini[order.color_id]
+				if order.weight >= weight:afazS
 				if spools[order.plastic_type] == {}:
 					del spools[order.plastic_type]
 

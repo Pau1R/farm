@@ -5,6 +5,7 @@ from lib.equipment.Location import Location
 from lib.equipment.Printer_type import Printer_type
 from lib.equipment.Printer import Printer
 from lib.equipment.Spool import Spool
+from lib.equipment.Spool_logic import Spool_logic
 from lib.equipment.Color import Color
 from lib.equipment.Surface import Surface
 from datetime import date
@@ -22,6 +23,7 @@ class Equipment:
 	printer_types = []
 	printers = []
 	spools = []
+	spool_logic = None
 	colors = []
 	surfaces = []
 
@@ -66,7 +68,7 @@ class Equipment:
 		for data in self.db.get_surfaces():
 			surface = Surface(self.db, data[0], data[1], data[2])
 			self.surfaces.append(surface)
-		
+
 		self.sort_containers()
 		self.sort_dryers()
 		self.sort_extruders()
@@ -76,6 +78,8 @@ class Equipment:
 		self.sort_spools()
 		self.sort_colors()
 		self.sort_surfaces()
+
+		self.spool_logic = Spool_logic(self.spools)
 
 	def get_next_free_id(self, equipment):
 		ids = []
@@ -91,7 +95,7 @@ class Equipment:
 		return str(id)
 
 	def get_object_id(self, element):
-		    return element.id
+		return element.id
 
 	def create_new_container(self, type, capacity):
 		id = self.get_next_free_id(self.containers)
@@ -197,6 +201,13 @@ class Equipment:
 	def sort_printers(self):
 		self.printers.sort(key=self.get_object_id)
 
+	def print_cost(self, type_):
+		for printer in self.printer_types:
+			if printer.name == type_:
+				return printer.hour_cost
+		print('Equipment.py, print_cost: possible error, self.printer_types:', self.printer_types, ', type_:', type_)
+		return None
+
 	def create_new_spool(self, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate):
 		id = self.get_next_free_id(self.spools)
 		spool = Spool(self.app, self.db, id, date.today(), type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate)
@@ -213,35 +224,6 @@ class Equipment:
 
 	def sort_spools(self):
 		self.spools.sort(key=self.get_object_id)
-
-	def available_spools(self):
-		diction = {}
-		for spool in self.spools:
-			if spool.type not in diction:
-				# add spool type
-				diction[spool.type] = {spool.color_id: ''}
-			else:
-				# add spool color
-				if spool.color_id not in diction[spool.type]:
-					mini = diction[spool.type].copy()
-					mini.update({spool.color_id: ''})
-			# add spool weight
-			mini = diction[spool.type]
-			if spool.color_id in mini:
-				previous_weight = mini[spool.color_id]
-				if previous_weight == '':
-					previous_weight = 0
-			mini.update({spool.color_id: previous_weight + spool.weight})
-		return diction
-
-	def spools_average_price(self, material):
-		price = 1
-		weight = 1
-		for spool in self.spools:
-			if material == 'any' or spool.type == material:
-				price += spool.price
-				weight += spool.weight
-		return int(price/weight)
 
 	def create_new_color(self, name, parent, samplePhoto):
 		id = int(self.get_next_free_id(self.colors))
