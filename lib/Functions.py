@@ -20,7 +20,13 @@ class Functions:
 			return ''
 		return str(date.day) + ' ' + self.months[date.month]
 
-	def get_weight_string(weight):
+	def russian_date_2(self, date_):
+		if date_ < date.today():
+			return 'задержка'
+		else:
+			return self.russian_date(date_)
+
+	def get_weight_string(self, weight):
 	    if weight % 1000 == 0:
 	        return str(weight // 1000) + 'кг'
 	    else:
