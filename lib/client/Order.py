@@ -84,9 +84,9 @@ class Order:
 		time_price = (self.time / 60) * print_cost														# cost of all printer working time
 		self.price = int(plastic_price + time_price)
 
-	def reserve_plastic(self): # TODO: бронь пластика на 20 минут (проверять при поступлении new_message) при нажатии выборе цвета. Снятие брони при отказе от предоплаты. Если предоплата выполнена, бронь остается
-		self.booked = self.app.equipment.spool_logic.book(self.type, self.color_id, self.weight, self.quantity)
-		self.app.db.update_order(self)
+	def reserve_plastic(self, statuses, color_id): # TODO: бронь пластика на 20 минут (проверять при поступлении new_message) при нажатии выборе цвета. Снятие брони при отказе от предоплаты. Если предоплата выполнена, бронь остается
+		self.booked = self.app.equipment.spool_logic.book(statuses, self.type, color_id, self.weight, self.quantity)
+		return self.booked
 
 	def remove_reserve(self):
 		x = ''

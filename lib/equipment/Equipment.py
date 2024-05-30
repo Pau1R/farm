@@ -7,6 +7,7 @@ from lib.equipment.Printer import Printer
 from lib.equipment.Spool import Spool
 from lib.equipment.Spool_logic import Spool_logic
 from lib.equipment.Color import Color
+from lib.equipment.Color_logic import Color_logic
 from lib.equipment.Surface import Surface
 from datetime import date
 
@@ -24,6 +25,7 @@ class Equipment:
 	printers = []
 	spools = []
 	spool_logic = None
+	color_logic = None
 	colors = []
 	surfaces = []
 
@@ -79,7 +81,8 @@ class Equipment:
 		self.sort_colors()
 		self.sort_surfaces()
 
-		self.spool_logic = Spool_logic(self.spools)
+		self.color_logic = Color_logic(app)
+		self.spool_logic = Spool_logic(app)
 
 	def get_next_free_id(self, equipment):
 		ids = []
