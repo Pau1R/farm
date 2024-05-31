@@ -74,8 +74,8 @@ class Owner:
 		buttons = ['Сотрудники', 'Статистика']
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
-		for obj in self.app.chats:
-			if obj.get_employed:
+		for chat in self.app.chats:
+			if chat.get_employed:
 				buttons.append('Запросы')
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 1, 0)
 
@@ -94,18 +94,18 @@ class Owner:
 
 	def show_employees(self):
 		buttons = []
-		for obj in self.app.chats:
-			if obj.is_employee:
-				self.employees.append(obj)
-				buttons.append([obj.user.name, obj.user_id])
+		for chat in self.app.chats:
+			if chat.is_employee:
+				self.employees.append(chat)
+				buttons.append([chat.user.name, chat.user_id])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(self.texts.owner_employee_menu, buttons, ['Назад'], 5, 0)
 
 	def show_employee(self):
 		if self.employee == None:
-			for obj in self.employees:
-				if obj.user_id == self.message.btn_data:
-					self.employee = obj
+			for chat in self.employees:
+				if str(chat.user_id) == self.message.btn_data:
+					self.employee = chat
 		self.employees = []
 		text = 'Имя: ' + self.employee.user.name + '\nРоли: ' + str(self.employee.user.roles.copy()) + '\nДата создания: ' + self.employee.created  # add additional info in future
 		buttons = ['Статистика', 'Удалить', ['Сделать владельцем вместо себя', 'tranfer_ownership'], 'Добавить роль', 'Удалить роль', 'Назад']
@@ -124,9 +124,9 @@ class Owner:
 
 	def show_add_employees(self):
 		buttons = []
-		for obj in self.app.chats:
-			if obj.get_employed:
-				buttons.append([obj.user.name, obj.user_id])
+		for chat in self.app.chats:
+			if chat.get_employed:
+				buttons.append([chat.user.name, chat.user_id])
 		buttons.append('Назад')
 		text = 'Добавьте сотрудника:'
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
@@ -210,12 +210,12 @@ class Owner:
 		if self.message.btn_data == 'Отменить добавление':
 			self.show_top_menu()
 		elif self.message.btn_data == 'Подтвердить':
-			for obj in self.app.chats:
-				if obj.user_id == self.new_employee_id:
-					obj.become_employee()
-					self.app.db.update_chat(obj)
-					# self.db.add_employee(obj.user_id, obj.user.name)
-					self.GUI.tell_id(obj.user_id, 'Вы стали сотрудником, поздравляем!')
+			for chat in self.app.chats:
+				if chat.user_id == self.new_employee_id:
+					chat.become_employee()
+					self.app.db.update_chat(chat)
+					# self.db.add_employee(chat.user_id, chat.user.name)
+					self.GUI.tell_id(chat.user_id, 'Вы стали сотрудником, поздравляем!')
 			self.show_top_menu()
 
 	def process_add_employee_role(self):

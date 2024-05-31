@@ -47,22 +47,26 @@ class App:
 		print('app.py new_message')
 		message = Message(message)
 		self.chat = None
-		user_id = message.user_id
+		user_id = int(message.user_id)
 
-		for obj in self.chats:
-			if obj.user_id == user_id:
-				self.chat = obj
+		for chat in self.chats:
+			if chat.user_id == user_id:
+				self.chat = chat
 				self.chat.last_access_date = date.today()
 		if self.chat == None:
 			self.chat = self.create_chat(message)
 		self.chat.new_message(message)
 
 	def create_chat(self, message):
-		chat = Chat(self, message.user_id, False, date.today())
+		chat = Chat(self, int(message.user_id), False, date.today())
 		self.chats.append(chat)
 		self.db.create_chat(chat)
 		return chat
 
+	def get_chat(self, user_id):
+		for chat in self.chats:
+			if chat.user_id == int(user_id):
+				return chat
 
 # app structure for buttons:
 # 1 client 

@@ -18,7 +18,10 @@ class Functions:
 	def russian_date(self, date):
 		if date == None:
 			return ''
-		return str(date.day) + ' ' + self.months[date.month]
+		elif date == date.today():
+			return 'сегодня'
+		else:
+			return str(date.day) + ' ' + self.months[date.month]
 
 	def russian_date_2(self, date_):
 		if date_ < date.today():

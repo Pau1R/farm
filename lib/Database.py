@@ -92,31 +92,31 @@ class Database:
 			type TEXT"""
 		order = """
 			order_id INTEGER PRIMARY KEY,
-			created DATETIME,
 			name TEXT,
+			created DATETIME,
+			user_id INTEGER,
 			status TEXT,
-			quantity INTEGER,
-			support_time DECIMAL,
-			support_remover TEXT,
-			user_id TEXT,
-			model_file TEXT,
-			priority INTEGER,
-			plastic_type TEXT,
-			color_id INTEGER,
-			printer_type TEXT,
-			layer_hight DECIMAL,
-			sketches TEXT,
 			assinged_designer_id TEXT,
+			priority INTEGER,
+			quantity INTEGER,
+			conditions TEXT,
+			comment TEXT,
+			color_id INTEGER,
+			support_remover TEXT,
+			sketches TEXT,
+			model_file TEXT,
+			plastic_type TEXT,
+			printer_type TEXT,
 			weight DECIMAL,
 			time DECIMAL,
-			start_time_estimate DATETIME,
-			end_time_estimate DATETIME,
+			support_time DECIMAL,
+			layer_hight DECIMAL,
 			price DECIMAL,
 			pay_code TEXT,
 			prepayed DECIMAL,
 			prepayment_percent DECIMAL,
-			conditions TEXT,
-			comment TEXT """
+			booked TEXT,
+			booked_time INTEGER """
 		setting = """
 			id INTEGER,
 			name TEXT PRIMARY KEY,
@@ -164,13 +164,13 @@ class Database:
 
 	def create_chat(self, chat):
 		if chat.is_employee:
-			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,?,Null,Null)', (chat.user_id, date.today(), chat.user.name, chat.is_employee, ','.join(chat.user.roles)))
+			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,?,Null,Null)', (str(chat.user_id), date.today(), chat.user.name, chat.is_employee, ','.join(chat.user.roles)))
 		else:
-			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,Null,?,?)', (chat.user_id, date.today(), chat.user.name, chat.is_employee, chat.user.payId, chat.user.money_payed))
+			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,Null,?,?)', (str(chat.user_id), date.today(), chat.user.name, chat.is_employee, chat.user.payId, chat.user.money_payed))
 		self.db.commit()
 
 	def update_chat(self, chat):
-		values = 'user_id = "' + chat.user_id + '", '
+		values = 'user_id = "' + str(chat.user_id) + '", '
 		values += 'created = "' + str(chat.created) + '", '
 		values += 'name = "' + chat.user.name + '", '
 		values += 'isEmployee = "' + str(chat.is_employee) + '", '
@@ -186,7 +186,7 @@ class Database:
 		self.db.commit()
 
 	def remove_chat(self, chat):
-		self.cursor.execute('DELETE FROM chat WHERE user_id=?', (chat.user_id,))
+		self.cursor.execute('DELETE FROM chat WHERE user_id=?', (str(chat.user_id),))
 		self.db.commit()
 
 #---------------------------- ORDER ----------------------------
@@ -197,39 +197,35 @@ class Database:
 		orders = []
 		for line in sql:
 			order = Order(self.app, line[0])
-			order.created = self.string_to_date(line[1])
-			order.name = line[2]
-			order.status = line[3]
-			order.quantity = line[4]
-			order.support_time = line[5]
-			order.support_remover = line[6]
-			order.user_id = line[7]
-			order.model_file = line[8]
-			order.priority = line[9]
-			order.plastic_type = line[10]
-			order.color_id = int(line[11])
-			order.printer_type = line[12]
-			order.layer_hight = line[13]
-			order.sketches = line[14]
-			order.assinged_designer_id = line[15]
-			order.weight = line[16]
-			order.booked = ast.literal_eval(line[17])
-			order.time = line[18]
-			try:
-				order.start_time_estimate = datetime.strptime(line[19], '%m/%d/%y %H:%M:%S')
-			except:
-				order.start_time_estimate = None
-			# order.end_time_estimate = line[20]
-			order.price = line[21]
-			order.pay_code = line[22]
-			order.prepayed = line[23]
-			order.prepayment_percent = line[24]
-			order.comment = line[25]
-			order.conditions = line[26]
+			order.name = line[1]
+			order.date = self.string_to_date(line[2])
+			order.user_id = int(line[3])
+			order.status = line[4]
+			order.assinged_designer_id = line[5]
+			order.priority = int(line[6])
+			order.quantity = int(line[7])
+			order.conditions = line[8]
+			order.comment = line[9]
+			order.color_id = int(line[10])
+			order.support_remover = line[11]
+			order.sketches = line[12]
+			order.model_file = line[13]
+			order.plastic_type = line[14]
+			order.printer_type = line[15]
+			order.weight = int(line[16])
+			order.time = line[17]
+			order.support_time = int(line[18])
+			order.layer_hight = line[19]
+			order.price = int(line[20])
+			order.pay_code = line[21]
+			order.prepayed = line[22]
+			order.prepayment_percent = int(line[23])
+			order.booked = ast.literal_eval(line[24])
+			order.booked_time = int(line[25])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
 
 		# self.cursor.execute('INSERT OR IGNORE INTO order_ VALUES (order_id, created)', (order.order_id, date.today()))
 		self.db.commit()
@@ -237,30 +233,29 @@ class Database:
 
 	def update_order(self, order):
 		values = 'name = "' + order.name + '", '
+		values += 'user_id = "' + str(order.user_id) + '", '
 		values += 'status = "' + order.status + '", '
-		values += 'quantity = "' + str(order.quantity) + '", '
-		values += 'support_time = "' + str(order.support_time) + '", '
-		values += 'support_remover = "' + str(order.support_remover) + '", '
-		values += 'user_id = "' + order.user_id + '", '
-		values += 'model_file = "' + order.model_file + '", '
-		values += 'priority = "' + str(order.priority) + '", '
-		values += 'plastic_type = "' + order.plastic_type + '", '
-		values += 'color_id = "' + str(order.color_id) + '", '
-		values += 'printer_type = "' + order.printer_type + '", '
-		values += 'layer_hight = "' + str(order.layer_hight) + '", '
-		values += 'sketches = "' + str(order.sketches) + '", '
 		values += 'assinged_designer_id = "' + order.assinged_designer_id + '", '
+		values += 'priority = "' + str(order.priority) + '", '
+		values += 'quantity = "' + str(order.quantity) + '", '
+		values += 'conditions = "' + order.conditions + '", '
+		values += 'comment = "' + order.comment + '" '
+		values += 'color_id = "' + str(order.color_id) + '", '
+		values += 'support_remover = "' + str(order.support_remover) + '", '
+		values += 'sketches = "' + str(order.sketches) + '", '
+		values += 'model_file = "' + order.model_file + '", '
+		values += 'plastic_type = "' + order.plastic_type + '", '
+		values += 'printer_type = "' + order.printer_type + '", '
 		values += 'weight = "' + str(order.weight) + '", '
-		values += 'booked = "' + str(order.booked) + '", '
 		values += 'time = "' + str(order.time) + '", '
-		values += 'start_time_estimate = "' + str(order.start_time_estimate) + '", '
-		values += 'end_time_estimate = "' + str(order.end_time_estimate) + '", '
+		values += 'support_time = "' + str(order.support_time) + '", '
+		values += 'layer_hight = "' + str(order.layer_hight) + '", '
 		values += 'price = "' + str(order.price) + '", '
 		values += 'pay_code = "' + order.pay_code + '", '
 		values += 'prepayed = "' + str(order.prepayed) + '", '
 		values += 'prepayment_percent = "' + str(order.prepayment_percent) + '", '
-		values += 'conditions = "' + order.conditions + '", '
-		values += 'comment = "' + order.comment + '" '
+		values += 'booked = "' + str(order.booked) + '", '
+		values += 'booked_time = "' + str(order.booked_time) + '" '
 		self.cursor.execute('UPDATE order_ SET ' + values + ' WHERE order_id = ' + str(order.order_id))
 		self.db.commit()
 

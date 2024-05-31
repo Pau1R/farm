@@ -1,6 +1,6 @@
 class Message:
 	chat_id = ''
-	user_id = ''
+	user_id = 0
 	user_name = ''
 	id = ''
 	type = ''
@@ -30,10 +30,10 @@ class Message:
 		# self.chat_id = message.chat.id
 
 		try:
-			self.chat_id = str(message.json['chat']['id'])
+			self.chat_id = int(message.json['chat']['id'])
 		except:
-			self.chat_id = str(message.json['message']['chat']['id'])
-		self.user_id = str(message.json['from']['id'])
+			self.chat_id = int(message.json['message']['chat']['id'])
+		self.user_id = int(message.json['from']['id'])
 
 		self.user_name = str(message.from_user.first_name) + ' ' + str(message.from_user.last_name)
 		if len(self.user_name) < 2:

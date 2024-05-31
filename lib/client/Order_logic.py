@@ -10,6 +10,6 @@ class Order_logic:
 	def remove_unpaid_reserves(self):
 		now = int(time.time())
 		for order in self.orders:
-			if not order.is_prepayed():
-				if now > order.booked_time + 1200:
+			if not order.is_prepayed() and order.booked:
+				if now > order.booked_time + 1800: # 30 minutes to prepay
 					order.remove_reserve()

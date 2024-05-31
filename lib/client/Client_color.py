@@ -3,6 +3,7 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Texts import Texts
+import time
 
 class Client_color:
 	address = '1/2'
@@ -55,6 +56,8 @@ class Client_color:
 				self.process_order_colors_ordered()
 			elif message.function == '5':
 				self.process_color()
+			elif message.function == '6':
+				self.process_booked()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
 
@@ -106,6 +109,11 @@ class Client_color:
 			order_id = self.order.order_id
 		buttons.append (['Назад', 'Назад^^' + str(context_id)])
 		self.GUI.tell_photo_buttons(text, color.samplePhoto, buttons, buttons, 5, order_id)
+
+	def show_booked(self):
+		text = 'Пластик забронирован. Вам нужно в течении 30 минут внести предоплату, в противном случае бронь будет отменена'
+		buttons = [['Хорошо','ok']]
+		self.GUI.tell_buttons(text, buttons, buttons, 6, 0)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -168,5 +176,9 @@ class Client_color:
 			self.order.color_id = color_id
 			self.order.set_price()
 			self.app.db.update_order(self.order)
+			self.show_booked()
+
+	def process_booked(self):
+		if self.message.btn_data == 'ok':
 			self.chat.user.client_order.last_data = ''
 			self.chat.user.client_order.first_message(self.message)

@@ -164,4 +164,4 @@ class Client:
 		return orders
 
 	def get_object_date(self, object):
-		return object.created
+		return object.date

@@ -7,7 +7,7 @@ class Chat:
     app = None
     GUI = None
     message = None
-    user_id: str
+    user_id = 0
     is_employee = False
     created = None
     get_employed = False

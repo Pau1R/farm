@@ -122,8 +122,9 @@ class Client_order:
 				text += f' (часов): {int(order.time/60)}\n'
 			else:
 				text += f': {int(order.time)} минут\n'
-		if order.start_time_estimate != None:
-			text += f'Дата готовности (примерно):' # TODO: {order.start_time_estimate}\n'
+		ready = order.completion_estimate_date()
+		if ready != None:
+			text += f'Дата готовности (примерно): {ready}'
 		if order.support_remover != '':
 			text += f'Удаление поддержек: {order.support_remover.lower()}\n'
 		if order.prepayed > 0:
@@ -232,6 +233,10 @@ class Client_order:
 		text = f'Заказ {order.name}\n\n'
 		text += 'К сожалению в настоящее время на складе отсутствует нужный вам тип пластика. '
 		text += 'Мы вам сообщим когда он будет в наличии.'
+		self.GUI.tell(text)
+
+	def show_booking_canceled(self, order):
+		text = f'Предоплата заказа "{order.name}" не выполнена в срок. Бронь материала отменена'
 		self.GUI.tell(text)
 
 #---------------------------- PROCESS ----------------------------
