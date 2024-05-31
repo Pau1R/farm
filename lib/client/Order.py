@@ -1,6 +1,7 @@
 from datetime import date
 from lib.Gui import Gui
 import time
+import math
 
 class Order:
 	app = None
@@ -45,7 +46,7 @@ class Order:
 
 	# payment and booking info
 	price = 0.0
-	pay_code = ''
+	pay_code = 0
 	prepayed = 0.0
 	prepayment_percent = 0
 	booked = []
@@ -81,20 +82,51 @@ class Order:
 		plastic_price = self.weight * self.quantity * gram_price  										# total plastic price for order
 		print_cost = self.app.equipment.print_cost(self.printer_type)  									# cost of one hour for printer
 		time_price = (self.time / 60) * print_cost														# cost of all printer working time
-		self.price = int(plastic_price + time_price)
+		supports_price = self.get_supports_price()
+		rounded_price = math.ceil((plastic_price + time_price) / 10) * 10  # round to upper side
+		self.price = int(rounded_price + supports_price)
+
+	def get_prepayment_price(self):
+		prepay_price = (self.prepayment_percent / 100) * self.price
+		prepay_price = math.ceil(prepay_price / 10) * 10
 
 	def is_prepayed(self):
-		prepay_price = (self.prepayment_percent / 100) * self.price + 5 # use a buffer of 5 rub for rounding errors
+		if self.is_free_start:
+			return True
+		prepay_price = (self.prepayment_percent / 100) * self.price
+		prepay_price = math.ceil(prepay_price / 10) * 10
 		if self.prepayed < prepay_price:
 			return False
 		return True
+
+	def get_supports_price(self):
+		price = 0
+		if self.support_remover == 'Магазин':
+			setting = int(self.app.settings.get('support_remove_price'))
+			price = int(self.support_time * self.quantity * setting)
+			price = math.ceil(price / 10) * 10
+		return price
+
+	def set_pay_code(self):
+		if self.pay_code == 0:
+			used_codes = [0]
+			code = 0
+			code_upper = 99
+			if len(self.app.orders) > 80:
+				code_upper = 999
+			for order_ in self.app.orders:
+				used_codes.append(order_.pay_code)
+			while code in used_codes:
+				code = random.randint(10, code_upper)
+			self.pay_code = code
+			self.app.db.update_order(self)
 
 	def is_free_start(self):
 		money_payed = 0
 		for chat in self.app.chats:
 			if chat.user_id == self.user_id:
 				money_payed = chat.user.money_payed
-		if self.price < int(self.app.settings.get('prepayment_free_max')) and self.price < (money_payed / 2):
+		if self.price < int(self.app.settings.get('prepayment_free_max')) and self.price < (money_payed / 4):
 			return True
 		return False
 
@@ -110,8 +142,6 @@ class Order:
 				spool.booked -= book[1]
 		self.booked_time = 0
 		self.color_id = 0
-		chat = self.app.get_chat(self.user_id)
-		chat.user.client_order.show_booking_canceled(self)
 
 	def min_weight(self): # minimum weight of one spool
 		if self.weight < 300:

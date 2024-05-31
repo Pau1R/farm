@@ -30,7 +30,7 @@ class Spool_logic:
 				weight += spool.weight
 		return int(price/weight)
 
-	def get_gram_price(color_id, plastic_type):
+	def get_gram_price(self, color_id, plastic_type):
 		if color_id != 0:
 			for spool in self.spools:
 				if spool.color_id == color_id and spool.type == plastic_type:
@@ -204,5 +204,5 @@ class Spool_logic:
 
 	def get_spool(self, id):
 		for spool in self.spools:
-			if spool.id == str(id):
+			if spool.id == int(id):
 				return spool

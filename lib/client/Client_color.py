@@ -111,7 +111,10 @@ class Client_color:
 		self.GUI.tell_photo_buttons(text, color.samplePhoto, buttons, buttons, 5, order_id)
 
 	def show_booked(self):
-		text = 'Пластик забронирован. Вам нужно в течении 30 минут внести предоплату, в противном случае бронь будет отменена'
+		if self.order.is_free_start():
+			text = 'Заказ принят и помещен в очередь на печать'
+		else:
+			text = 'Цвет забронирован. Если в течении 30 минут не будет внесена предоплата, бронь отменится'
 		buttons = [['Хорошо','ok']]
 		self.GUI.tell_buttons(text, buttons, buttons, 6, 0)
 

@@ -207,7 +207,7 @@ class SpoolGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for spool in self.app.equipment.spools:
-				if spool.id == self.message.btn_data :
+				if spool.id == int(self.message.btn_data):
 					self.spool = spool
 					self.show_spool()
 
@@ -338,7 +338,7 @@ class SpoolGUI:
 			self.show_top_menu()
 		else:
 			for spool in self.app.equipment.spools:
-				if spool.id == self.message.btn_data:
+				if spool.id == int(self.message.btn_data):
 					self.spool = spool
 					self.show_spool()
 

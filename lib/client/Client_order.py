@@ -160,32 +160,19 @@ class Client_order:
 		self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.order_id)
 
 	def show_supports(self):
-		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на '
-		setting = int(self.app.settings.get('support_remove_price'))
-		text += f'{int(self.order.support_time * self.order.quantity * setting)} рублей'
+		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + self.order.get_supports_price() + ' рублей'
 		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Магазин'], 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.order_id)
 
-	def show_prepay(self):
+	def show_pay(self):
 		order = self.order
-		if order.pay_code == '':
-			used_codes = [0]
-			code = 0
-			code_upper = 99
-			if len(self.app.orders) > 80:
-				code_upper = 999
-			for order_ in self.app.orders:
-				used_codes.append(order_.pay_code)
-			while code in used_codes:
-				code = random.randint(10, code_upper)
-			order.pay_code = str(code)
-			self.app.db.update_order(order)
+		order.set_pay_code()
 
-		prepay_price = (order.prepayment_percent / 100) * order.price + 5
-		if order.prepayed >= prepay_price:
-			price = order.price - order.prepayed
+		if order.is_prepayed():
+			price = order.price
 		else:
-			price = prepay_price - order.prepayed
+			price = order.get_prepayment_price()
+
 		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру телефона, карточки или счета, указанных ниже. В комментарии обязательно укажите код заказа: '
 		text += order.pay_code
 		self.GUI.tell(text)
@@ -251,7 +238,7 @@ class Client_order:
 		elif data == 'continue':
 			x = ''
 		elif data == 'pay':
-			self.show_prepay()
+			self.show_pay()
 		elif data == 'Отменить заказ':
 			if self.is_admin():
 				self.show_reject_reason()
@@ -266,13 +253,8 @@ class Client_order:
 				self.chat.user.show_orders()
 
 	def process_supports(self):
-		data = self.message.btn_data
-		if data == 'Клиент':
-			self.order.support_remover = 'Клиент'
-			setting = int(self.app.settings.get('support_remove_price'))
-			self.order.price -= int(self.order.support_time * self.order.quantity * setting)
-		elif data == 'Магазин':
-			self.order.support_remover = 'Магазин'
+		self.order.support_remover = self.message.btn_data
+		self.order.set_price()
 		self.app.db.update_order(self.order)
 		self.show_order()
 
@@ -298,6 +280,7 @@ class Client_order:
 					if chat.user_id == self.order.user_id:
 						chat.user.client_order.show_rejected_by_admin(self.order, self.reject_reason)
 						self.reject_reason = ''
+			self.order.remove_reserve()
 			self.app.orders.remove(self.order)
 			self.app.db.remove_order(self.order)
 			self.order = None

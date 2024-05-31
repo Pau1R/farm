@@ -4,7 +4,7 @@ class Spool:
 	app = None
 	db = None
 
-	id = '1' # TODO: change to int type
+	id = 1
 	date: date
 	type = ''
 	diameter = 0.0

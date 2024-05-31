@@ -76,6 +76,7 @@ class Database:
 			color_id TEXT,
 			dried TEXT,
 			brand TEXT,
+			booked INTEGER,
 			used TEXT,
 			price INTEGER,
 			status TEXT,
@@ -112,7 +113,7 @@ class Database:
 			support_time DECIMAL,
 			layer_hight DECIMAL,
 			price DECIMAL,
-			pay_code TEXT,
+			pay_code INTEGER,
 			prepayed DECIMAL,
 			prepayment_percent DECIMAL,
 			booked TEXT,
@@ -217,7 +218,7 @@ class Database:
 			order.support_time = int(line[18])
 			order.layer_hight = line[19]
 			order.price = int(line[20])
-			order.pay_code = line[21]
+			order.pay_code = int(line[21])
 			order.prepayed = line[22]
 			order.prepayment_percent = int(line[23])
 			order.booked = ast.literal_eval(line[24])
@@ -239,7 +240,7 @@ class Database:
 		values += 'priority = "' + str(order.priority) + '", '
 		values += 'quantity = "' + str(order.quantity) + '", '
 		values += 'conditions = "' + order.conditions + '", '
-		values += 'comment = "' + order.comment + '" '
+		values += 'comment = "' + order.comment + '", '
 		values += 'color_id = "' + str(order.color_id) + '", '
 		values += 'support_remover = "' + str(order.support_remover) + '", '
 		values += 'sketches = "' + str(order.sketches) + '", '
@@ -251,7 +252,7 @@ class Database:
 		values += 'support_time = "' + str(order.support_time) + '", '
 		values += 'layer_hight = "' + str(order.layer_hight) + '", '
 		values += 'price = "' + str(order.price) + '", '
-		values += 'pay_code = "' + order.pay_code + '", '
+		values += 'pay_code = "' + str(order.pay_code) + '", '
 		values += 'prepayed = "' + str(order.prepayed) + '", '
 		values += 'prepayment_percent = "' + str(order.prepayment_percent) + '", '
 		values += 'booked = "' + str(order.booked) + '", '

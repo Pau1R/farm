@@ -220,8 +220,8 @@ class Equipment:
 
 	def remove_spool(self, id):
 		for spool in self.spools:
-			if spool.id == id:
-				self.db.remove_spool(id)
+			if spool.id == int(id):
+				self.db.remove_spool(int(id))
 				self.spools.remove(spool)
 				break
 

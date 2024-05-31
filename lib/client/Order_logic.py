@@ -13,3 +13,5 @@ class Order_logic:
 			if not order.is_prepayed() and order.booked:
 				if now > order.booked_time + 1800: # 30 minutes to prepay
 					order.remove_reserve()
+					chat = self.app.get_chat(order.user_id)
+					chat.user.client_order.show_booking_canceled(self)
