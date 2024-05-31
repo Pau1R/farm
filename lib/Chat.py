@@ -1,6 +1,7 @@
 from lib.employee.Employee import Employee
 from lib.client.Client import Client
 from lib.Gui import Gui
+from datetime import date
 
 class Chat:
     app = None
@@ -13,6 +14,7 @@ class Chat:
     user = None
     context = ''
     message_pause = None
+    last_access_date = date.today() # TODO: add field to db
 
     def __init__(self, app, user_id, isEmployee, created):
         self.app = app

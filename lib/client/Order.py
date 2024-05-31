@@ -1,5 +1,6 @@
 from datetime import date
 from lib.Gui import Gui
+import time
 
 class Order:
 	app = None
@@ -35,6 +36,7 @@ class Order:
 	support_remover = ''
 	conditions = ''
 	comment = ''
+	spool_logic = None
 
 	start_time_estimate = None
 	end_time_estimate = None
@@ -46,6 +48,7 @@ class Order:
 	pay_code = ''
 
 	booked = []
+	booked_time = 0 # TODO: add field to db
 
 	sketches = []
 	model_file = ''
@@ -57,7 +60,7 @@ class Order:
 		self.order_id = order_id
 		self.date = date.today()
 		self.spools = self.app.equipment.spools
-		# self.GUI = Gui(app, app.chat)
+		self.spool_logic = self.app.equipment.spool_logic
 
 	def reset(self):
 		self.order_id = self.get_next_free_id(self.app.orders)
@@ -84,12 +87,32 @@ class Order:
 		time_price = (self.time / 60) * print_cost														# cost of all printer working time
 		self.price = int(plastic_price + time_price)
 
-	def reserve_plastic(self, statuses, color_id): # TODO: бронь пластика на 20 минут (проверять при поступлении new_message) при нажатии выборе цвета. Снятие брони при отказе от предоплаты. Если предоплата выполнена, бронь остается
+	def is_prepayed(self):
+		prepay_price = (self.prepayment_percent / 100) * self.price + 5 # use a buffer of 5 rub for rounding errors
+		if order.prepayed < prepay_price:
+			return False
+		return True
+
+	def is_free_start(self):
+		money_payed = 0
+		for chat in self.app.chats:
+			if chat.user_id == order.user_id:
+				money_payed = chat.user.money_payed
+		if self.price < int(self.app.settings.get('prepayment_free_max')) and self.price < (money_payed / 2):
+			return True
+		return False
+
+	def reserve_plastic(self, statuses, color_id):
 		self.booked = self.app.equipment.spool_logic.book(statuses, self.type, color_id, self.weight, self.quantity)
+		self.booked_time = int(time.time())
 		return self.booked
 
 	def remove_reserve(self):
-		x = ''
+		for book in self.booked:
+			spool = self.spool_logic.get_spool(book[0])
+			if spool.booked >= book[1]:
+				spool.booked -= book[1]
+		self.booked_time = 0
 
 	def min_weight(self): # minimum weight of one spool
 		if self.weight < 300:

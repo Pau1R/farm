@@ -88,7 +88,8 @@ class SpoolGUI:
 		buttons = []
 		for spool in self.app.equipment.spools:
 			if spool.status == 'stock':
-				buttons.append([f'{spool.type} ({spool.id}) {spool.color_name()}', spool.id])
+				color_name = self.app.equipment.color_logic.get_color_name(self.spool.color_id)
+				buttons.append([f'{spool.type} ({spool.id}) {color_name}', spool.id])
 		buttons.sort(key=self.get_first_elem)
 		buttons.extend(['Добавить', ['Катушки, ожидаемые к поставке', 'ordered'], 'Назад'])
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
@@ -101,7 +102,8 @@ class SpoolGUI:
 		buttons = []
 		for spool in self.app.equipment.spools:
 			if spool.status == 'ordered':
-				buttons.append([f'{spool.type} ({spool.id}) {spool.color_name()} {self.app.functions.russian_date(spool.delivery_date_estimate)}', spool.id])
+				color_name = self.app.equipment.color_logic.get_color_name(self.spool.color_id)
+				buttons.append([f'{spool.type} ({spool.id}) {color_name} {self.app.functions.russian_date(spool.delivery_date_estimate)}', spool.id])
 		buttons.sort(key=self.get_first_elem)
 		buttons.extend(['Добавить', 'Назад'])
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 2, 0)
@@ -109,7 +111,8 @@ class SpoolGUI:
 	def show_spool(self):
 		text = f'Номер катушки: {self.spool.id}\n'
 		text += f'Тип: {self.spool.type}\n'
-		text += f'Цвет: {self.spool.color_name()}\n'
+		color_name = self.app.equipment.color_logic.get_color_name(self.spool.color_id)
+		text += f'Цвет: {color_name}\n'
 		text += f'Цена: {self.spool.price} рублей\n'
 		text += f'Вес: {self.spool.weight} грамм\n'
 		text += f'Использовано: {self.spool.used} грамм\n'
@@ -127,7 +130,8 @@ class SpoolGUI:
 			buttons.append(['Катушка прибыла на склад', 'delivered']) # TODO: process delivered spool
 		buttons.extend(['Изменить вес', 'Удалить', 'Назад'])
 
-		self.GUI.tell_photo_buttons(text, self.spool.color_photo(), buttons, buttons, 3, self.spool.id)
+		color_photo = self.app.equipment.color_logic.get_color_photo(self.spool.color_id)
+		self.GUI.tell_photo_buttons(text, color_photo, buttons, buttons, 3, self.spool.id)
 
 	def show_change_weight(self):
 		text = 'Выберите действие'

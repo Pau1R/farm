@@ -21,3 +21,8 @@ class Color_logic:
 		for color in self.colors:
 			if color.id == int(id):
 				return color
+
+	def get_color_photo(self, id):
+		for color in self.colors:
+			if color.id == int(id):
+				return color.samplePhoto

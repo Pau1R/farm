@@ -169,6 +169,7 @@ class Spool_logic:
 			stock_spools = [sublist[0] for sublist in stock_spools]
 			ordered.extend(ordered_spools)
 			stock.extend(stock_spools)
+			
 		ordered = [spool for spool in ordered if spool not in stock] # remove color if stock buttons already contain it
 
 		# get latest delivery date for each color
@@ -200,3 +201,8 @@ class Spool_logic:
 			if spool.type in plastic_types:
 				colors.append(self.color_logic.get_color(spool.color_id))
 		return list(set(colors)) # remove duplicates
+
+	def get_spool(self, id):
+		for spool in self.spools:
+			if spool.id == str(id):
+				return spool

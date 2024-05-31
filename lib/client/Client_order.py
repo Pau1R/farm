@@ -73,38 +73,19 @@ class Client_order:
 
 	def show_order(self):
 		order = self.order
-		status = ''
 
 		# set parameters
 		settings_set = False
-		prepay_price = (order.prepayment_percent / 100) * order.price + 5
 		if order.color_id != 0 and (order.support_remover != '' or order.support_time == 0):
 			if order.prepayment_percent == 0:
 				order.prepayment_percent = int(self.app.settings.get('prepayment_percent'))
 				self.app.db.update_order(self.order)
 			settings_set = True
+		free_start = order.is_free_start()
+		prepayed = order.is_prepayed()
+		color = self.app.equipment.color_logic.get_color_name(order.color_id)
 
-		money_payed = 0
-		for chat in self.app.chats:
-			if chat.user_id == order.user_id:
-				money_payed = chat.user.money_payed
-		
-		free_start = False
-		prepayed = True
-		if order.price < int(self.app.settings.get('prepayment_free_max')) and order.price < (money_payed / 2):
-			free_start = True
-		elif order.prepayed < prepay_price:
-			prepayed = False
-
-		for color_ in self.app.equipment.colors:
-			if color_.id == order.color_id:
-				if color_.parent_id == 0:
-					color = color_.name
-				else:
-					for col in self.app.equipment.colors:
-						if col.id == color_.parent_id:
-							color = col.name + '-' + color_.name
-
+		status = ''
 		if order.status == 'validate':
 			status = 'Ожидание дизайнера'
 		elif order.status == 'validated':

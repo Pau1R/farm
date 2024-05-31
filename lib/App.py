@@ -4,8 +4,10 @@ from lib.Chat import Chat
 from datetime import date
 from lib.Msg import Message
 from lib.client.Order import Order
+from lib.client.Order_logic import Order_logic
 from lib.Test import Test
 from lib.Settings import Settings
+from lib.Clicker import Clicker
 import jsonpickle
 from datetime import date
 from lib.Functions import Functions
@@ -18,11 +20,14 @@ class App:
 	settings = None
 	orders = []
 	functions = Functions()
+	clicker = None
 
 	chats = []
 	chat = None
 	count = 0
 	last_check_date = None
+
+	order_logic = None
 
 	def __init__(self, bot, conf):
 		self.bot = bot
@@ -33,9 +38,12 @@ class App:
 		self.db.get_chats()
 		self.db.get_orders()
 		self.settings = Settings(self)
+		self.order_logic = Order_logic(self)
+		self.clicker = Clicker(self)
 		# test = Test(self.db, self)
 
 	def new_message(self, message):
+		self.clicker.click()
 		print('app.py new_message')
 		message = Message(message)
 		self.chat = None
@@ -49,32 +57,11 @@ class App:
 			self.chat = self.create_chat(message)
 		self.chat.new_message(message)
 
-		self.remove_inactive_chats()
-
 	def create_chat(self, message):
 		chat = Chat(self, message.user_id, False, date.today())
 		self.chats.append(chat)
 		self.db.create_chat(chat)
 		return chat
-
-	def remove_inactive_chats(self):  # TODO: also remove forgotten and unpaid orders
-		if self.count < 100:  
-			self.count += 1
-			return
-		self.count = 0
-		today = date.today()
-		if today != self.last_check_date: # run check once a day
-			self.last_check_date = today
-			for obj in self.chats:
-				if not obj.is_employee:
-					period = (today - obj.last_access_date).days
-					if period < 30:
-						break
-					elif period < 60:
-						for order in self.orders:
-							if order.user_id == obj.user_id:
-								break
-					self.chats.remove(obj)
 
 
 # app structure for buttons:

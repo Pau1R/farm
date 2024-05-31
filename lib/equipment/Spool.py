@@ -4,7 +4,7 @@ class Spool:
 	app = None
 	db = None
 
-	id = '1'
+	id = '1' # TODO: change to int type
 	date: date
 	type = ''
 	diameter = 0.0
@@ -38,18 +38,3 @@ class Spool:
 
 	def available_weight(self):
 		return self.weight - self.used
-
-	def color_name(self):
-		for color in self.app.equipment.colors:
-			if color.id == self.color_id:
-				if color.parent_id == 0:
-					return color.name
-				else:
-					for col in self.app.equipment.colors:
-						if col.id == color.parent_id:
-							return col.name + '-' + color.name
-
-	def color_photo(self):
-		for color in self.app.equipment.colors:
-			if color.id == self.color_id:
-				return color.samplePhoto
