@@ -10,6 +10,7 @@ from lib.client.Order import Order
 from lib.client.Client_model import Client_model
 from lib.client.Client_color import Client_color
 from lib.client.Client_order import Client_order
+from lib.client.Info import Info
 
 class Client:
 	address = '1'
@@ -41,13 +42,12 @@ class Client:
 		self.chat = chat
 		self.texts = Texts(app)
 		self.GUI = Gui(app, chat, self.address)
-
 		self.order = Order(app, 1)
-		self.app.orders.append(self.order)
 
 		self.client_model = Client_model(app, chat)
 		self.client_color = Client_color(app, chat)
-		self.client_order = Client_order(app, chat, '1/4')
+		self.client_order = Client_order(app, chat, '1/3') # TODO: consider moving address to this format for all subfiles 
+		self.info = Info(app, chat)
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -64,8 +64,6 @@ class Client:
 					self.process_top_menu()
 				if message.function == '2':
 					self.process_order_menu()
-				# elif message.function == '3':
-					# self.process_supports()
 				elif message.function == '4':
 					self.process_price()
 				elif message.function == '5':
@@ -86,8 +84,10 @@ class Client:
 				self.client_model.new_message(message)
 			elif message.file2 == '2':
 				self.client_color.new_message(message)
-			elif message.file2 == '4':
+			elif message.file2 == '3':
 				self.client_order.new_message(message)
+			elif message.file2 == '4':
+				self.info.new_message(message)
 		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
 

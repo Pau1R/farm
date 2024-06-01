@@ -72,8 +72,8 @@ class App:
 # 1 client 
 #	1 client_model
 #	2 client_color
-#	3 client_logic
-#   4 client_order
+#   3 client_order
+#   4 client_info
 # 1 Employee
 #	1 Owner
 #	2 Admin

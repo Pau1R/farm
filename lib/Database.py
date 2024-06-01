@@ -232,7 +232,7 @@ class Database:
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,0,0,0,0,0,0,"",0)', (order.order_id, date.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,0,0,0,0,0,0,"[]",0)', (order.order_id, date.today()))
 
 		# self.cursor.execute('INSERT OR IGNORE INTO order_ VALUES (order_id, created)', (order.order_id, date.today()))
 		self.db.commit()
