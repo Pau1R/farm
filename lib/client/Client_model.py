@@ -22,8 +22,10 @@ class Client_model:
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
-
-		self.show_name()
+		if self.chat.user.orders_canceled >= 3:
+			self.show_client_limited()
+		else:
+			self.show_name()
 		# self.process_file()
 
 	def new_message(self, message):
@@ -77,6 +79,11 @@ class Client_model:
 	def show_wait_for_designer(self):
 		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
 		time.sleep(3)
+		self.chat.user.show_top_menu()
+
+	def show_client_limited(self):
+		self.GUI.tell('Размещение заказа недоступно по причине превышения лимита на отмену оцененных заказов')
+		time.sleep(5)
 		self.chat.user.show_top_menu()
 
 #---------------------------- PROCESS ----------------------------

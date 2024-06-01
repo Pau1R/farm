@@ -90,6 +90,3 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
-
-
-# TODO: client_order.py, client wait for specific material, Order.py 2

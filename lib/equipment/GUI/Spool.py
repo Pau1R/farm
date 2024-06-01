@@ -88,7 +88,7 @@ class SpoolGUI:
 		buttons = []
 		for spool in self.app.equipment.spools:
 			if spool.status == 'stock':
-				color_name = self.app.equipment.color_logic.get_color_name(self.spool.color_id)
+				color_name = self.app.equipment.color_logic.get_color_name(spool.color_id)
 				buttons.append([f'{spool.type} ({spool.id}) {color_name}', spool.id])
 		buttons.sort(key=self.get_first_elem)
 		buttons.extend(['Добавить', ['Катушки, ожидаемые к поставке', 'ordered'], 'Назад'])
@@ -102,7 +102,7 @@ class SpoolGUI:
 		buttons = []
 		for spool in self.app.equipment.spools:
 			if spool.status == 'ordered':
-				color_name = self.app.equipment.color_logic.get_color_name(self.spool.color_id)
+				color_name = self.app.equipment.color_logic.get_color_name(spool.color_id)
 				buttons.append([f'{spool.type} ({spool.id}) {color_name} {self.app.functions.russian_date(spool.delivery_date_estimate)}', spool.id])
 		buttons.sort(key=self.get_first_elem)
 		buttons.extend(['Добавить', 'Назад'])

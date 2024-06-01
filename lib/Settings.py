@@ -11,7 +11,6 @@ class Settings:
 		'transfer_receiver',
 		'plastic_types',
 		'basic_plastic_types']
-		# TODO: add new setting for plastic types
 
 	def __init__(self, app):
 		self.app = app

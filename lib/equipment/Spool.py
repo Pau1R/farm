@@ -19,12 +19,12 @@ class Spool:
 	status = ''
 	delivery_date_estimate: date
 
-	def __init__(self, app, db, id, created, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate):
+	def __init__(self, app, db, id, created, type_, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate):
 		self.app = app
 		self.db = db
 		self.id = id
 		self.date = created
-		self.type = type
+		self.type = type_
 		self.diameter = diameter
 		self.weight = int(weight)
 		self.density = density

@@ -119,7 +119,7 @@ class Spool_logic:
 	    
 	    buttons = [
 	        [
-	            f"{type_} {self.color_logic.get_color_name(color_id)} {color_id}: {self.app.functions.get_weight_string(weight)}" +
+	            f"{type_} {self.color_logic.get_color_name(color_id)}: {self.app.functions.get_weight_string(weight)}" +
 	            (f" ({self.app.functions.russian_date_2(date)})" if status == 'ordered' else ''), 
 	            color_id
 	        ]
@@ -143,7 +143,7 @@ class Spool_logic:
 			spools_ = self.satisfy(['stock'], types, color.id, order_weight, one_copy_weight)
 			spools_ = [sublist[0] for sublist in spools_]
 			if spools_:
-				buttons.append([color.get_color_name(), color.id])
+				buttons.append([color.color_logic.get_color_name(), color.id])
 		return buttons
 
 	def is_ordered(self, types, one_copy_weight, order_quantity):

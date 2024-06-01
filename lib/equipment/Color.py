@@ -18,7 +18,7 @@ class Color:
 		self.parent_id = parent_id
 		self.samplePhoto = samplePhoto
 
-	def get_color_name(self):
+	def get_name(self):
 		if self.parent_id == 0:
 			return self.name
 		else:

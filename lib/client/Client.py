@@ -1,5 +1,7 @@
 import sys
 import random
+import time
+from datetime import date
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
@@ -16,7 +18,7 @@ class Client:
 	chat = None
 	order = None
 	name = ''
-	date = None
+	# date_ = None
 	GUI = None
 	message = None
 	texts = None
@@ -31,6 +33,8 @@ class Client:
 
 	payId = ''
 	money_payed = 0.0
+	orders_canceled = 0
+	limit_date = date.today()
 
 	def __init__(self, app, chat):
 		self.app = app
@@ -68,8 +72,16 @@ class Client:
 					self.process_orders()
 				elif message.function == '6':
 					self.process_order()
-				elif message.function == '7':
+				elif message.function == '7': # TODO: move info menu into different file
 					self.process_info()
+				elif message.function == '8':
+					self.process_receive()
+				elif message.function == '9':
+					self.process_tech()
+				elif message.function == '10':
+					self.process_disclaimer()
+				elif message.function == '11':
+					self.process_support()
 			elif message.file2 == '1':
 				self.client_model.new_message(message)
 			elif message.file2 == '2':
@@ -105,8 +117,45 @@ class Client:
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
 
 	def show_info(self):
-		buttons = [['Доступные цвета и типы пластика', 'colors'], 'Назад']
-		self.GUI.tell_buttons(self.texts.info_text, buttons, buttons, 7, 0)
+		text = 'Информация о студии'
+		buttons = []
+		buttons.append(['Доступные цвета и типы пластика', 'colors'])
+		buttons.append(['Получение заказов', 'receive'])
+		buttons.append(['Технические подробности', 'tech'])
+		buttons.append(['Дисклеймер', 'disclaimer'])
+		buttons.append(['Поддержка', 'support'])
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 7, 0)
+
+	def show_receive(self):
+		text = 'Среднее время выполнения заказа: 2-3 дня\n\n'
+		text += 'Пункт выдачи: г. Стерлитамак, ул. Сакко и Ванцетти, 63, "Бизнес-контакт". График работы: ежедневно с 9:00 до 21:00.\n\n'
+		text += 'Доставка по странам СНГ службой boxberry за счет клиента'
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 8, 0)
+
+	def show_tech(self):
+		text = 'Технология печати: одноцветная на fdm принтерах.\n\n'
+		text += 'Используемые принтеры: BAMBU LAB P1S и CREALITY ENDER 3 S1 PRO.\n\n'
+		text += 'Есть ограниченная возможность печатать поликарбонатом'
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 9, 0)
+
+	def show_disclaimer(self):
+		text = """
+Дисклеймер:
+1) не даю гарантии на изделие
+2) не несу ответственности за причиненный изделием вред
+3) Если вес одного изделия превышает 0.8 кг, то могут быть отличия в цвете
+3) Если общий вес нескольких изделий заказа превышает 0.8 кг, то также могут быть отличия в цвете"""
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 10, 0)
+
+	def show_support(self):
+		self.chat.set_context(self.address, 11)
+		text = 'Опишите вашу проблему'
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 11, 0)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -141,11 +190,45 @@ class Client:
 			self.client_order.first_message(self.message)
 
 	def process_info(self):
-		if self.message.btn_data == 'Назад':
+		data = self.message.btn_data
+		if data == 'Назад':
 			self.show_top_menu()
-		elif self.message.btn_data == 'colors':
+		elif data == 'colors':
 			self.client_color.last_data = ''
 			self.client_color.first_message(self.message)
+		elif data == 'receive':
+			self.show_receive()
+		elif data == 'tech':
+			self.show_tech()
+		elif data == 'disclaimer':
+			self.show_disclaimer()
+		elif data == 'support':
+			self.show_support()
+
+	def process_receive(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_info()
+
+	def process_tech(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_info()
+
+	def process_disclaimer(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_info()
+
+	def process_support(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.chat.context = ''
+		else: # TODO: think over the support logic
+			text = self.message.text
+			self.GUI.tell('Ваш обращение получено, ждите ответа')
+			time.sleep(2)
+		self.show_info()
 
 #---------------------------- LOGIC ----------------------------
 
@@ -165,3 +248,19 @@ class Client:
 
 	def get_object_date(self, object):
 		return object.date
+
+	def penalty(self):
+		self.orders_canceled += 1
+		if self.orders_canceled >= 3:
+			self.limit_date = date.today()
+
+	def is_limited(self):
+		if self.orders_canceled >= 3:  # repeated order cancelation limit
+			period = (date.today() - self.limit_date).days
+			if period > 1:  # days to limit placing orders
+				self.orders_canceled -= 1 # give one chance to place order
+			else:
+				return True
+		return False
+
+	# TODO: limit amount of unpaid orders

@@ -4,51 +4,50 @@ from lib.Gui import Gui
 from datetime import date
 
 class Chat:
-    app = None
-    GUI = None
-    message = None
-    user_id = 0
-    is_employee = False
-    created = None
-    get_employed = False
-    user = None
-    context = ''
-    message_pause = None
-    last_access_date = date.today() # TODO: add field to db
-
-    def __init__(self, app, user_id, isEmployee, created):
+    def __init__(self, app, user_id, is_employee, created):
         self.app = app
         self.user_id = user_id
-        self.is_employee = isEmployee
+        self.is_employee = is_employee
         self.created = created
         self.GUI = Gui(app, self, '-1')
-
+        self.message = None
+        self.context = ''
+        self.message_pause = None
+        self.last_access_date = date.today()
+        self.user = None
+        self.get_employed = False
+        
         self.create_user()
 
     def new_message(self, message):
         self.GUI.clear_chat()
         self.message = message
 
-        if self.user == None:
+        if not self.user:
             self.create_user()
 
         if message.file1 == '-1' and message.function == '1':
             self.process_warn_user()
-            return
         elif self.context.startswith('~'):
-            data = self.message.data.split('|')
-            context = self.context.split('|')
-            if message.type == 'button' and not (data[0] == context[0] and data[1] == context[1]):
-                self.show_warn_user()
-            else:
-                self.special_format()
+            self.handle_context_message()
         elif message.type == 'button':
-            self.message.data_to_special_format(self.message.data)
-            self.user.new_message(self.message)
+            self.button_format()
         elif self.context.startswith('secret_message~'):
             self.special_format()
         else:
             self.user.new_message(message)
+
+    def handle_context_message(self):
+        data = self.message.data.split('|')
+        context = self.context.split('|')
+        if self.message.type == 'button' and not (data[0] == context[0] and data[1] == context[1]):
+            self.show_warn_user()
+        else:
+            self.button_format() if self.message.type == 'button' else self.special_format()
+
+    def button_format(self):
+        self.message.data_to_special_format(self.message.data)
+        self.user.new_message(self.message)
 
     def special_format(self):
         self.message.data_to_special_format(self.context)
@@ -56,10 +55,7 @@ class Chat:
         self.user.new_message(self.message)
 
     def create_user(self):
-        if self.is_employee:
-            self.user = Employee(self.app, self)
-        else:
-            self.user = Client(self.app, self)
+        self.user = Employee(self.app, self) if self.is_employee else Client(self.app, self)
 
     def become_employee(self):
         self.is_employee = True
@@ -69,7 +65,7 @@ class Chat:
         self.user.name = name
 
     def set_context(self, address, function):
-        self.context = '~' + address + '|' + str(function) + '||'
+        self.context = f'~{address}|{function}||'
 
     def show_warn_user(self):
         self.message_pause = self.message

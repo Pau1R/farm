@@ -22,7 +22,7 @@ class Order:
 	#   - validate
 	# - bot:
 	#   - validated: prepayed
-	assinged_designer_id = '' # not used yet
+	assinged_designer_id = 0 # not used yet
 	priority = 0
 
 	# user settings
@@ -85,6 +85,7 @@ class Order:
 		supports_price = self.get_supports_price()
 		rounded_price = math.ceil((plastic_price + time_price) / 10) * 10  # round to upper side
 		self.price = int(rounded_price + supports_price)
+		self.app.db.update_order(self)
 
 	def get_prepayment_price(self):
 		prepay_price = (self.prepayment_percent / 100) * self.price
@@ -101,7 +102,7 @@ class Order:
 
 	def get_supports_price(self):
 		price = 0
-		if self.support_remover == 'Магазин':
+		if self.support_remover == 'Компания':
 			setting = int(self.app.settings.get('support_remove_price'))
 			price = int(self.support_time * self.quantity * setting)
 			price = math.ceil(price / 10) * 10
@@ -133,6 +134,7 @@ class Order:
 	def reserve_plastic(self, statuses, color_id):
 		self.booked = self.app.equipment.spool_logic.book(statuses, self.plastic_type, color_id, self.weight, self.quantity)
 		self.booked_time = int(time.time())
+		self.app.db.update_order(self)
 		return self.booked
 
 	def remove_reserve(self):
@@ -142,6 +144,7 @@ class Order:
 				spool.booked -= book[1]
 		self.booked_time = 0
 		self.color_id = 0
+		self.app.db.update_order(self)
 
 	def min_weight(self): # minimum weight of one spool
 		if self.weight < 300:

@@ -32,7 +32,11 @@ class Database:
 			isEmployee LOGICAL,
 			roles TEXT,
 			payId TEXT,
-			money_payed DECIMAL"""
+			money_payed DECIMAL,
+			last_access_date DATETIME,
+			orders_canceled INTEGER,
+			limit_date DATETIME
+			"""
 		container = """
 			id INTEGER PRIMARY KEY,
 			created DATETIME,
@@ -142,17 +146,17 @@ class Database:
 #---------------------------- LOGIC ----------------------------
 
 	def string_to_date(self, date):
-		if date == '' or date == 'None':
-			return None
-		else:
+		if date and date != 'None':
 			return datetime.strptime(date, '%Y-%m-%d').date()
+		else:
+			return None
 
 #---------------------------- CHAT ----------------------------
 
 	def get_chats(self):
 		self.cursor.execute('SELECT * FROM chat')
 		for row in self.cursor.fetchall():
-			chat = Chat(self.app, str(row[0]), bool(row[3]), row[1])
+			chat = Chat(self.app, int(row[0]), bool(row[3]), row[1])
 			chat.user.name = row[2]
 			if row[3]: # employee
 				chat.user.roles = row[4].split(',')
@@ -161,19 +165,18 @@ class Database:
 			else:
 				chat.user.payId = row[5]
 				chat.user.money_payed = float(row[6])
+				chat.user.orders_canceled = int(row[8])
+				chat.user.limit_date = self.string_to_date(row[9])
+				chat.last_access_date = self.string_to_date(row[7])
 			self.app.chats.append(chat)
 
 	def create_chat(self, chat):
-		if chat.is_employee:
-			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,?,Null,Null)', (str(chat.user_id), date.today(), chat.user.name, chat.is_employee, ','.join(chat.user.roles)))
-		else:
-			self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,?,?,Null,?,?)', (str(chat.user_id), date.today(), chat.user.name, chat.is_employee, chat.user.payId, chat.user.money_payed))
+		self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,"",0,"","",0,"",0,"")', (str(chat.user_id), date.today()))
 		self.db.commit()
+		self.update_chat(chat)
 
 	def update_chat(self, chat):
-		values = 'user_id = "' + str(chat.user_id) + '", '
-		values += 'created = "' + str(chat.created) + '", '
-		values += 'name = "' + chat.user.name + '", '
+		values = 'name = "' + chat.user.name + '", '
 		values += 'isEmployee = "' + str(chat.is_employee) + '", '
 		if chat.is_employee:
 			chat.user.roles.append('')
@@ -182,7 +185,10 @@ class Database:
 			values += 'roles = "' + ','.join(chat.user.roles) + '" '
 		else:
 			values += 'payId = "' + chat.user.payId + '", '
-			values += 'money_payed = "' + str(chat.user.money_payed) + '" '
+			values += 'money_payed = "' + str(chat.user.money_payed) + '", '
+			values += 'last_access_date = "' + str(chat.last_access_date) + '" '
+			values += 'orders_canceled = "' + str(chat.user.orders_canceled) + '" '
+			values += 'limit_date = "' + str(chat.user.limit_date) + '" '
 		self.cursor.execute('UPDATE chat SET ' + values + ' WHERE user_id = ' + str(chat.user_id))
 		self.db.commit()
 
@@ -218,7 +224,7 @@ class Database:
 			order.support_time = int(line[18])
 			order.layer_hight = line[19]
 			order.price = int(line[20])
-			order.pay_code = int(line[21])
+			order.pay_code = 0 if line[21] == '' else int(line[21])
 			order.prepayed = line[22]
 			order.prepayment_percent = int(line[23])
 			order.booked = ast.literal_eval(line[24])
@@ -226,7 +232,7 @@ class Database:
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (order.order_id, date.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,0,0,0,0,0,0,"",0)', (order.order_id, date.today()))
 
 		# self.cursor.execute('INSERT OR IGNORE INTO order_ VALUES (order_id, created)', (order.order_id, date.today()))
 		self.db.commit()
@@ -236,7 +242,7 @@ class Database:
 		values = 'name = "' + order.name + '", '
 		values += 'user_id = "' + str(order.user_id) + '", '
 		values += 'status = "' + order.status + '", '
-		values += 'assinged_designer_id = "' + order.assinged_designer_id + '", '
+		values += 'assinged_designer_id = "' + str(order.assinged_designer_id) + '", '
 		values += 'priority = "' + str(order.priority) + '", '
 		values += 'quantity = "' + str(order.quantity) + '", '
 		values += 'conditions = "' + order.conditions + '", '
@@ -368,17 +374,16 @@ class Database:
 		sql = self.cursor.fetchall()
 		spools = []
 		for spool in sql:
-			spools.append([str(spool[0]), self.string_to_date(spool[1]), spool[2], float(spool[3]), int(spool[4]), float(spool[5]), int(spool[6]), spool[7], spool[8], int(spool[9]), int(spool[10]), spool[11], self.string_to_date(spool[12])])
+			spools.append([int(spool[0]), self.string_to_date(spool[1]), spool[2], float(spool[3]), int(spool[4]), float(spool[5]), int(spool[6]), spool[7], spool[8], int(spool[9]), int(spool[10]), spool[11], self.string_to_date(spool[12])])
 		return spools
 
 	def add_spool(self, spool):
-		self.cursor.execute('INSERT INTO spool VALUES (?,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null,Null)', (spool.id,))
+		self.cursor.execute('INSERT INTO spool VALUES (?,?,"","",0,"",0,0,"",0,0,"","")', (spool.id, str(spool.date)))
 		self.db.commit()
 		self.update_spool(spool)
 
 	def update_spool(self, spool):
-		values = 'created = "' + str(spool.date) + '", '
-		values += 'type = "' + spool.type + '", '
+		values = 'type = "' + spool.type + '", '
 		values += 'diameter = "' + str(spool.diameter) + '", '
 		values += 'weight = "' + str(spool.weight) + '", '
 		values += 'density = "' + str(spool.density) + '", '

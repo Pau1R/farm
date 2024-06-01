@@ -47,7 +47,7 @@ class Client_order:
 			elif message.function == '2':
 				self.process_supports()
 			elif message.function == '3':
-				self.process_prepay()
+				self.process_pay()
 			elif message.function == '4':
 				self.process_cancel_confirmation()
 			elif message.function == '5':
@@ -161,7 +161,7 @@ class Client_order:
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + self.order.get_supports_price() + ' рублей'
-		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Магазин'], 'Назад']
+		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Компания'], 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.order_id)
 
 	def show_pay(self):
@@ -258,12 +258,12 @@ class Client_order:
 		self.app.db.update_order(self.order)
 		self.show_order()
 
-	def process_prepay(self):
-		data = self.message.btn_data
-		if data == 'prepayed':
-			x = '' # TODO: save info somewhere
-		elif data == 'Назад':
-			x = ''
+	def process_pay(self):
+		# data = self.message.btn_data
+		# if data == 'prepayed':
+		# 	x = ''
+		# elif data == 'Назад':
+		# 	x = ''
 		self.show_order()
 
 	def process_reject_reason(self):
@@ -286,7 +286,9 @@ class Client_order:
 			self.order = None
 			self.chat.user.last_data = ''
 			self.chat.user.show_orders()
-# TODO: if user canceled order after validation add him a penalty score
+			if self.order.status == 'validated':
+				chat = self.app.get_chat(self.order.user_id)
+				chat.user.penalty()
 			return
 		self.show_order()
 
@@ -298,3 +300,5 @@ class Client_order:
 
 	def is_admin(self):
 		return self.chat.is_employee and 'Администратор' in self.chat.user.roles
+
+	# TODO: create function to receive transfer from client. If prepayment is successful set client.orders_canceled to 0.
