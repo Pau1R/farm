@@ -4,7 +4,7 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 
 class PrinterGUI:
-	address = '1/2/5'
+	address = ''
 	app = None
 	chat = None
 	GUI = None
@@ -16,9 +16,10 @@ class PrinterGUI:
 	name = ''
 	type_ = ''
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 
 	def first_message(self, message):

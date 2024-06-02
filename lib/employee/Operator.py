@@ -4,7 +4,7 @@ from lib.Msg import Message
 from lib.Gui import Gui
 
 class Operator:
-	address = '1/3'
+	address = ''
 
 	app = None
 	chat = None
@@ -12,9 +12,10 @@ class Operator:
 	message = None
 	last_data = ''
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 
 	def first_message(self, message):
@@ -37,7 +38,7 @@ class Operator:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
-		text = 'Здравствуйте, ' + self.chat.name
+		text = 'Здравствуйте, ' + self.chat.user_name
 
 #---------------------------- PROCESS ----------------------------
 

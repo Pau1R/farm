@@ -1,3 +1,4 @@
+from datetime import datetime
 from datetime import date
 from lib.Gui import Gui
 import time
@@ -9,11 +10,11 @@ class Order:
 	spool_logic = None
 
 	# order attributes:
-	order_id = 1
+	id = 1
 	name = ''
 	date = None
 	user_id = 1
-	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools
+	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
 	# who can change order status to another:
 	# - client:
 	#   - creating: validate
@@ -44,29 +45,31 @@ class Order:
 	support_time = 0
 	layer_hight = 0.0
 
-	# payment and booking info
+	# payment, booking and delivery info
 	price = 0.0
 	pay_code = 0
-	prepayed = 0.0
+	payed = 0.0
 	prepayment_percent = 0
 	booked = []
 	booked_time = 0
+	delivery_code = 0
+	delivery_user_id = 0
 	
-	def __init__(self, app, order_id):
+	def __init__(self, app, id):
 		self.app = app
-		self.order_id = order_id
-		self.date = date.today()
+		self.id = id
+		self.date = datetime.today()
 		self.spools = self.app.equipment.spools
 		self.spool_logic = self.app.equipment.spool_logic
 
 	def reset(self):
-		self.order_id = self.get_next_free_id(self.app.orders)
+		self.id = self.get_next_free_id(self.app.orders)
 		self.status = 'creating'
 
 	def get_next_free_id(self, orders):
 		ids = []
 		for order in orders:
-			ids.append(int(order.order_id))
+			ids.append(int(order.id))
 		ids.sort()
 		ids = list(dict.fromkeys(ids))
 		id = 1
@@ -96,9 +99,14 @@ class Order:
 			return True
 		prepay_price = (self.prepayment_percent / 100) * self.price
 		prepay_price = math.ceil(prepay_price / 10) * 10
-		if self.prepayed < prepay_price:
+		if self.payed < prepay_price:
 			return False
 		return True
+
+	def is_payed(self):
+		if self.payed >= self.price:
+			return True
+		return False
 
 	def get_supports_price(self):
 		price = 0
@@ -168,3 +176,29 @@ class Order:
 		date_ = date.today()
 		# TODO: write algorithm to calculate completion date
 		return self.app.functions.russian_date(date_)
+
+	def order_payed(self, amount):
+		self.payed += amount
+		if self.is_prepayed():
+			chat = self.app.get_chat(self.user_id)
+			chat.user.orders_canceled = 0
+			if self.status == 'in_pick-up' and self.delivery_user_id != 0:
+				chat = self.app.get_chat(self.delivery_user_id)
+				chat.user.delivery.show_order_payed(self)
+
+	def set_delivery_code(self):
+		if self.delivery_code == 0:
+			used_codes = [0]
+			code = 0
+			code_upper = 99
+			if len(self.app.orders) > 80:
+				code_upper = 999
+			for order_ in self.app.orders:
+				used_codes.append(order_.delivery_code)
+			while code in used_codes:
+				code = random.randint(10, code_upper)
+			self.delivery_code = code
+			self.app.db.update_order(self)
+
+	def remaining_payment(self):
+		return self.price - self.payed

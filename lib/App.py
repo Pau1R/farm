@@ -58,7 +58,7 @@ class App:
 		self.chat.new_message(message)
 
 	def create_chat(self, message):
-		chat = Chat(self, int(message.user_id), False, date.today())
+		chat = Chat(self, int(message.user_id), message.user_name, False, date.today())
 		self.chats.append(chat)
 		self.db.create_chat(chat)
 		return chat
@@ -90,3 +90,6 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
+
+
+# TODO: Owner.py repair and refactor

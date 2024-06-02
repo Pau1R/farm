@@ -17,7 +17,7 @@ from lib.employee.SettingsGUI import SettingsGUI
 from lib.client.Client_order import Client_order
 
 class Admin:
-	address = '1/2'
+	address = ''
 
 	app = None
 	chat = None
@@ -37,24 +37,25 @@ class Admin:
 	surfaceGUI = None
 	settingsGUI = None
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
-		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(chat, self.address)
+		self.address = address
+		self.GUI = Gui(app, chat, address)
+		self.texts = Texts(chat, address)
 
-		self.containerGUI = ContainerGUI(app, chat)
-		self.dryerGUI = DryerGUI(app, chat)
-		self.extruderGUI = ExtruderGUI(app, chat)
-		self.locationGUI = LocationGUI(app, chat)
-		self.printer_typeGUI = Printer_typeGUI(app, chat)
-		self.printerGUI = PrinterGUI(app, chat)
-		self.spoolGUI = SpoolGUI(app, chat)
-		self.colorGUI = ColorGUI(app, chat)
-		self.surfaceGUI = SurfaceGUI(app, chat)
-		self.settingsGUI = SettingsGUI(app, chat)
-
-		self.client_order = Client_order(app, chat, '1/2/11')
+		self.containerGUI = ContainerGUI(app, chat, address + '/1')
+		self.dryerGUI = DryerGUI(app, chat, address + '/2')
+		self.extruderGUI = ExtruderGUI(app, chat, address + '/3')
+		self.locationGUI = LocationGUI(app, chat, address + '/4')
+		self.printer_typeGUI = Printer_typeGUI(app, chat, address + '/5')
+		self.printerGUI = PrinterGUI(app, chat, address + '/6')
+		self.spoolGUI = SpoolGUI(app, chat, address + '/7')
+		self.colorGUI = ColorGUI(app, chat, address + '/8')
+		self.surfaceGUI = SurfaceGUI(app, chat, address + '/9')
+		self.settingsGUI = SettingsGUI(app, chat, address + '/10')
+		
+		self.client_order = Client_order(app, chat, address + '/11')
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -85,17 +86,17 @@ class Admin:
 			elif message.file3 == '4':
 				self.locationGUI.new_message(message)
 			elif message.file3 == '5':
-				self.printerGUI.new_message(message)
-			elif message.file3 == '6':
-				self.spoolGUI.new_message(message)
-			elif message.file3 == '7':
-				self.colorGUI.new_message(message)
-			elif message.file3 == '8':
-				self.surfaceGUI.new_message(message)
-			elif message.file3 == '9':
-				self.settingsGUI.new_message(message)
-			elif message.file3 == '10':
 				self.printer_typeGUI.new_message(message)
+			elif message.file3 == '6':
+				self.printerGUI.new_message(message)
+			elif message.file3 == '7':
+				self.spoolGUI.new_message(message)
+			elif message.file3 == '8':
+				self.colorGUI.new_message(message)
+			elif message.file3 == '9':
+				self.surfaceGUI.new_message(message)
+			elif message.file3 == '10':
+				self.settingsGUI.new_message(message)
 			elif message.file3 == '11':
 				self.client_order.new_message(message)
 		if message.type == 'text' and message.file3 == '':
@@ -104,7 +105,7 @@ class Admin:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
-		text = 'Здравствуйте, Администратор ' + self.chat.user.name
+		text = 'Здравствуйте, Администратор ' + self.chat.user_name
 		buttons = ['Заказы', 'Оборудование', 'Настройки']
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
@@ -114,7 +115,7 @@ class Admin:
 		text = 'Все активные заказы'
 		buttons = []
 		for order in self.app.orders:
-			buttons.append([f'{order.order_id}: {order.name}', order.order_id])
+			buttons.append([f'{order.id}: {order.name}', order.id])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
 

@@ -96,7 +96,7 @@ class Database:
 			created DATETIME,
 			type TEXT"""
 		order = """
-			order_id INTEGER PRIMARY KEY,
+			id INTEGER PRIMARY KEY,
 			name TEXT,
 			created DATETIME,
 			user_id INTEGER,
@@ -118,10 +118,12 @@ class Database:
 			layer_hight DECIMAL,
 			price DECIMAL,
 			pay_code INTEGER,
-			prepayed DECIMAL,
+			payed DECIMAL,
 			prepayment_percent DECIMAL,
 			booked TEXT,
-			booked_time INTEGER """
+			booked_time INTEGER,
+			delivery_code INTEGER,
+			delivery_user_id INTEGER """
 		setting = """
 			id INTEGER,
 			name TEXT PRIMARY KEY,
@@ -151,13 +153,18 @@ class Database:
 		else:
 			return None
 
+	def string_to_datetime(self, date):
+		if date and date != 'None':
+			return datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
+		else:
+			return None
+
 #---------------------------- CHAT ----------------------------
 
 	def get_chats(self):
 		self.cursor.execute('SELECT * FROM chat')
 		for row in self.cursor.fetchall():
-			chat = Chat(self.app, int(row[0]), bool(row[3]), row[1])
-			chat.user.name = row[2]
+			chat = Chat(self.app, int(row[0]), row[2], bool(row[3]), row[1])
 			if row[3]: # employee
 				chat.user.roles = row[4].split(',')
 				while ('' in chat.user.roles):
@@ -176,7 +183,7 @@ class Database:
 		self.update_chat(chat)
 
 	def update_chat(self, chat):
-		values = 'name = "' + chat.user.name + '", '
+		values = 'name = "' + chat.user_name + '", '
 		values += 'isEmployee = "' + str(chat.is_employee) + '", '
 		if chat.is_employee:
 			chat.user.roles.append('')
@@ -186,8 +193,8 @@ class Database:
 		else:
 			values += 'payId = "' + chat.user.payId + '", '
 			values += 'money_payed = "' + str(chat.user.money_payed) + '", '
-			values += 'last_access_date = "' + str(chat.last_access_date) + '" '
-			values += 'orders_canceled = "' + str(chat.user.orders_canceled) + '" '
+			values += 'last_access_date = "' + str(chat.last_access_date) + '", '
+			values += 'orders_canceled = "' + str(chat.user.orders_canceled) + '", '
 			values += 'limit_date = "' + str(chat.user.limit_date) + '" '
 		self.cursor.execute('UPDATE chat SET ' + values + ' WHERE user_id = ' + str(chat.user_id))
 		self.db.commit()
@@ -205,7 +212,7 @@ class Database:
 		for line in sql:
 			order = Order(self.app, line[0])
 			order.name = line[1]
-			order.date = self.string_to_date(line[2])
+			order.date = self.string_to_datetime(line[2])
 			order.user_id = int(line[3])
 			order.status = line[4]
 			order.assinged_designer_id = line[5]
@@ -225,16 +232,16 @@ class Database:
 			order.layer_hight = line[19]
 			order.price = int(line[20])
 			order.pay_code = 0 if line[21] == '' else int(line[21])
-			order.prepayed = line[22]
+			order.payed = line[22]
 			order.prepayment_percent = int(line[23])
 			order.booked = ast.literal_eval(line[24])
 			order.booked_time = int(line[25])
+			order.delivery_code = int(line[26])
+			order.delivery_user_id = int(line[27])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,0,0,0,0,0,0,"[]",0)', (order.order_id, date.today()))
-
-		# self.cursor.execute('INSERT OR IGNORE INTO order_ VALUES (order_id, created)', (order.order_id, date.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,0,0,0,0,0,0,"[]",0,0,0)', (order.id, datetime.today()))
 		self.db.commit()
 		self.update_order(order)
 
@@ -259,15 +266,17 @@ class Database:
 		values += 'layer_hight = "' + str(order.layer_hight) + '", '
 		values += 'price = "' + str(order.price) + '", '
 		values += 'pay_code = "' + str(order.pay_code) + '", '
-		values += 'prepayed = "' + str(order.prepayed) + '", '
+		values += 'payed = "' + str(order.payed) + '", '
 		values += 'prepayment_percent = "' + str(order.prepayment_percent) + '", '
 		values += 'booked = "' + str(order.booked) + '", '
-		values += 'booked_time = "' + str(order.booked_time) + '" '
-		self.cursor.execute('UPDATE order_ SET ' + values + ' WHERE order_id = ' + str(order.order_id))
+		values += 'booked_time = "' + str(order.booked_time) + '", '
+		values += 'delivery_code = "' + str(order.delivery_code) + '", '
+		values += 'delivery_user_id = "' + str(order.delivery_user_id) + '" '
+		self.cursor.execute('UPDATE order_ SET ' + values + ' WHERE id = ' + str(order.id))
 		self.db.commit()
 
 	def remove_order(self, order):
-		self.cursor.execute('DELETE FROM order_ WHERE order_id=?', (order.order_id,))
+		self.cursor.execute('DELETE FROM order_ WHERE id=?', (order.id,))
 		self.db.commit()
 
 #---------------------------- EQUIPMENT ----------------------------

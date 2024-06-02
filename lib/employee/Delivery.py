@@ -6,7 +6,7 @@ from lib.Gui import Gui
 from lib.Texts import Texts
 
 class Delivery:
-	address = '1/5'
+	address = ''
 
 	app = None
 	chat = None
@@ -18,9 +18,10 @@ class Delivery:
 	order = ''
 	price = 0
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(chat, self.address)
 
@@ -30,6 +31,7 @@ class Delivery:
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.message = message
+		self.GUI.clear_order_chat(message.instance_id)
 
 		if message.data_special_format:
 			if message.file3 == '' and (message.data == '' or message.data != self.last_data):
@@ -48,48 +50,67 @@ class Delivery:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
+		text = f'Здравствуйте, {self.chat.user_name}. Для выдачи заказа нажмите на кнопку'
 		buttons = ['Выдать заказ']
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
-		self.GUI.tell_buttons(self.texts.delivery_top_menu(self.chat.user.name), buttons, ['Назад'], 1, 0)
+		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_order_query(self):
 		self.chat.set_context(self.address, 2)
-		self.GUI.tell('Введите код получения заказа')
+		self.GUI.tell('Введите код получения заказа который сообщит вам клиент')
 
-	def show_issue_order(self):
-		buttons = ['Заказ выдан']
-		self.GUI.tell_buttons(self.texts.delivery_issue_order(self.order), buttons, [], 3, 0)
+	def show_client(self):
+		if self.order.is_payed():
+			text = f'Выдайте заказ № {self.order.id}\n'
+			buttons = [['Клиент забрал заказ', 'issued']]
+		else:
+			text = f'Предоставьте заказ № {self.order.id} клиенту для ознакомления.\n'
+			text += f'Заказ оплачен не полностью. Сумма доплаты: {self.order.remaining_payment()} рублей\n\n'
+			text += 'Клиент может оплатить наличными либо переводом через чат-бот на странице заказа.'
+			buttons = [['Клиент оплатил наличными', 'payed']]
+			buttons.append(['Клиент отказался от заказа', 'refused'])
+		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.id)
 
-	def show_pay_for_order(self):
-		buttons = ['Наличные приняты']
-		self.GUI.tell_buttons(self.texts.delivery_pay_for_order(self.order, self.price), buttons, [], 4, 0)
+	def show_order_payed(self, order):
+		text = f'Заказ № {self.order.id} оплачен полностью'
+		buttons = [['Клиент забрал заказ', 'issued']]
+		message = self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
+		message.general_clear = False
 
 #---------------------------- PROCESS ----------------------------
 	
 	def process_top_menu(self):
-		if self.message.btn_data == 'Назад':
+		data = self.message.btn_data
+		if data == 'Назад':
 			self.message.text = '/start'
 			self.chat.user.new_message(self.message)
-		if self.message.btn_data == 'Выдать заказ':
+		if data == 'Выдать заказ':
 			self.show_order_query()
 
 	def process_order_query(self):
-		code = self.message.text # order recieving code
-		self.order = 5 # TODO: get order number from receiving code
-		self.price = 1000 # TODO: get order price
-		if self.price > 0: # if order is not paid
-			self.show_pay_for_order()
-		else:
-			self.show_issue_order()
+		code = self.message.text
+		order = self.app.order_logic.get_order_by_delivery_code(code)
+		self.order = order
+		order.delivery_user_id = self.chat.user_id
+		self.show_client()
 
-	def process_issue_order(self):
-		if self.message.btn_data == 'Заказ выдан':
-			self.GUI.tell_permanent(f'Заказ {self.order} выдан')
-			time.sleep(3)
+	def process_client(self):
+		data = self.message.btn_data
+		if data == 'issued' or data == 'payed':
+			self.order_issued(self.order)
+		elif data == 'refused':
+			self.order.status = 'client_refused' # client doesn't get refund for prepayment
 			self.show_top_menu()
-			# change order status to received
 
-	def process_pay_for_order(self):
-		if self.message.btn_data == 'Наличные приняты':
-			self.show_issue_order()
+	def process_order_payed(self):
+		if self.message.btn_data == 'issued':
+			order = self.app.order_logic.get_order_by_id(self.message.instance_id)
+			self.order_issued(order)
+
+#---------------------------- LOGIC ----------------------------
+
+	def order_issued(self, order):
+		self.order.status = 'issued'
+		time.sleep(5)
+		self.show_top_menu()

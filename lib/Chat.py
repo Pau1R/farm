@@ -4,9 +4,10 @@ from lib.Gui import Gui
 from datetime import date
 
 class Chat:
-    def __init__(self, app, user_id, is_employee, created):
+    def __init__(self, app, user_id, user_name, is_employee, created):
         self.app = app
         self.user_id = user_id
+        self.user_name = user_name
         self.is_employee = is_employee
         self.created = created
         self.GUI = Gui(app, self, '-1')
@@ -60,9 +61,10 @@ class Chat:
     def become_employee(self):
         self.is_employee = True
         self.get_employed = False
-        name = self.user.name
+        name = self.name
         self.create_user()
-        self.user.name = name
+        self.name = name
+        self.app.db.update_chat(chat)
 
     def set_context(self, address, function):
         self.context = f'~{address}|{function}||'

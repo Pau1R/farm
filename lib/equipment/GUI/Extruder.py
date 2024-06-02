@@ -4,7 +4,7 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 
 class ExtruderGUI:
-	address = '1/2/3'
+	address = ''
 
 	app = None
 	chat = None
@@ -17,9 +17,10 @@ class ExtruderGUI:
 	maxTemp = 0
 	nozzleDiameter = 0
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 
 	def first_message(self, message):

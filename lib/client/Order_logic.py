@@ -15,3 +15,25 @@ class Order_logic:
 					order.remove_reserve()
 					chat = self.app.get_chat(order.user_id)
 					chat.user.client_order.show_booking_canceled(self)
+
+	def get_order_by_id(self, order_id):
+		for order in self.orders:
+			if order.id == order_id:
+				return order
+
+	def get_client_orders(self, user_id):
+		orders = []
+		for order in self.orders:
+			if order.user_id == user:
+				orders.append(order)
+		return orders
+
+	def get_order_by_pay_code(self, pay_code):
+		for order in self.orders:
+			if order.pay_code == pay_code:
+				return order
+
+	def get_order_by_delivery_code(self, delivery_code):
+		for order in self.orders:
+			if order.delivery_code == delivery_code:
+				return order

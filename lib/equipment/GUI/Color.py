@@ -7,7 +7,7 @@ from datetime import date
 import time
 
 class ColorGUI:
-	address = '1/2/7'
+	address = ''
 
 	app = None
 	chat = None
@@ -22,9 +22,10 @@ class ColorGUI:
 	parent_id = 0
 	samplePhoto = ''
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(chat, self.address) 
 		self.colors = app.equipment.colors

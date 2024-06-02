@@ -7,7 +7,7 @@ from datetime import date
 from datetime import timedelta
 
 class SpoolGUI:
-	address = '1/2/6'
+	address = ''
 
 	app = None
 	chat = None
@@ -30,9 +30,10 @@ class SpoolGUI:
 
 	change_weight_type = ''
  
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(chat, self.address)
 

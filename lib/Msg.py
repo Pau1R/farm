@@ -9,7 +9,7 @@ class Message:
 	file_id = ''
 	file_name = ''
 	data = ''
-	order_id = 0
+	# order_id = 0
 	general_clear = True
 
 	data_special_format = False
@@ -59,7 +59,6 @@ class Message:
 				elif message.content_type == 'photo':
 					self.type = 'photo'
 					self.file_id = str(message.json['photo'][3]['file_id'])
-# TODO: process all file types, i.e. png
 				elif message.content_type == 'video':
 					self.type = 'video'
 					self.file_id = str(message.video.file_id)

@@ -6,7 +6,7 @@ from lib.client.Texts import Texts
 import time
 
 class Client_color:
-	address = '1/2'
+	address = ''
 	
 	app = None
 	chat = None
@@ -22,9 +22,10 @@ class Client_color:
 	spool_logic = None
 	color_logic = None
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(app)
 		self.spool_logic = app.equipment.spool_logic
@@ -64,7 +65,7 @@ class Client_color:
 	def set_order(self):
 		order_id = int(self.message.instance_id)
 		for order in self.app.orders:
-			if order.order_id == order_id:
+			if order.id == order_id:
 				self.order = order
 				return
 		self.order = None
@@ -89,7 +90,7 @@ class Client_color:
 		if self.spool_logic.is_ordered(self.order.plastic_type, self.order.weight, self.order.quantity):
 			buttons.append(['Ожидающие поставки', 'ordered'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Выберите цвет', buttons, buttons, 3, self.order.order_id)
+		self.GUI.tell_buttons('Выберите цвет', buttons, buttons, 3, self.order.id)
 
 	def show_order_colors_ordered(self):
 		buttons = self.spool_logic.get_ordered_buttons(self.order.plastic_type, self.order.weight, self.order.quantity)
@@ -97,7 +98,7 @@ class Client_color:
 			self.show_order_colors()
 		buttons.append('Назад')
 		text = 'Ожидающие поставки'
-		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
 
 	def show_color(self, color_id, context_id):
 		color = self.app.equipment.color_logic.get_color(self.message.btn_data)
@@ -106,7 +107,7 @@ class Client_color:
 		order_id = 0
 		if self.order != None:
 			buttons.append(['Подтвердить выбор цвета', 'confirm^' + str(color.id) + '^' + str(context_id)])
-			order_id = self.order.order_id
+			order_id = self.order.id
 		buttons.append (['Назад', 'Назад^^' + str(context_id)])
 		self.GUI.tell_photo_buttons(text, color.samplePhoto, buttons, buttons, 5, order_id)
 
@@ -123,8 +124,8 @@ class Client_color:
 	def process_colors(self):
 		data = self.message.btn_data
 		if data == 'Назад':
-			self.chat.user.last_data = ''
-			self.chat.user.show_info()
+			self.chat.user.info.last_data = ''
+			self.chat.user.info.show_top_menu()
 		elif data == 'ordered':
 			self.show_colors_ordered()
 		else:

@@ -20,7 +20,7 @@ class Gui:
 		messages = self.chat.user.GUI.messages
 		messages.extend(self.messages)
 		for message in messages:
-			if message.order_id == int(order_id):
+			if message.instance_id == str(order_id):
 				self.remove_message(message)
 
 	def remove_messages(self, messages):

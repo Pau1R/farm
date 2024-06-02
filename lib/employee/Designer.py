@@ -7,7 +7,7 @@ from lib.Texts import Texts
 from lib.employee.Designer_validate import Validate
 
 class Designer:
-	address = '1/4'
+	address = ''
 
 	app = None
 	chat = None
@@ -19,9 +19,10 @@ class Designer:
 
 	validate = None
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(chat, '1/4')
 		self.validate = Validate(app, chat)
@@ -47,7 +48,7 @@ class Designer:
 
 	def show_top_menu(self):
 		self.last_data = ''
-		text = self.texts.designer_top_menu_text(self.chat.user.name, len(self.app.orders))
+		text = self.texts.designer_top_menu_text(self.chat.username, len(self.app.orders))
 		buttons = self.texts.designer_top_menu_btns.copy()
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
@@ -63,7 +64,7 @@ class Designer:
 		self.last_data = ''
 		text = self.texts.designer_order_text(self.order)
 		buttons = self.texts.designer_order_btns(self.order_timer, self.order)
-		self.GUI.tell_buttons(text, buttons, ['Назад'], 3, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 3, self.order.id)
 		
 	def show_finished_orders(self):
 		self.last_data = ''
@@ -91,7 +92,7 @@ class Designer:
 		if self.message.btn_data == 'Назад':
 			self.show_top_menu()
 		for order in self.app.orders:
-			if order.order_id == self.message.instance_id:
+			if order.id == self.message.instance_id:
 				self.order = order
 				self.show_order()
 

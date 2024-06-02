@@ -7,7 +7,7 @@ import time
 import random
 
 class Client_order:
-	address = '1/3'
+	address = ''
 	
 	app = None
 	chat = None
@@ -38,7 +38,7 @@ class Client_order:
 		self.GUI.clear_chat()
 		self.message = message
 		self.set_order()
-		self.GUI.clear_order_chat(self.order.order_id)
+		self.GUI.clear_order_chat(self.order.id)
 
 		if message.data_special_format and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
 			self.last_data = message.data
@@ -61,7 +61,7 @@ class Client_order:
 		try:
 			order_id = int(self.message.instance_id)
 			for order in self.app.orders:
-				if order.order_id == order_id:
+				if order.id == order_id:
 					self.order = order
 					return
 		except:
@@ -94,10 +94,17 @@ class Client_order:
 			status = 'Выполняется'
 		elif order.status == 'no_spools':
 			status = 'Приостановлен (отсутствует пластик)'
+		elif order.status == 'in_pick-up':
+			status = 'Ожидает в пункте выдачи'
+		elif order.status == 'issued':
+			status = 'Выдан клиенту'
 
 		# set text
 		text = order.name + '\n\n'
-		text += f'Статус: {status.lower()}\n'
+		text += f'Статус: {status.upper()}\n'
+		if order.status == 'in_pick-up' and order.delivery_code > 0:
+			text += f'Код получения: {order.delivery_code}\n\n'
+		text += f'Дата создания: {self.app.functions.russian_date(order.date)}\n'
 		if order.price > 0:
 			if settings_set:
 				text += 'С'
@@ -127,11 +134,11 @@ class Client_order:
 			text += f'Дата готовности (примерно): {ready}'
 		if order.support_remover != '':
 			text += f'Удаление поддержек: {order.support_remover.lower()}\n'
-		if order.prepayed > 0:
+		if order.payed > 0:
 			if not free_start and not prepayed:
-				text += f'Предоплачено: {int(order.prepayed)}/{int(prepay_price)} рублей'
+				text += f'Предоплачено: {int(order.payed)}/{int(prepay_price)} рублей'
 			else:
-				text += f'Предоплачено: {int(order.prepayed)} рублей'
+				text += f'Предоплачено: {int(order.payed)} рублей'
 
 		# set buttons
 		buttons = []
@@ -157,12 +164,12 @@ class Client_order:
 
 		buttons.append(['Отменить заказ'])
 		buttons.append(['Назад'])
-		self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.order_id)
+		self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + self.order.get_supports_price() + ' рублей'
 		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Компания'], 'Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.id)
 
 	def show_pay(self):
 		order = self.order
@@ -184,19 +191,18 @@ class Client_order:
 		text = 'Для зачисления средств может понадобиться несколько минут. После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
 		buttons = [['Предоплату сделал', 'prepayed']]
 		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, buttons, 3, order.order_id)
+		self.GUI.tell_buttons(text, buttons, buttons, 3, order.id)
 
 	def show_cancel_confirmation(self):
 		text = 'Подтвердите отмену заказа'
 		buttons = [['Да, подтверждаю', 'confirm'], 'Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
 
 	def show_confirmed_by_designer(self, order):
 		text = f'Оценка заказа {order.name} выполнена'
 		buttons = [['Перейти к заказу', 'now'], ['Перейти к заказу попозже', 'then']]
-		message = self.GUI.tell_buttons(text, buttons, buttons, 5, order.order_id)
+		message = self.GUI.tell_buttons(text, buttons, buttons, 5, order.id)
 		message.general_clear = False
-		message.order_id = order.order_id
 
 	def show_rejected_by_designer(self, order, reason):
 		text = f'Заказ {order.name} не прошел оценку.'
@@ -207,7 +213,7 @@ class Client_order:
 	def show_reject_reason(self):
 		self.order_waiting = self.order
 		self.chat.set_context(self.address, 6)
-		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 6, self.order.order_id)
+		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 6, self.order.id)
 
 	def show_rejected_by_admin(self, order, reason):
 		text = ''
@@ -300,5 +306,3 @@ class Client_order:
 
 	def is_admin(self):
 		return self.chat.is_employee and 'Администратор' in self.chat.user.roles
-
-	# TODO: create function to receive transfer from client. If prepayment is successful set client.orders_canceled to 0.

@@ -6,7 +6,7 @@ from lib.client.Texts import Texts
 import time
 
 class Client_model:
-	address = '1/1'
+	address = ''
 
 	app = None
 	chat = None
@@ -14,16 +14,19 @@ class Client_model:
 	GUI = None
 	texts = None
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(app)
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
-		if self.chat.user.orders_canceled >= 3:
-			self.show_client_limited()
+		if self.chat.user.is_limited():
+			self.show_limited()
+		elif self.chat.user.is_unprepaided_orders_limit_reached():
+			self.show_unprepaided_orders_limit_reached()
 		else:
 			self.show_name()
 		# self.process_file()
@@ -56,17 +59,17 @@ class Client_model:
 	def show_quantity(self):
 		text = self.texts.model_quantity
 		buttons = self.texts.model_quantity_buttons.copy()
-		self.GUI.tell_buttons(text, buttons, ['1', '2'], 2, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, ['1', '2'], 2, self.order.id)
 
 	def show_conditions(self):
 		text = self.texts.model_conditions
 		buttons = self.texts.model_conditions_buttons.copy()
-		self.GUI.tell_buttons(text, buttons, [], 3, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
 
 	def show_comment(self):
 		self.chat.set_context(self.address, 4)
 		buttons = ['Комментариев к заказу не имею']
-		self.GUI.tell_buttons('Напишите комментарий', buttons, [], 4, self.order.order_id)
+		self.GUI.tell_buttons('Напишите комментарий', buttons, [], 4, self.order.id)
 
 	def show_file(self):
 		self.chat.set_context(self.address, 5)
@@ -81,8 +84,13 @@ class Client_model:
 		time.sleep(3)
 		self.chat.user.show_top_menu()
 
-	def show_client_limited(self):
-		self.GUI.tell('Размещение заказа недоступно по причине превышения лимита на отмену оцененных заказов')
+	def show_limited(self):
+		self.GUI.tell('Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите несколько дней')
+		time.sleep(5)
+		self.chat.user.show_top_menu()
+
+	def show_unprepaided_orders_limit_reached(self):
+		self.GUI.tell('У вас 3 непредоплаченных заказа, больше нельзя =)')
 		time.sleep(5)
 		self.chat.user.show_top_menu()
 

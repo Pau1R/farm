@@ -81,7 +81,7 @@ class Validate:
 	def show_validate(self):
 		text = self.texts.designer_order_validate_text(self.order)
 		buttons = [['Принять модель', 'accept'], ['Отказать','reject'], ['Назад']]
-		self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.order_id)
+		self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.id)
 
 	def show_accept(self):
 		buttons = []
@@ -98,14 +98,14 @@ class Validate:
 		text = f'Выберите тип пластика. Условия эксплуатации: {self.order.conditions}'
 		buttons.append(['любой базовый', 'any'])
 		buttons.append(['Подходящего пластика нет', 'unavailable'])
-		self.GUI.tell_buttons(text, buttons, [], 4, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, [], 4, self.order.id)
 
 	def show_accept_quantity(self):
 		if self.order.quantity > 1:
 			buttons = []
 			for i in range(1, self.order.quantity + 1):
 				buttons.append(str(i))
-			self.GUI.tell_buttons('Выберите кол-во моделей на одном столе', buttons, [], 5, self.order.order_id)
+			self.GUI.tell_buttons('Выберите кол-во моделей на одном столе', buttons, [], 5, self.order.id)
 		else:
 			self.show_accept_weight()
 
@@ -114,30 +114,30 @@ class Validate:
 		self.GUI.tell('Введите вес стола в граммах')
 
 	def show_accept_supports(self):
-		self.GUI.tell_buttons('Нужно ли печатать поддержки?', ['Да','Нет'], [], 7, self.order.order_id)
+		self.GUI.tell_buttons('Нужно ли печатать поддержки?', ['Да','Нет'], [], 7, self.order.id)
 
 	def show_accept_supports_time(self):
 		text = 'Сколько нужно минут на удаление поддержек'
 		if self.order.quantity > 1:
 			text += ' с одного экземпляра'
-		self.GUI.tell_buttons(text + '?', ['0.5','1','2','3','5','10','15','20'], [], 8, self.order.order_id)
+		self.GUI.tell_buttons(text + '?', ['0.5','1','2','3','5','10','15','20'], [], 8, self.order.id)
 
 	def show_accept_time(self):
 		text = 'Продолжительность печати.\n\nВначале выберите сколько часов:'
 		buttons = self.texts.order_validate_accept_time_btns
-		self.GUI.tell_buttons(text, buttons, [], 9, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, [], 9, self.order.id)
 
 	def show_accept_time_minutes(self):
 		text = 'Продолжительность печати.\n\nТеперь выберите сколько минут:'
 		buttons = self.texts.order_validate_accept_time_minutes_btns
-		self.GUI.tell_buttons(text, buttons, [], 10, self.order.order_id)
+		self.GUI.tell_buttons(text, buttons, [], 10, self.order.id)
 
 	def show_accept_confirmation(self):
 		buttons = ['Подтвердить', 'Отмена']
-		self.GUI.tell_buttons('Подтвердите валидацию', buttons, [], 11, self.order.order_id)
+		self.GUI.tell_buttons('Подтвердите валидацию', buttons, [], 11, self.order.id)
 
 	def show_reject(self):
-		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 12, self.order.order_id)
+		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 12, self.order.id)
 
 	def show_new_order(self, order):
 		self.GUI.tell('Поступил новый заказ: ' + order.name)
@@ -154,7 +154,7 @@ class Validate:
 			self.app.chat.user.designer.first_message(self.message)
 		else:
 			for order in self.app.orders:
-				if int(self.message.btn_data) == order.order_id:
+				if int(self.message.btn_data) == order.id:
 					self.order = order
 					self.show_validate()
 

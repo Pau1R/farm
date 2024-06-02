@@ -5,7 +5,7 @@ from lib.Gui import Gui
 from lib.Texts import Texts
 
 class SurfaceGUI:
-	address = '1/2/8'
+	address = ''
 
 	app = None
 	chat = None
@@ -18,9 +18,10 @@ class SurfaceGUI:
 
 	type = ''
 
-	def __init__(self, app, chat):
+	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(chat, '1/2/1')
 

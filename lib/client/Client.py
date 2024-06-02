@@ -8,7 +8,6 @@ from lib.Gui import Gui
 from lib.client.Texts import Texts
 from lib.client.Order import Order
 from lib.client.Client_model import Client_model
-from lib.client.Client_color import Client_color
 from lib.client.Client_order import Client_order
 from lib.client.Info import Info
 
@@ -28,9 +27,8 @@ class Client:
 	
 	menu = None
 	client_model = None
-	client_color = None
 	client_order = None
-	order_id = None
+	# order_id = None
 
 	payId = ''
 	money_payed = 0.0
@@ -44,10 +42,9 @@ class Client:
 		self.GUI = Gui(app, chat, self.address)
 		self.order = Order(app, 1)
 
-		self.client_model = Client_model(app, chat)
-		self.client_color = Client_color(app, chat)
-		self.client_order = Client_order(app, chat, '1/3') # TODO: consider moving address to this format for all subfiles 
-		self.info = Info(app, chat)
+		self.client_model = Client_model(app, chat, self.address + '/1')
+		self.client_order = Client_order(app, chat, self.address + '/2')
+		self.info = Info(app, chat, self.address + '/3')
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -70,23 +67,11 @@ class Client:
 					self.process_orders()
 				elif message.function == '6':
 					self.process_order()
-				elif message.function == '7': # TODO: move info menu into different file
-					self.process_info()
-				elif message.function == '8':
-					self.process_receive()
-				elif message.function == '9':
-					self.process_tech()
-				elif message.function == '10':
-					self.process_disclaimer()
-				elif message.function == '11':
-					self.process_support()
 			elif message.file2 == '1':
 				self.client_model.new_message(message)
 			elif message.file2 == '2':
-				self.client_color.new_message(message)
-			elif message.file2 == '3':
 				self.client_order.new_message(message)
-			elif message.file2 == '4':
+			elif message.file2 == '3':
 				self.info.new_message(message)
 		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
@@ -112,50 +97,12 @@ class Client:
 		orders = self.get_orders(['validate', 'validated', 'prepayed'])
 		orders.sort(key=self.get_object_date)
 		for order in orders:
-			buttons.append([order.name, order.order_id])
+			buttons.append([order.name, order.id])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
 
-	def show_info(self):
-		text = 'Информация о студии'
-		buttons = []
-		buttons.append(['Доступные цвета и типы пластика', 'colors'])
-		buttons.append(['Получение заказов', 'receive'])
-		buttons.append(['Технические подробности', 'tech'])
-		buttons.append(['Дисклеймер', 'disclaimer'])
-		buttons.append(['Поддержка', 'support'])
-		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, buttons, 7, 0)
-
-	def show_receive(self):
-		text = 'Среднее время выполнения заказа: 2-3 дня\n\n'
-		text += 'Пункт выдачи: г. Стерлитамак, ул. Сакко и Ванцетти, 63, "Бизнес-контакт". График работы: ежедневно с 9:00 до 21:00.\n\n'
-		text += 'Доставка по странам СНГ службой boxberry за счет клиента'
-		buttons = ['Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 8, 0)
-
-	def show_tech(self):
-		text = 'Технология печати: одноцветная на fdm принтерах.\n\n'
-		text += 'Используемые принтеры: BAMBU LAB P1S и CREALITY ENDER 3 S1 PRO.\n\n'
-		text += 'Есть ограниченная возможность печатать поликарбонатом'
-		buttons = ['Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 9, 0)
-
-	def show_disclaimer(self):
-		text = """
-Дисклеймер:
-1) не даю гарантии на изделие
-2) не несу ответственности за причиненный изделием вред
-3) Если вес одного изделия превышает 0.8 кг, то могут быть отличия в цвете
-3) Если общий вес нескольких изделий заказа превышает 0.8 кг, то также могут быть отличия в цвете"""
-		buttons = ['Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 10, 0)
-
-	def show_support(self):
-		self.chat.set_context(self.address, 11)
-		text = 'Опишите вашу проблему'
-		buttons = ['Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 11, 0)
+	def show_becomes_employee(self):
+		self.GUI.tell('Вы стали сотрудником, поздравляем!')
 
 #---------------------------- PROCESS ----------------------------
 
@@ -167,7 +114,7 @@ class Client:
 		elif self.message.btn_data == 'order':
 			self.show_order_menu()
 		elif self.message.btn_data == 'info':
-			self.show_info()
+			self.info.first_message(self.message)
 		elif self.message.btn_data == 'orders':
 			self.show_orders()
 
@@ -189,52 +136,11 @@ class Client:
 			self.client_order.last_data = ''
 			self.client_order.first_message(self.message)
 
-	def process_info(self):
-		data = self.message.btn_data
-		if data == 'Назад':
-			self.show_top_menu()
-		elif data == 'colors':
-			self.client_color.last_data = ''
-			self.client_color.first_message(self.message)
-		elif data == 'receive':
-			self.show_receive()
-		elif data == 'tech':
-			self.show_tech()
-		elif data == 'disclaimer':
-			self.show_disclaimer()
-		elif data == 'support':
-			self.show_support()
-
-	def process_receive(self):
-		data = self.message.btn_data
-		if data == 'Назад':
-			self.show_info()
-
-	def process_tech(self):
-		data = self.message.btn_data
-		if data == 'Назад':
-			self.show_info()
-
-	def process_disclaimer(self):
-		data = self.message.btn_data
-		if data == 'Назад':
-			self.show_info()
-
-	def process_support(self):
-		data = self.message.btn_data
-		if data == 'Назад':
-			self.chat.context = ''
-		else: # TODO: think over the support logic
-			text = self.message.text
-			self.GUI.tell('Ваш обращение получено, ждите ответа')
-			time.sleep(2)
-		self.show_info()
-
 #---------------------------- LOGIC ----------------------------
 
-	def get_order(self, order_id):
+	def get_order(self, id):
 		for order in self.app.orders:
-			if order.order_id == order_id:
+			if order.id == id:
 				return order
 		return None
 
@@ -257,10 +163,19 @@ class Client:
 	def is_limited(self):
 		if self.orders_canceled >= 3:  # repeated order cancelation limit
 			period = (date.today() - self.limit_date).days
-			if period > 1:  # days to limit placing orders
+			if period > 2:  # days to limit placing orders
 				self.orders_canceled -= 1 # give one chance to place order
+				self.limit_date = date.today()
 			else:
 				return True
 		return False
 
-	# TODO: limit amount of unpaid orders
+	def is_unprepaided_orders_limit_reached(self):
+		orders = self.app.order_logic.get_client_orders(self.chat.user_id)
+		counter = 0
+		for order in orders:
+			if not order.is_prepayed():
+				counter += 1
+		if counter >= 3: # maximum allowed unprepaid orders
+			return True
+		return False

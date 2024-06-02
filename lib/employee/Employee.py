@@ -17,7 +17,6 @@ class Employee:
 	messages = []
 	message = None
 	roles = []
-	name = ''
 	date = None
 	active = True
 	
@@ -33,11 +32,11 @@ class Employee:
 		self.app = app
 		self.chat = chat
 		self.GUI = Gui(app, chat, self.address)
-		self.owner = Owner(app, chat)
-		self.admin = Admin(app, chat)
-		self.operator = Operator(app, chat)
-		self.designer = Designer(app, chat)
-		self.delivery = Delivery(app, chat)
+		self.owner = Owner(app, chat, self.address + '/1')
+		self.admin = Admin(app, chat, self.address + '/2')
+		self.operator = Operator(app, chat, self.address + '/3')
+		self.designer = Designer(app, chat, self.address + '/4')
+		self.delivery = Delivery(app, chat, self.address + '/5')
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -100,8 +99,8 @@ class Employee:
 	# 	print(id)
 	# 	# print('process_assign_order')
 	# 	for order in self.app.orders:
-	# 		print('order', order.order_id, type(order.order_id), id, type(id))
-	# 		if order.order_id == id:
+	# 		print('order', order.id, type(order.id), id, type(id))
+	# 		if order.id == id:
 	# 			print(self.message.data.split(",")[1])
 	# 			if self.message.data.split(",")[1] == 'yes':
 	# 				if not order.assign_designer(self.chat.user_id):
