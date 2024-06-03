@@ -126,6 +126,8 @@ class Database:
 			printer_type TEXT,
 			weight DECIMAL,
 			time DECIMAL,
+			completion_date DATE,
+			start_datetime DATETIME,
 			support_time DECIMAL,
 			layer_hight DECIMAL,
 			price DECIMAL,
@@ -240,20 +242,22 @@ class Database:
 			order.printer_type = line[15]
 			order.weight = int(line[16])
 			order.time = line[17]
-			order.support_time = int(line[18])
-			order.layer_hight = line[19]
-			order.price = int(line[20])
-			order.pay_code = 0 if line[21] == '' else int(line[21])
-			order.payed = line[22]
-			order.prepayment_percent = int(line[23])
-			order.booked = ast.literal_eval(line[24])
-			order.booked_time = int(line[25])
-			order.delivery_code = int(line[26])
-			order.delivery_user_id = int(line[27])
+			order.completion_date = line[18]
+			order.start_datetime = line[19]
+			order.support_time = int(line[20])
+			order.layer_hight = line[21]
+			order.price = int(line[22])
+			order.pay_code = 0 if line[23] == '' else int(line[23])
+			order.payed = line[24]
+			order.prepayment_percent = int(line[25])
+			order.booked = ast.literal_eval(line[26])
+			order.booked_time = int(line[27])
+			order.delivery_code = int(line[28])
+			order.delivery_user_id = int(line[29])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,0,0,0,0,0,0,"[]",0,0,0)', (order.id, datetime.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, datetime.today()))
 		self.db.commit()
 		self.update_order(order)
 
@@ -274,6 +278,8 @@ class Database:
 		values += 'printer_type = "' + order.printer_type + '", '
 		values += 'weight = "' + str(order.weight) + '", '
 		values += 'time = "' + str(order.time) + '", '
+		values += 'completion_date = "' + str(order.completion_date) + '", '
+		values += 'start_datetime = "' + str(order.start_datetime) + '", '
 		values += 'support_time = "' + str(order.support_time) + '", '
 		values += 'layer_hight = "' + str(order.layer_hight) + '", '
 		values += 'price = "' + str(order.price) + '", '

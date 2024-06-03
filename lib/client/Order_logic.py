@@ -37,3 +37,13 @@ class Order_logic:
 		for order in self.orders:
 			if order.delivery_code == delivery_code:
 				return order
+
+	def count_all_time(self, printer_type):
+		scheduled_time = 0
+		for order in self.orders:
+			if order.general_status in ['in_line', 'printing'] and order.printer_type == printer_type:
+				# TODO: count how much time has passed since order started printing 
+				# order.start_datetime
+
+				scheduled_time += order.time
+		return scheduled_time

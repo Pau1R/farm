@@ -5,6 +5,7 @@ from datetime import date
 from lib.Msg import Message
 from lib.client.Order import Order
 from lib.client.Order_logic import Order_logic
+from lib.equipment.Printer_logic import Printer_logic
 from lib.Test import Test
 from lib.Settings import Settings
 from lib.Clicker import Clicker
@@ -28,6 +29,7 @@ class App:
 	last_check_date = None
 
 	order_logic = None
+	printer_logic = None
 
 	def __init__(self, bot, conf):
 		self.bot = bot
@@ -40,6 +42,7 @@ class App:
 		self.settings = Settings(self)
 		self.order_logic = Order_logic(self)
 		self.clicker = Clicker(self)
+		self.Printer_logic = Printer_logic(self)
 		# test = Test(self.db, self)
 
 	def new_message(self, message):

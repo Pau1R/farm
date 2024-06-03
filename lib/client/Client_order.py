@@ -129,9 +129,9 @@ class Client_order:
 				text += f' (часов): {int(order.time/60)}\n'
 			else:
 				text += f': {int(order.time)} минут\n'
-		ready = order.completion_estimate_date()
-		if ready != None:
-			text += f'Дата готовности (примерно): {ready}'
+		if order.completion_date:
+			date = self.app.functions.russian_date(order.completion_date)
+			text += f'Дата готовности (примерно): {date}'
 		if order.support_remover != '':
 			text += f'Удаление поддержек: {order.support_remover.lower()}\n'
 		if order.payed > 0:

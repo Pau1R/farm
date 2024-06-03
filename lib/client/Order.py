@@ -14,6 +14,8 @@ class Order:
 	name = ''
 	date = None
 	user_id = 1
+	general_status = '' # preparing, in_line, printing, printed  TODO: add to db
+
 	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
 	# who can change order status to another:
 	# - client:
@@ -37,11 +39,13 @@ class Order:
 	sketches = []
 	model_file = ''
 
-	# evaluation data
+	# evaluation data and process
 	plastic_type = ''
 	printer_type = ''
 	weight = 0
 	time = 0.0
+	completion_date = None
+	start_datetime = None # date and time when order started printing
 	support_time = 0
 	layer_hight = 0.0
 
@@ -143,6 +147,7 @@ class Order:
 		self.booked = self.app.equipment.spool_logic.book(statuses, self.plastic_type, color_id, self.weight, self.quantity)
 		self.booked_time = int(time.time())
 		self.app.db.update_order(self)
+		self.set_completion_date()
 		return self.booked
 
 	def remove_reserve(self):
@@ -152,6 +157,7 @@ class Order:
 				spool.booked -= book[1]
 		self.booked_time = 0
 		self.color_id = 0
+		self.completion_date = None
 		self.app.db.update_order(self)
 
 	def min_weight(self): # minimum weight of one spool
@@ -172,10 +178,14 @@ class Order:
 	def get_object_date(self, element):
 		return element.date
 
-	def completion_estimate_date(self):
-		date_ = date.today()
-		# TODO: write algorithm to calculate completion date
-		return self.app.functions.russian_date(date_)
+	def set_completion_date(self):
+		average_load = self.app.printer_logic.get_average_load(self.printer_type)	# average time to begin this order
+		end_time = average_load + self.time											# add this order time
+		end_time += time.time() / 60 - 9 * 60										# take in account time of day, starting from 9 am
+		end_time += 60 * 5															# add buffer time
+		days = int(end_time / (60 * 10))											# get amount of days to finish this order. Daily work hours: 10
+		self.completion_date = date.today() + timedelta(days=days)
+		self.app.db.update_order(self)
 
 	def order_payed(self, amount):
 		self.payed += amount
