@@ -1,12 +1,10 @@
 class Printer_type:
-	db = None
+	app = None
 
-	id = '1'
+	id = 1
 	name = ''
 	hour_cost = 0
 
-	def __init__(self, db, id, name, hour_cost):
-		self.db = db
+	def __init__(self, app, id):
+		self.app = app
 		self.id = id
-		self.name = name
-		self.hour_cost = hour_cost

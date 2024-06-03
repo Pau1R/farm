@@ -128,7 +128,7 @@ class SpoolGUI:
 		text += f'Плотность: {self.spool.density} г/см3\n'
 		buttons = []
 		if self.spool.status == 'ordered':
-			buttons.append(['Катушка прибыла на склад', 'delivered']) # TODO: process delivered spool
+			buttons.append(['Катушка прибыла на склад', 'delivered'])
 		buttons.extend(['Изменить вес', 'Удалить', 'Назад'])
 
 		color_photo = self.app.equipment.color_logic.get_color_photo(self.spool.color_id)
@@ -201,7 +201,7 @@ class SpoolGUI:
 	def process_top_menu(self):
 		if self.message.btn_data == 'Добавить':
 			self.status = 'stock'
-			self.show_add_new_spool() # TODO: add spools amount query
+			self.show_add_new_spool()
 		elif self.message.btn_data == 'ordered':
 			self.show_ordered()
 		elif self.message.btn_data == 'Назад':

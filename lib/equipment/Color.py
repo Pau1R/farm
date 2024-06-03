@@ -1,7 +1,7 @@
 from datetime import date
 
 class Color:
-	db = None
+	app = None
 
 	id = 0
 	date: date
@@ -9,14 +9,10 @@ class Color:
 	parent_id = 0
 	samplePhoto = ''
 	
-	def __init__(self, app, db, id, created, name, parent_id, samplePhoto):
+	def __init__(self, app, id):
 		self.app = app
-		self.db = db
 		self.id = id
-		self.date = created
-		self.name = name
-		self.parent_id = parent_id
-		self.samplePhoto = samplePhoto
+		self.date = date.today()
 
 	def get_name(self):
 		if self.parent_id == 0:

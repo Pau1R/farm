@@ -1,16 +1,14 @@
 from datetime import date
 
 class Container:
-	db = None
-
-	id = '1'
+	app = None
+	
+	id = 1
 	date: date
-	type = 'box'
+	type = ''
 	capacity = 0
 
-	def __init__(self, db, id, created, type, capacity):
-		self.db = db
+	def __init__(self, app, id):
+		self.app = app
 		self.id = id
 		self.date = date.today()
-		self.type = type
-		self.capacity = capacity

@@ -43,33 +43,15 @@ class Equipment:
 	def init(self, app, db):
 		self.app = app
 		self.db = db
-		for data in self.db.get_containers():
-			container = Container(self.db, data[0], data[1], data[2], data[3])
-			self.containers.append(container)
-		for data in self.db.get_dryers():
-			dryer = Dryer(self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6])
-			self.dryers.append(dryer)
-		for data in self.db.get_extruders():
-			extruder = Extruder(self.db, data[0], data[1], data[2], data[3], data[4])
-			self.extruders.append(extruder)
-		for data in self.db.get_locations():
-			location = Location(self.db, data[0], data[1], data[2], data[3])
-			self.locations.append(location)
-		for data in self.db.get_printer_types():
-			printer_type = Printer_type(self.db, data[0], data[1], data[2])
-			self.printer_types.append(printer_type)
-		for data in self.db.get_printers():
-			printer = Printer(self.db, data[0], data[1], data[2], data[3])
-			self.printers.append(printer)
-		for data in self.db.get_spools():
-			spool = Spool(self.app, self.db, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11], data[12])
-			self.spools.append(spool)
-		for data in self.db.get_colors():
-			color = Color(self.app, self.db, data[0], data[1], data[2], data[3], data[4])
-			self.colors.append(color)
-		for data in self.db.get_surfaces():
-			surface = Surface(self.db, data[0], data[1], data[2])
-			self.surfaces.append(surface)
+		self.db.get_containers()
+		self.db.get_dryers()
+		self.db.get_extruders()
+		self.db.get_locations()
+		self.db.get_printer_types()
+		self.db.get_printers()
+		self.db.get_spools()
+		self.db.get_colors()
+		self.db.get_surfaces()
 
 		self.sort_containers()
 		self.sort_dryers()
@@ -95,14 +77,16 @@ class Equipment:
 				id += 1
 			else:
 				break
-		return str(id)
+		return id
 
 	def get_object_id(self, element):
 		return element.id
 
 	def create_new_container(self, type, capacity):
 		id = self.get_next_free_id(self.containers)
-		container = Container(self.db, id, date.today(), type, capacity)
+		container = Container(self.app, id)
+		container.type = type
+		container.capacity = capacity
 		self.db.add_container(container)
 		self.containers.append(container)
 		self.sort_containers()
@@ -120,7 +104,12 @@ class Equipment:
 
 	def create_new_dryer(self, name, capacity, minTemp, maxTemp, maxTime):
 		id = self.get_next_free_id(self.dryers)
-		dryer = Dryer(self.db, id, date.today(), name, capacity, minTemp, maxTemp, maxTime)
+		dryer = Dryer(self.app, id)
+		dryer.name = name
+		dryer.capacity = capacity
+		dryer.minTemp = minTemp
+		dryer.maxTemp = maxTemp
+		dryer.maxTime = maxTime
 		self.db.add_dryer(dryer)
 		self.dryers.append(dryer)
 		self.sort_dryers()
@@ -138,7 +127,10 @@ class Equipment:
 
 	def create_new_extruder(self, name, maxTemp, nozzle):
 		id = self.get_next_free_id(self.extruders)
-		extruder = Extruder(self.db, id, date.today(), name, maxTemp, nozzle)
+		extruder = Extruder(self.db, id)
+		extruder.name = name
+		extruder.maxTemp = maxTemp
+		extruder.nozzle = nozzle
 		self.db.add_extruder(extruder)
 		self.extruders.append(extruder)
 		return extruder
@@ -155,7 +147,9 @@ class Equipment:
 
 	def create_new_location(self, name, type):
 		id = self.get_next_free_id(self.locations)
-		location = Location(self.db, id, date.today(), name, type)
+		location = Location(self.db, id)
+		location.name = name
+		location.type = type
 		self.db.add_location(location)
 		self.locations.append(location)
 		return location
@@ -172,7 +166,9 @@ class Equipment:
 
 	def create_new_printer_type(self, name, hour_cost):
 		id = self.get_next_free_id(self.printer_types)
-		printer_type = Printer_type(self.db, id, name, hour_cost)
+		printer_type = Printer_type(self.app, id)
+		printer_type.name = name
+		printer_type.hour_cost = hour_cost
 		self.db.add_printer_type(printer_type)
 		self.printer_types.append(printer_type)
 		return printer_type
@@ -189,7 +185,9 @@ class Equipment:
 
 	def create_new_printer(self, name, type_):
 		id = self.get_next_free_id(self.printers)
-		printer = Printer(self.db, id, date.today(), name, type_)
+		printer = Printer(self.app, id)
+		printer.name = name
+		printer.type_ = type_
 		self.db.add_printer(printer)
 		self.printers.append(printer)
 		return printer
@@ -213,7 +211,20 @@ class Equipment:
 
 	def create_new_spool(self, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate):
 		id = self.get_next_free_id(self.spools)
-		spool = Spool(self.app, self.db, id, date.today(), type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate)
+		spool = Spool(self.app, id)
+		spool.type = type
+		spool.diameter = diameter
+		spool.weight = weight
+		spool.density = density
+		spool.color_id = color_id
+		spool.dried = dried
+		spool.brand = brand
+		spool.booked = booked
+		spool.used = used
+		spool.price = price
+		spool.status = status
+		spool.delivery_date_estimate = delivery_date_estimate
+
 		self.db.add_spool(spool)
 		self.spools.append(spool)
 		return spool
@@ -230,7 +241,10 @@ class Equipment:
 
 	def create_new_color(self, name, parent, samplePhoto):
 		id = int(self.get_next_free_id(self.colors))
-		color = Color(self.app, self.db, id, date.today(), name, parent, samplePhoto)
+		color = Color(self.app, id)
+		color.name = name
+		color.parent = parent
+		color.samplePhoto = samplePhoto
 		self.db.add_color(color)
 		self.colors.append(color)
 		return color
@@ -240,7 +254,8 @@ class Equipment:
 
 	def create_new_surface(self, type):
 		id = self.get_next_free_id(self.surfaces)
-		surface = Surface(self.db, id, date.today(), type)
+		surface = Surface(self.db, id)
+		surface.type = type
 		self.db.add_surface(surface)
 		self.surfaces.append(surface)
 		return surface

@@ -55,7 +55,7 @@ class ContainerGUI:
 			text = 'Ящики отсутствуют'
 		buttons = []
 		for container in self.app.equipment.containers:
-			buttons.append([container.id + ': ' + container.type, container.id]) 
+			buttons.append([str(container.id) + ': ' + container.type, container.id]) 
 		buttons.append('Добавить')
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
@@ -94,7 +94,7 @@ class ContainerGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for container in self.app.equipment.containers:
-				if self.message.btn_data == container.id:
+				if container.id == int(self.message.btn_data):
 					self.container = container
 					self.show_container()
 

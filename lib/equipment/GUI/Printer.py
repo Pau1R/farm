@@ -92,7 +92,7 @@ class PrinterGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for printer in self.app.equipment.printers:
-				if self.message.btn_data == printer.id:
+				if printer.id == int(self.message.btn_data):
 					self.printer = printer
 					self.show_printer()
 

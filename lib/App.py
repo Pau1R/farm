@@ -90,6 +90,3 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
-
-
-# TODO: Owner.py repair and refactor

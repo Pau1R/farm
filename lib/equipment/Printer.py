@@ -1,16 +1,14 @@
 from datetime import date
 
 class Printer:
-	db = None
+	app = None
 
-	id = '1'
+	id = 1
 	date: date
 	name = ''
 	type_ = ''
 
-	def __init__(self, db, id, created, name, type_):
-		self.db = db
+	def __init__(self, app, id):
+		self.app = app
 		self.id = id
-		self.date = created
-		self.name = name
-		self.type_ = type_
+		self.date = date.today()

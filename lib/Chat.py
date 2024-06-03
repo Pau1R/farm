@@ -61,10 +61,10 @@ class Chat:
     def become_employee(self):
         self.is_employee = True
         self.get_employed = False
-        name = self.name
+        name = self.user_name
         self.create_user()
-        self.name = name
-        self.app.db.update_chat(chat)
+        self.user_name = name
+        self.app.db.update_chat(self)
 
     def set_context(self, address, function):
         self.context = f'~{address}|{function}||'

@@ -86,7 +86,7 @@ class SurfaceGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for surface in self.app.equipment.surfaces:
-				if self.message.btn_data == surface.id:
+				if surface.id == int(self.message.btn_data):
 					self.surface = surface
 					self.show_surface()
 

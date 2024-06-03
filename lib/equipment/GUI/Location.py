@@ -89,7 +89,7 @@ class LocationGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for location in self.app.equipment.locations:
-				if self.message.btn_data == location.id:
+				if location.id == int(self.message.btn_data):
 					self.location = location
 					self.show_location()
 

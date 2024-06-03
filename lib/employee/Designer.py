@@ -48,7 +48,7 @@ class Designer:
 
 	def show_top_menu(self):
 		self.last_data = ''
-		text = self.texts.designer_top_menu_text(self.chat.username, len(self.app.orders))
+		text = self.texts.designer_top_menu_text(self.chat.user_name, len(self.app.orders))
 		buttons = self.texts.designer_top_menu_btns.copy()
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')

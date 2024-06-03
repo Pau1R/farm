@@ -63,7 +63,7 @@ class DryerGUI:
 			text = 'Сушилки отсутствуют'
 		buttons = []
 		for dryer in self.app.equipment.dryers:
-			buttons.append([dryer.id + ': ' + dryer.name, dryer.id]) 
+			buttons.append([str(dryer.id) + ': ' + dryer.name, dryer.id]) 
 		buttons.append('Добавить')
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
@@ -120,7 +120,7 @@ class DryerGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for dryer in self.app.equipment.dryers:
-				if self.message.btn_data == dryer.id:
+				if dryer.id == int(self.message.btn_data):
 					self.dryer = dryer
 					self.show_dryer()
 

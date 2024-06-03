@@ -58,7 +58,7 @@ class ExtruderGUI:
 			text = 'Экструдеры отсутствуют'
 		buttons = []
 		for extruder in self.app.equipment.extruders:
-			buttons.append([extruder.id + ': ' + extruder.name, extruder.id]) 
+			buttons.append([str(extruder.id) + ': ' + extruder.name, extruder.id]) 
 		buttons.append('Добавить')
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
@@ -103,7 +103,7 @@ class ExtruderGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for extruder in self.app.equipment.extruders:
-				if self.message.btn_data == extruder.id:
+				if extruder.id == int(self.message.btn_data):
 					self.extruder = extruder
 					self.show_extruder()
 

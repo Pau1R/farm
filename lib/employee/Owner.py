@@ -35,7 +35,6 @@ class Owner:
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.GUI.messages_append(message)
-		# self.GUI.messages.append(message)
 		self.message = message
 		context = self.context
 
@@ -82,9 +81,9 @@ class Owner:
 
 	def process_top_menu(self):
 		if self.message.btn_data == 'Сотрудники':
-			self.show_employees() # 'employees'
+			self.show_employees()
 		elif self.message.btn_data == 'Запросы':
-			self.show_add_employees() # 'add_employees'
+			self.show_add_employees()
 		elif self.message.btn_data == 'Статистика':
 			self.show_farm_statistics()
 		elif self.message.btn_data == 'Назад':
@@ -150,7 +149,6 @@ class Owner:
 			text = 'Какую роль вы хотите добавить пользователю ' + self.employee.user_name + '?'
 		else:
 			function_id = 8
-			# buttons = self.employee.user.roles.copy()
 			buttons = [i for i in self.employee.user.roles if i not in 'Владелец']
 			text = 'Какую роль вы хотите удалить для пользователя ' + self.employee.user_name + '?'
 		buttons.append('Назад')
@@ -167,12 +165,12 @@ class Owner:
 		if self.message.btn_data == 'Назад':
 			self.show_top_menu()
 		else:
-			self.show_employee() # 'employee'
+			self.show_employee()
 
 	def process_employee(self):
 		data = self.message.btn_data
 		if data == 'Удалить':
-			self.show_employee_delete_confirmationshow_employee_delete_confirmation()  # TODO: function untested, test
+			self.show_employee_delete_confirmation()
 		elif data == 'Статистика':
 			self.show_employee_statistics()
 		elif data == 'tranfer_ownership':
@@ -204,16 +202,16 @@ class Owner:
 		if self.message.btn_data == 'Назад':
 			self.show_top_menu()
 		else:
-			self.new_employee_id = self.message.btn_data
+			self.message.instance_id = self.message.btn_data
 			self.show_add_employee_confirmation(self.message)
 
 	def process_add_employee_confirmation(self):
+		chat = self.app.get_chat(self.message.instance_id)
 		if self.message.btn_data == 'Отменить добавление':
-			# TODO: set chat.get_employed to false
+			chat.get_employed = False
+			self.app.db.update_chat(chat)
 			self.show_top_menu()
 		elif self.message.btn_data == 'Подтвердить':
-			chat = self.app.get_chat(self.message.instance_id)
-			# chat = self.app.get_chat(self.new_employee_id)
 			chat.user.show_becomes_employee()
 			chat.become_employee()
 			self.show_top_menu()
@@ -240,7 +238,7 @@ class Owner:
 			self.employee.user.roles = []
 			self.employee.user_name = ''
 			self.app.db.remove_chat(self.employee)
-			self.GUI.tell_id(self.employee.user_id, 'Ваше сотрудничество окончено, всего хорошего')
+			self.GUI.tell_id(self.employee.user_id, 'Вы перестали быть сотрудником')
 			self.app.chats.remove(self.employee)
 			self.employee = None
 			self.show_employees()

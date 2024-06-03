@@ -24,7 +24,7 @@ class Order_logic:
 	def get_client_orders(self, user_id):
 		orders = []
 		for order in self.orders:
-			if order.user_id == user:
+			if order.user_id == user_id:
 				orders.append(order)
 		return orders
 

@@ -1,18 +1,15 @@
 from datetime import date
 
 class Extruder:
-	db = None
+	app = None
 
-	id = '1'
+	id = 1
 	date: date
 	name = ''
 	maxTemp = 0
 	nozzleDiameter = 0
 
-	def __init__(self, db, id, created, name, maxTemp, nozzle):
-		self.db = db
+	def __init__(self, app, id):
+		self.app = app
 		self.id = id
-		self.date = created
-		self.name = name
-		self.maxTemp = maxTemp
-		self.nozzleDiameter = nozzle
+		self.date = date.today()

@@ -88,7 +88,7 @@ class Printer_typeGUI:
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for printer_type in self.app.equipment.printer_types:
-				if self.message.btn_data == printer_type.id:
+				if printer_type.id == int(self.message.btn_data):
 					self.printer_type = printer_type
 					self.show_printer_type()
 

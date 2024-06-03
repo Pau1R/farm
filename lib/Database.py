@@ -4,6 +4,18 @@ from datetime import datetime
 import os
 from lib.Chat import Chat
 from lib.client.Order import Order
+from lib.equipment.Container import Container
+from lib.equipment.Dryer import Dryer
+from lib.equipment.Spool import Spool
+from lib.equipment.Extruder import Extruder
+from lib.equipment.Location import Location
+from lib.equipment.Printer_type import Printer_type
+from lib.equipment.Printer import Printer
+from lib.equipment.Spool import Spool
+from lib.equipment.Spool_logic import Spool_logic
+from lib.equipment.Color import Color
+from lib.equipment.Color_logic import Color_logic
+from lib.equipment.Surface import Surface
 import time
 import ast
 
@@ -282,12 +294,14 @@ class Database:
 #---------------------------- EQUIPMENT ----------------------------
 
 	def get_containers(self):
-		self.cursor.execute('SELECT id, created, type, capacity FROM container')
+		self.cursor.execute('SELECT * FROM container')
 		sql = self.cursor.fetchall()
-		containers = []
-		for container in sql:
-			containers.append([str(container[0]), self.string_to_date(container[1]), container[2], container[3]])
-		return containers
+		for line in sql:
+			container = Container(self.app, int(line[0]))
+			container.created = self.string_to_date(line[1])
+			container.type = line[2]
+			container.capacity = int(line[3])
+			self.app.equipment.containers.append(container)
 
 	def add_container(self, container):
 		self.cursor.execute('INSERT INTO container VALUES (?,?,?,?)', (container.id, date.today(), container.type, container.capacity))
@@ -297,14 +311,18 @@ class Database:
 		self.cursor.execute('DELETE FROM container WHERE id=?', (id,))
 		self.db.commit()
 
-
 	def get_dryers(self):
-		self.cursor.execute('SELECT id, created, name, capacity, minTemp, maxTemp, maxTime FROM dryer')
+		self.cursor.execute('SELECT * FROM dryer')
 		sql = self.cursor.fetchall()
-		dryers = []
-		for dryer in sql:
-			dryers.append([str(dryer[0]), self.string_to_date(dryer[1]), dryer[2], dryer[3], dryer[4], dryer[5], dryer[6]])
-		return dryers
+		for line in sql:
+			dryer = Dryer(self.app, int(line[0]))
+			dryer.created = self.string_to_date(line[1])
+			dryer.name = line[2]
+			dryer.capacity = line[3]
+			dryer.minTemp = line[4]
+			dryer.maxTemp = line[5]
+			dryer.maxTime = line[6]
+			self.app.equipment.dryers.append(dryer)
 
 	def add_dryer(self, dryer):
 		self.cursor.execute('INSERT INTO dryer VALUES (?,?,?,?,?,?,?)', (dryer.id, date.today(), dryer.name, dryer.capacity, dryer.minTemp, dryer.maxTemp, dryer.maxTime))
@@ -315,12 +333,15 @@ class Database:
 		self.db.commit()
 
 	def get_extruders(self):
-		self.cursor.execute('SELECT id, created, name, maxTemp, nozzleDiameter FROM extruder')
+		self.cursor.execute('SELECT * FROM extruder')
 		sql = self.cursor.fetchall()
-		extruders = []
-		for extruder in sql:
-			extruders.append([str(extruder[0]), self.string_to_date(extruder[1]), extruder[2], extruder[3], extruder[4]])
-		return extruders
+		for line in sql:
+			extruder = Extruder(self.app, int(line[0]))
+			extruder.created = self.string_to_date(line[1])
+			extruder.name = line[2]
+			extruder.maxTemp = line[3]
+			extruder.nozzleDiameter = line[4]
+			self.app.equipment.extruders.append(extruder)
 
 	def add_extruder(self, extruder):
 		self.cursor.execute('INSERT INTO extruder VALUES (?,?,?,?,?)', (extruder.id, date.today(), extruder.name, extruder.maxTemp, extruder.nozzleDiameter))
@@ -331,12 +352,14 @@ class Database:
 		self.db.commit()
 
 	def get_locations(self):
-		self.cursor.execute('SELECT id, created, name, type FROM location')
+		self.cursor.execute('SELECT * FROM location')
 		sql = self.cursor.fetchall()
-		locations = []
-		for location in sql:
-			locations.append([str(location[0]), self.string_to_date(location[1]), location[2], location[3]])
-		return locations
+		for line in sql:
+			location = Location(self.app, int(line[0]))
+			location.date = self.string_to_date(line[1])
+			location.name = line[2]
+			location.type = line[3]
+			self.app.equipment.locations.append(location)
 
 	def add_location(self, location):
 		self.cursor.execute('INSERT INTO location VALUES (?,?,?,?)', (location.id, date.today(), location.name, location.type))
@@ -347,12 +370,13 @@ class Database:
 		self.db.commit()
 
 	def get_printer_types(self):
-		self.cursor.execute('SELECT id, name, hour_cost FROM printer_type')
+		self.cursor.execute('SELECT * FROM printer_type')
 		sql = self.cursor.fetchall()
-		printer_types = []
-		for printer_type in sql:
-			printer_types.append([str(printer_type[0]), printer_type[1], printer_type[2]])
-		return printer_types
+		for line in sql:
+			printer_type = Printer_type(self.app, int(line[0]))
+			printer_type.name = line[1]
+			printer_type.hour_cost = line[2]
+			self.app.equipment.printer_types.append(printer_type)
 
 	def add_printer_type(self, printer_type):
 		self.cursor.execute('INSERT INTO printer_type VALUES (?,?,?)', (printer_type.id, printer_type.name, printer_type.hour_cost))
@@ -363,12 +387,14 @@ class Database:
 		self.db.commit()
 
 	def get_printers(self):
-		self.cursor.execute('SELECT id, created, name, type FROM printer')
+		self.cursor.execute('SELECT * FROM printer')
 		sql = self.cursor.fetchall()
-		printers = []
-		for printer in sql:
-			printers.append([str(printer[0]), self.string_to_date(printer[1]), printer[2], printer[3]])
-		return printers
+		for line in sql:
+			printer = Printer(self.app, int(line[0]))
+			printer.date = self.string_to_date(line[1])
+			printer.name = line[2]
+			printer.type_ = line[3]
+			self.app.equipment.printers.append(printer)
 
 	def add_printer(self, printer):
 		self.cursor.execute('INSERT INTO printer VALUES (?,?,?,?)', (printer.id, date.today(), printer.name, printer.type_))
@@ -379,15 +405,27 @@ class Database:
 		self.db.commit()
 
 	def get_spools(self):
-		self.cursor.execute('SELECT id, created, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate FROM spool')
+		self.cursor.execute('SELECT * FROM spool')
 		sql = self.cursor.fetchall()
-		spools = []
-		for spool in sql:
-			spools.append([int(spool[0]), self.string_to_date(spool[1]), spool[2], float(spool[3]), int(spool[4]), float(spool[5]), int(spool[6]), spool[7], spool[8], int(spool[9]), int(spool[10]), spool[11], self.string_to_date(spool[12])])
-		return spools
+		for line in sql:
+			spool = Spool(self.app, int(line[0]))
+			spool.date = self.string_to_date(line[1])
+			spool.type = line[2]
+			spool.diameter = float(line[3])
+			spool.weight = int(line[4])
+			spool.density = float(line[5])
+			spool.color_id = int(line[6])
+			spool.dried = bool(line[7])
+			spool.brand = line[8]
+			spool.booked = int(line[9])
+			spool.used = int(line[10])
+			spool.price = int(line[11])
+			spool.status = line[12]
+			spool.delivery_date_estimate = self.string_to_date(line[13])
+			self.app.equipment.spools.append(spool)
 
 	def add_spool(self, spool):
-		self.cursor.execute('INSERT INTO spool VALUES (?,?,"","",0,"",0,0,"",0,0,"","")', (spool.id, str(spool.date)))
+		self.cursor.execute('INSERT INTO spool VALUES (?,?,"","",0,"",0,0,"",0,0,"","","")', (spool.id, str(spool.date)))
 		self.db.commit()
 		self.update_spool(spool)
 
@@ -411,12 +449,15 @@ class Database:
 		self.db.commit()
 
 	def get_colors(self):
-		self.cursor.execute('SELECT id, created, name, parent_id, samplePhoto FROM color')
+		self.cursor.execute('SELECT * FROM color')
 		sql = self.cursor.fetchall()
-		colors = []
-		for color in sql:
-			colors.append([color[0], self.string_to_date(color[1]), color[2], color[3], color[4]])
-		return colors
+		for line in sql:
+			color = Color(self.app, int(line[0]))
+			color.date = self.string_to_date(line[1])
+			color.name = line[2]
+			color.parent = line[3]
+			color.samplePhoto = line[4]
+			self.app.equipment.colors.append(color)
 
 	def add_color(self, color):
 		self.cursor.execute('INSERT INTO color VALUES (?,Null,Null,Null,Null)', (color.id,))
@@ -436,12 +477,12 @@ class Database:
 		self.db.commit()
 	
 	def get_surfaces(self):
-		self.cursor.execute('SELECT id, created, type FROM surface')
+		self.cursor.execute('SELECT * FROM surface')
 		sql = self.cursor.fetchall()
-		surfaces = []
-		for surface in sql:
-			surfaces.append([str(surface[0]), surface[1], surface[2]])
-		return surfaces
+		for line in sql:
+			surfaces = Surface(self.app, int(line[0]))
+			surfaces.created = line[1]
+			surfaces.type = line[2]
 
 	def add_surface(self, surface):
 		self.cursor.execute('INSERT INTO surface VALUES (?,?,?)', (surface.id, date.today(), surface.type))
@@ -466,7 +507,6 @@ class Database:
 
 	def update_setting(self, name, value):
 		values = 'value = "' + value + '" '
-		# self.cursor.execute('UPDATE setting SET ' + values + ' WHERE name =' + name)
 		self.cursor.execute('UPDATE setting SET ' + values + ' WHERE name = "' + name + '"')
 		self.db.commit()
 

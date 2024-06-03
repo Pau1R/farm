@@ -1,14 +1,13 @@
 from datetime import date
 
 class Surface:
-	db = None
+	app = None
 
-	id = '1'
+	id = 1
 	date: date
 	type = ''
 
-	def __init__(self, db, id, created, type):
-		self.db = db
+	def __init__(self, app, id):
+		self.app = app
 		self.id = id
-		self.date = created
-		self.type = type
+		self.date = date.today()
