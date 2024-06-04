@@ -14,8 +14,7 @@ class Order:
 	name = ''
 	date = None
 	user_id = 1
-	general_status = '' # preparing, in_line, printing, printed  TODO: add to db
-
+	print_status = '' # preparing, in_line, printing, printed
 	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
 	# who can change order status to another:
 	# - client:
@@ -182,13 +181,15 @@ class Order:
 		average_load = self.app.printer_logic.get_average_load(self.printer_type)	# average time to begin this order
 		end_time = average_load + self.time											# add this order time
 		end_time += time.time() / 60 - 9 * 60										# take in account time of day, starting from 9 am
-		end_time += 60 * 5															# add buffer time
-		days = int(end_time / (60 * 10))											# get amount of days to finish this order. Daily work hours: 10
+		end_time += 60 * 5															# add buffer time of 5 hours (near time)
+		days = end_time / (60 * 10)													# get amount of days to finish this order. Daily work hours: 10
+		days = int(days * 1.2)														# add buffer to days (far time)
 		self.completion_date = date.today() + timedelta(days=days)
 		self.app.db.update_order(self)
 
 	def order_payed(self, amount):
 		self.payed += amount
+		self.print_status = 'in_line'
 		if self.is_prepayed():
 			chat = self.app.get_chat(self.user_id)
 			chat.user.orders_canceled = 0

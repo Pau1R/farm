@@ -6,6 +6,7 @@ from lib.Msg import Message
 from lib.client.Order import Order
 from lib.client.Order_logic import Order_logic
 from lib.equipment.Printer_logic import Printer_logic
+from lib.request.Request_logic import Request_logic
 from lib.Test import Test
 from lib.Settings import Settings
 from lib.Clicker import Clicker
@@ -19,7 +20,6 @@ class App:
 	db = None
 	equipment = None
 	settings = None
-	orders = []
 	functions = Functions()
 	clicker = None
 
@@ -28,8 +28,13 @@ class App:
 	count = 0
 	last_check_date = None
 
+	orders = []
 	order_logic = None
+	
 	printer_logic = None
+
+	requests = []
+	request_logic = None
 
 	def __init__(self, bot, conf):
 		self.bot = bot
@@ -42,7 +47,8 @@ class App:
 		self.settings = Settings(self)
 		self.order_logic = Order_logic(self)
 		self.clicker = Clicker(self)
-		self.Printer_logic = Printer_logic(self)
+		self.printer_logic = Printer_logic(self)
+		self.request_logic = Request_logic(self)
 		# test = Test(self.db, self)
 
 	def new_message(self, message):
@@ -71,6 +77,17 @@ class App:
 			if chat.user_id == int(user_id):
 				return chat
 
+	def get_chats(self, roles):
+		if type(roles) == str:
+			roles = [roles]
+		chats = []
+		for chat in self.chats:
+			if chat.is_employee:
+				for role in roles:
+					if role in chat.user.roles:
+						chats.append(chat)
+		return chats
+
 # app structure for buttons:
 # 1 client 
 #	1 client_model
@@ -89,6 +106,7 @@ class App:
 #     7 color
 #     8 surface
 #	  9 settings
+#     10 requests
 #	3 Operator
 #	4 Designer
 #	  1 Validate

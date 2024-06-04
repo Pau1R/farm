@@ -162,8 +162,8 @@ class Client_order:
 						else:
 							buttons.append(['Внести предоплату', 'pay'])
 
-		buttons.append(['Отменить заказ'])
-		buttons.append(['Назад'])
+		buttons.append('Отменить заказ')
+		buttons.append('Назад')
 		self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 
 	def show_supports(self):
@@ -242,7 +242,8 @@ class Client_order:
 		elif data == 'supports':
 			self.show_supports()
 		elif data == 'continue':
-			x = ''
+			self.order.print_status = 'in_line'
+			self.order.status = 'prepayed'
 		elif data == 'pay':
 			self.show_pay()
 		elif data == 'Отменить заказ':
@@ -265,11 +266,6 @@ class Client_order:
 		self.show_order()
 
 	def process_pay(self):
-		# data = self.message.btn_data
-		# if data == 'prepayed':
-		# 	x = ''
-		# elif data == 'Назад':
-		# 	x = ''
 		self.show_order()
 
 	def process_reject_reason(self):

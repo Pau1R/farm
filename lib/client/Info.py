@@ -1,5 +1,6 @@
 from lib.Gui import Gui
 from lib.client.Client_color import Client_color
+import time
 
 class Info:
 	address = ''
@@ -40,7 +41,7 @@ class Info:
 				elif message.function == '4':
 					self.process_disclaimer()
 				elif message.function == '5':
-					self.process_support()
+					self.process_request()
 			elif message.file3 == '1':
 				self.client_color.new_message(message)
 		if message.type == 'text':
@@ -55,7 +56,7 @@ class Info:
 		buttons.append(['Получение заказов', 'receive'])
 		buttons.append(['Технические подробности', 'tech'])
 		buttons.append(['Дисклеймер', 'disclaimer'])
-		buttons.append(['Поддержка', 'support'])
+		buttons.append(['Поддержка', 'request'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
@@ -83,18 +84,26 @@ class Info:
 		buttons = ['Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 4, 0)
 
-	def show_support(self):
+	def show_request(self):
 		self.chat.set_context(self.address, 5)
 		text = 'Опишите вашу проблему'
 		buttons = ['Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
+
+	def show_support_contact(self):
+		# TODO: share telegram support chat
+		self.GUI.tell_permanent('здесь должен быть контакт поддержки')
+
+	def show_support_reply(self, text):
+		self.GUI.tell_permanent(text)
 
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
 		data = self.message.btn_data
 		if data == 'Назад':
-			self.show_top_menu()
+			self.chat.user.last_data = ''
+			self.chat.user.show_top_menu()
 		elif data == 'colors':
 			self.client_color.last_data = ''
 			self.client_color.first_message(self.message)
@@ -104,8 +113,8 @@ class Info:
 			self.show_tech()
 		elif data == 'disclaimer':
 			self.show_disclaimer()
-		elif data == 'support':
-			self.show_support()
+		elif data == 'request':
+			self.show_request()
 
 	def process_receive(self):
 		data = self.message.btn_data
@@ -122,12 +131,15 @@ class Info:
 		if data == 'Назад':
 			self.show_top_menu()
 
-	def process_support(self):
+	def process_request(self):
 		data = self.message.btn_data
 		if data == 'Назад':
 			self.chat.context = ''
-		else: # TODO: think over the support logic
+		else:
 			text = self.message.text
-			self.GUI.tell('Ваш обращение получено, ждите ответа')
+			chat = self.app.get_chats('Администратор')[0]
+			chat.user.admin.requestGUI.show_new_request(text)
+			self.app.request_logic.add_request(self.chat.user_id, text)
+			self.GUI.tell('Ваш обращение получено, ожидайте ответа')
 			time.sleep(2)
 		self.show_top_menu()

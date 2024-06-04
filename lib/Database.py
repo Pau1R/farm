@@ -16,6 +16,7 @@ from lib.equipment.Spool_logic import Spool_logic
 from lib.equipment.Color import Color
 from lib.equipment.Color_logic import Color_logic
 from lib.equipment.Surface import Surface
+from lib.request.Request import Request
 import time
 import ast
 
@@ -112,6 +113,7 @@ class Database:
 			name TEXT,
 			created DATETIME,
 			user_id INTEGER,
+			print_status TEXT,
 			status TEXT,
 			assinged_designer_id TEXT,
 			priority INTEGER,
@@ -142,6 +144,11 @@ class Database:
 			id INTEGER,
 			name TEXT PRIMARY KEY,
 			value TEXT"""
+		request = """
+			id INTEGER,
+			user_id INTEGER PRIMARY KEY,
+			date DATETIME
+			text TEXT"""
 
 		create = 'CREATE TABLE IF NOT EXISTS '
 		
@@ -157,6 +164,7 @@ class Database:
 		self.cursor.execute(create + 'surface (' + surface + ')')
 		self.cursor.execute(create + 'order_ (' + order + ')')
 		self.cursor.execute(create + 'setting (' + setting + ')')
+		self.cursor.execute(create + 'request (' + request + ')')
 		self.db.commit()
 
 #---------------------------- LOGIC ----------------------------
@@ -198,7 +206,7 @@ class Database:
 
 	def update_chat(self, chat):
 		values = 'name = "' + chat.user_name + '", '
-		values += 'isEmployee = "' + str(chat.is_employee) + '", '
+		values += 'isEmployee = "' + str(int(chat.is_employee)) + '", '
 		if chat.is_employee:
 			chat.user.roles.append('')
 			while ("" in chat.user.roles):
@@ -228,42 +236,44 @@ class Database:
 			order.name = line[1]
 			order.date = self.string_to_datetime(line[2])
 			order.user_id = int(line[3])
-			order.status = line[4]
-			order.assinged_designer_id = line[5]
-			order.priority = int(line[6])
-			order.quantity = int(line[7])
-			order.conditions = line[8]
-			order.comment = line[9]
-			order.color_id = int(line[10])
-			order.support_remover = line[11]
-			order.sketches = line[12]
-			order.model_file = line[13]
-			order.plastic_type = line[14]
-			order.printer_type = line[15]
-			order.weight = int(line[16])
-			order.time = line[17]
-			order.completion_date = line[18]
-			order.start_datetime = line[19]
-			order.support_time = int(line[20])
-			order.layer_hight = line[21]
-			order.price = int(line[22])
-			order.pay_code = 0 if line[23] == '' else int(line[23])
-			order.payed = line[24]
-			order.prepayment_percent = int(line[25])
-			order.booked = ast.literal_eval(line[26])
-			order.booked_time = int(line[27])
-			order.delivery_code = int(line[28])
-			order.delivery_user_id = int(line[29])
+			order.print_status = line[4]
+			order.status = line[5]
+			order.assinged_designer_id = line[6]
+			order.priority = int(line[7])
+			order.quantity = int(line[8])
+			order.conditions = line[9]
+			order.comment = line[10]
+			order.color_id = int(line[11])
+			order.support_remover = line[12]
+			order.sketches = line[13]
+			order.model_file = line[14]
+			order.plastic_type = line[15]
+			order.printer_type = line[16]
+			order.weight = int(line[17])
+			order.time = line[18]
+			order.completion_date = line[19]
+			order.start_datetime = line[20]
+			order.support_time = int(line[21])
+			order.layer_hight = line[22]
+			order.price = int(line[23])
+			order.pay_code = 0 if line[24] == '' else int(line[24])
+			order.payed = line[25]
+			order.prepayment_percent = int(line[26])
+			order.booked = ast.literal_eval(line[27])
+			order.booked_time = int(line[28])
+			order.delivery_code = int(line[29])
+			order.delivery_user_id = int(line[30])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"",0,0,0,"","",0,"","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, datetime.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"","",0,0,0,"","",0,"","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, datetime.today()))
 		self.db.commit()
 		self.update_order(order)
 
 	def update_order(self, order):
 		values = 'name = "' + order.name + '", '
 		values += 'user_id = "' + str(order.user_id) + '", '
+		values += 'print_status = "' + order.print_status + '", '
 		values += 'status = "' + order.status + '", '
 		values += 'assinged_designer_id = "' + str(order.assinged_designer_id) + '", '
 		values += 'priority = "' + str(order.priority) + '", '
@@ -486,9 +496,10 @@ class Database:
 		self.cursor.execute('SELECT * FROM surface')
 		sql = self.cursor.fetchall()
 		for line in sql:
-			surfaces = Surface(self.app, int(line[0]))
-			surfaces.created = line[1]
-			surfaces.type = line[2]
+			surface = Surface(self.app, int(line[0]))
+			surface.created = line[1]
+			surface.type = line[2]
+			self.app.equipment.surfaces.append(surface)
 
 	def add_surface(self, surface):
 		self.cursor.execute('INSERT INTO surface VALUES (?,?,?)', (surface.id, date.today(), surface.type))
@@ -518,4 +529,22 @@ class Database:
 
 	def remove_setting(self, name):
 		self.cursor.execute('DELETE FROM setting WHERE name=?', (name,))
+		self.db.commit()
+
+	def get_requests(self):
+		self.cursor.execute('SELECT * FROM request')
+		sql = self.cursor.fetchall()
+		for line in sql:
+			request = Request(self.app, int(line[0]))
+			request.user_id = int(line[1])
+			request.date = self.string_to_date(line[2])
+			request.text = line[3]
+			self.app.requests.append(request)
+
+	def add_request(self, request):
+		self.cursor.execute('INSERT INTO request VALUES (?,?,?,?)', (request.id, request.user_id, date.today(), request.text))
+		self.db.commit()
+
+	def remove_request(self, request):
+		self.cursor.execute('DELETE FROM request WHERE id=?', (request.id,))
 		self.db.commit()

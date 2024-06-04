@@ -114,6 +114,7 @@ class Client_color:
 	def show_booked(self):
 		if self.order.is_free_start():
 			text = 'Заказ принят и помещен в очередь на печать'
+			self.order.print_status = 'in_line'
 		else:
 			text = 'Цвет забронирован. Если в течении 30 минут не будет внесена предоплата, бронь отменится'
 		buttons = [['Хорошо','ok']]

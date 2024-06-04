@@ -130,6 +130,7 @@ class Client_model:
 		if self.message.type == 'document':
 			extention = self.message.file_name.split(".")[-1]
 			if extention in self.texts.supported_3d_extensions:
+				self.order.print_status = 'preparing'
 				self.order.status = 'validate'
 				self.order.user_id = self.app.chat.user_id
 				self.order.model_file = self.message.file_id

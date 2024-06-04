@@ -83,7 +83,7 @@ class ColorGUI:
 			no_shades = True
 			for color in self.colors:
 				if color.parent_id == self.color.id:
-					buttons.append(['Оттенки'])
+					buttons.append('Оттенки')
 					no_shades = False
 					break
 			if no_shades:

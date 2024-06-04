@@ -30,10 +30,23 @@ class Functions:
 			return self.russian_date(date_)
 
 	def get_weight_string(self, weight):
-	    if weight % 1000 == 0:
-	        return str(weight // 1000) + 'кг'
-	    else:
-	        return '{:.2f}кг'.format(weight / 1000)
+		if weight % 1000 == 0:
+			return str(weight // 1000) + ' кг'
+		else:
+			return '{:.2f} кг'.format(weight / 1000)
+
+	def get_next_free_id(self, array):
+		ids = []
+		for elem in array:
+			ids.append(int(elem.id))
+		ids.sort()
+		id = 1
+		for elem in ids:
+			if elem == id:
+				id += 1
+			else:
+				break
+		return id
 
 functions = Functions()
 

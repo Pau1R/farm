@@ -15,6 +15,7 @@ from lib.equipment.GUI.Color import ColorGUI
 from lib.equipment.GUI.Surface import SurfaceGUI
 from lib.employee.SettingsGUI import SettingsGUI
 from lib.client.Client_order import Client_order
+from lib.request.RequestGUI import RequestGUI
 
 class Admin:
 	address = ''
@@ -37,6 +38,8 @@ class Admin:
 	surfaceGUI = None
 	settingsGUI = None
 
+	requestGUI = None
+
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
@@ -56,6 +59,7 @@ class Admin:
 		self.settingsGUI = SettingsGUI(app, chat, address + '/10')
 		
 		self.client_order = Client_order(app, chat, address + '/11')
+		self.requestGUI = RequestGUI(app, chat, address + '/12')
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -99,6 +103,8 @@ class Admin:
 				self.settingsGUI.new_message(message)
 			elif message.file3 == '11':
 				self.client_order.new_message(message)
+			elif message.file3 == '12':
+				self.requestGUI.new_message(message)
 		if message.type == 'text' and message.file3 == '':
 			self.GUI.messages_append(message)
 
@@ -107,6 +113,8 @@ class Admin:
 	def show_top_menu(self):
 		text = 'Здравствуйте, Администратор ' + self.chat.user_name
 		buttons = ['Заказы', 'Оборудование', 'Настройки']
+		if len(self.app.requests):
+			buttons.append(['Обращения в поддержку', 'request'])
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
@@ -137,6 +145,9 @@ class Admin:
 		elif self.message.btn_data == 'Настройки':
 			self.settingsGUI.last_data = ''
 			self.settingsGUI.first_message(self.message)
+		elif self.message.btn_data == 'request':
+			self.requestGUI.last_data = ''
+			self.requestGUI.first_message(self.message)
 
 	def process_orders(self):
 		if self.message.btn_data == 'Назад':
