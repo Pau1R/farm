@@ -1,14 +1,14 @@
-from lib.equipment.Container import Container
-from lib.equipment.Dryer import Dryer
-from lib.equipment.Extruder import Extruder
-from lib.equipment.Location import Location
-from lib.equipment.Printer_type import Printer_type
-from lib.equipment.Printer import Printer
-from lib.equipment.Spool import Spool
-from lib.equipment.Spool_logic import Spool_logic
-from lib.equipment.Color import Color
-from lib.equipment.Color_logic import Color_logic
-from lib.equipment.Surface import Surface
+from lib.equipment.container.Container import Container
+from lib.equipment.dryer.Dryer import Dryer
+from lib.equipment.extruder.Extruder import Extruder
+from lib.equipment.location.Location import Location
+from lib.equipment.printer_type.Printer_type import Printer_type
+from lib.equipment.printer.Printer import Printer
+from lib.equipment.spool.Spool import Spool
+from lib.equipment.spool.Logic import Spool_logic
+from lib.equipment.color.Color import Color
+from lib.equipment.color.Logic import Color_logic
+from lib.equipment.surface.Surface import Surface
 from datetime import date
 
 class Equipment:

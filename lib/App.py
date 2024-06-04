@@ -5,9 +5,9 @@ from datetime import date
 from lib.Msg import Message
 from lib.client.Order import Order
 from lib.client.Order_logic import Order_logic
-from lib.equipment.Printer_logic import Printer_logic
+from lib.equipment.printer.Logic import Printer_logic
 from lib.request.Request_logic import Request_logic
-from lib.Test import Test
+# from lib.Test import Test
 from lib.Settings import Settings
 from lib.Clicker import Clicker
 import jsonpickle
