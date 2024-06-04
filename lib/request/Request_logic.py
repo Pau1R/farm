@@ -9,6 +9,11 @@ class Request_logic:
 		self.requests = app.requests
 		self.app.db.get_requests()
 
+	def get_request(self, id):
+		for request in self.requests:
+			if request.id == id:
+				return request
+
 	def add_request(self, user_id, text):
 		id = self.app.functions.get_next_free_id(self.requests)
 		request = Request(self.app, id)

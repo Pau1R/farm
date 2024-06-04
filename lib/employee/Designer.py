@@ -14,6 +14,8 @@ class Designer:
 	GUI = None
 	texts = None
 	message = None
+
+	orders = []
 	
 	last_data = ''
 
@@ -23,6 +25,7 @@ class Designer:
 		self.app = app
 		self.chat = chat
 		self.address = address
+		self.orders = app.orders
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(chat, '1/4')
 		self.validate = Validate(app, chat)
@@ -48,8 +51,18 @@ class Designer:
 
 	def show_top_menu(self):
 		self.last_data = ''
-		text = self.texts.designer_top_menu_text(self.chat.user_name, len(self.app.orders))
-		buttons = self.texts.designer_top_menu_btns.copy()
+		text = f'Здравствуйте, дизайнер {self.chat.user_name}. '
+		amount = 0
+		for order in self.orders:
+			if order.status == 'validate':
+				amount += 1
+		if amount > 0:
+			text += f'Задач в очереди: {amount}'
+		else:
+			text += 'Задачи отсутствуют'
+		buttons = [['Разработка моделей по чертежу', 'design']] 
+		buttons.append(['Валидация моделей', 'validate'])
+		buttons.append(['Настройка параметрических моделей','parametric'])
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 1, 0)

@@ -238,7 +238,7 @@ class Database:
 			order.user_id = int(line[3])
 			order.print_status = line[4]
 			order.status = line[5]
-			order.assinged_designer_id = line[6]
+			order.assinged_designer_id = int(line[6])
 			order.priority = int(line[7])
 			order.quantity = int(line[8])
 			order.conditions = line[9]

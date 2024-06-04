@@ -30,16 +30,6 @@ class Texts:
 
 #---------------------------- DESIGNER TEXTS ----------------------------
 
-	def designer_top_menu_text(self, name, models):
-		text = f'Здравствуйте, дизайнер {name}.\n\n'
-		if models > 0:
-			text += f'У вас {models} задач в очереди'
-		else:
-			text += 'Задачи отсутствуют'
-		return text
-
-	designer_top_menu_btns = [['Разработка моделей по чертежу', 'design'], ['Валидация моделей', 'validate'], ['Настройка параметрических моделей','parametric']]
-
 	def designer_orders_design_text(self, order_timer, orders):
 		text = f'Текущая модель в работе: {order_timer}\n\nВыберите Модель'
 		if orders == []:
@@ -66,7 +56,7 @@ class Texts:
 		return buttons
 
 	def designer_orders_validate_text(self, order_timer, orders):
-		text = f'Валидация моделей.\n\nТекущая модель в работе: {order_timer}\n\nВыберите модель'
+		text = f'Выберите модель для валидации'
 		if orders == []:
 			text = 'Модели отсутствуют'
 		return text
@@ -76,7 +66,7 @@ class Texts:
 		orders = orders.copy()
 		orders.sort(key=self.get_object_date)
 		for order in orders:
-			if order.status == 'validate' and (order.assinged_designer_id == str(chat.user_id) or order.assinged_designer_id == ''):
+			if order.status == 'validate' and (order.assinged_designer_id == str(chat.user_id) or order.assinged_designer_id == 0):
 				buttons.append([str(order.id) + ': ' + order.name, order.id])
 		buttons.extend(['Назад'])
 		return buttons

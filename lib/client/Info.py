@@ -90,7 +90,8 @@ class Info:
 		buttons = ['Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
 
-	def show_support_contact(self):
+	def show_support_contact(self, text):
+		self.GUI.tell_permanent(text)
 		self.GUI.tell_contact_permanent('+375299967110', 'Павел')
 
 	def show_support_reply(self, text):
@@ -137,8 +138,8 @@ class Info:
 		else:
 			text = self.message.text
 			chat = self.app.get_chats('Администратор')[0]
-			chat.user.admin.requestGUI.show_new_request(text)
-			self.app.request_logic.add_request(self.chat.user_id, text)
+			request = self.app.request_logic.add_request(self.chat.user_id, text)
+			chat.user.admin.requestGUI.show_new_request(request)
 			self.GUI.tell('Ваш обращение получено, ожидайте ответа')
 			time.sleep(2)
 		self.show_top_menu()

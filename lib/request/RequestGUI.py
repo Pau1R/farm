@@ -32,8 +32,10 @@ class RequestGUI:
 			if message.function == '1':
 				self.process_top_menu()
 			elif message.function == '2':
-				self.process_request()
+				self.process_new_request()
 			elif message.function == '3':
+				self.process_request()
+			elif message.function == '4':
 				self.process_reply()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
@@ -51,9 +53,10 @@ class RequestGUI:
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
-	def show_new_request(self, text):
-		text = 'Новое обращение в службу поддержки:\n\n' + text
-		self.GUI.tell(text)
+	def show_new_request(self, request):
+		text = 'Новое обращение в службу поддержки:\n\n' + request.text
+		buttons = ['Перейти']
+		self.GUI.tell_buttons(text, buttons, buttons, 2, request.id)
 
 	def show_request(self):
 		text = self.request.text
@@ -61,13 +64,13 @@ class RequestGUI:
 		buttons.append(['Перенести разговор в чат поддержки','chat'])
 		buttons.append(['Оставить без ответа','ignore'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
+		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
 
 	def show_reply(self):
-		self.chat.set_context(self.address, 3)
+		self.chat.set_context(self.address, 4)
 		text = 'Напишите ответ на запрос:\n\n' + self.request.text
 		buttons = ['Назад']
-		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
+		self.GUI.tell_buttons(text, buttons, buttons, 4, 0)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -80,6 +83,12 @@ class RequestGUI:
 				if request.id == int(data):
 					self.request = request
 					self.show_request()
+
+	def process_new_request(self):
+		if self.message.btn_data == 'Перейти':
+			id = int(self.message.instance_id)
+			self.request = self.app.request_logic.get_request(id)
+			self.show_request()
 
 	def process_request(self):
 		data = self.message.btn_data
@@ -107,8 +116,9 @@ class RequestGUI:
 #---------------------------- LOGIC ----------------------------
 
 	def send_chat(self):
+		text = 'По поводу вашего обращения напишите в чат поддержки:'
 		chat = self.app.get_chat(self.request.user_id)
-		chat.user.info.show_support_contact()
+		chat.user.info.show_support_contact(text)
 
 	def remove(self, request):
 		self.app.request_logic.remove_request(self.request)
