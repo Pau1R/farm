@@ -91,8 +91,7 @@ class Info:
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
 
 	def show_support_contact(self):
-		# TODO: share telegram support chat
-		self.GUI.tell_permanent('здесь должен быть контакт поддержки')
+		self.GUI.tell_contact_permanent('+375299967110', 'Павел')
 
 	def show_support_reply(self, text):
 		self.GUI.tell_permanent(text)

@@ -64,15 +64,22 @@ class Gui:
 	def tell_id(self, id, text):
 		Message(self.app.bot.send_message(id, text))
 
+	def tell_contact(self, phone_number, first_name):
+		message = Message(self.app.bot.send_contact(self.chat.user_id, phone_number, first_name))
+		self.messages_append(message)
+
+	def tell_contact_permanent(self, phone_number, first_name):
+		message = Message(self.app.bot.send_contact(self.chat.user_id, phone_number, first_name))
+
+	def tell_document(self, document, caption):
+		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption))
+		self.messages_append(message)
+
 	def tell_document_buttons(self, document, caption, bts, strict_, function_id, object_id):
 		buttons = self.buttons_address(bts, function_id, object_id)
 		strict = self.buttons_address(strict_, function_id, object_id)
 		buttons = self.prepare_buttons(buttons, strict)
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption, reply_markup=buttons))
-		self.messages_append(message)
-
-	def tell_document(self, document, caption):
-		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption))
 		self.messages_append(message)
 
 	def tell_photo(self, caption, photo):
