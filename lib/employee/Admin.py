@@ -14,7 +14,7 @@ from lib.equipment.spool.GUI import SpoolGUI
 from lib.equipment.color.GUI import ColorGUI
 from lib.equipment.surface.GUI import SurfaceGUI
 from lib.settings.GUI import SettingsGUI
-from lib.client.Order import Client_order
+from lib.order.GUI import Client_order
 from lib.request.RequestGUI import RequestGUI
 
 class Admin:
@@ -124,6 +124,8 @@ class Admin:
 		buttons = []
 		for order in self.app.orders:
 			buttons.append([f'{order.id}: {order.name}', order.id])
+		if not buttons:
+			self.show_top_menu()
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
 

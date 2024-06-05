@@ -76,10 +76,13 @@ class Validate:
 	def show_top_menu(self):
 		text = self.texts.designer_orders_validate_text(self.order_timer, self.app.orders)
 		buttons = self.texts.designer_orders_validate_btns(self.app.orders, self.app.chat)
+		if not buttons:
+			self.app.chat.user.designer.first_message(self.message)
+		buttons.extend(['Назад'])
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_validate(self):
-		text = self.texts.designer_order_validate_text(self.order)
+		text = self.texts.designer_order_validate_text(self.app, self.order)
 		buttons = [['Принять модель', 'accept'], ['Отказать','reject'], ['Назад']]
 		self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.id)
 
@@ -96,9 +99,9 @@ class Validate:
 			if button not in buttons:
 				buttons.append(button)
 		text = f'Выберите тип пластика. Условия эксплуатации: {self.order.conditions}'
-		buttons.append(['любой базовый', 'any'])
+		buttons.append(['любой базовый', 'basic'])
 		buttons.append(['Подходящего пластика нет', 'unavailable'])
-		self.GUI.tell_buttons(text, buttons, [], 4, self.order.id)
+		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
 
 	def show_accept_quantity(self):
 		if self.order.quantity > 1:
@@ -154,7 +157,7 @@ class Validate:
 			self.app.chat.user.designer.first_message(self.message)
 		else:
 			for order in self.app.orders:
-				if int(self.message.btn_data) == order.id:
+				if order.id == int(self.message.btn_data):
 					self.order = order
 					self.show_validate()
 
@@ -163,7 +166,7 @@ class Validate:
 					# self.table_hours = 4
 					# self.table_minutes = 10
 					# self.support_minutes = 1
-					# self.material = 'any'
+					# self.material = 'basic'
 					# self.material = 'PLA'
 					# self.process_accept_confirmation()
 
@@ -178,15 +181,15 @@ class Validate:
 
 	def process_accept(self):
 		for type_ in self.app.equipment.printer_types:
-			if type_.id == self.message.btn_data:
+			if type_.id == int(self.message.btn_data):
 				self.printer_type = type_.name
 		self.show_accept_plastic_type()
 
 	def process_accept_plastic_type(self):
 		if self.message.btn_data == 'unavailable':
 			self.order.status = 'no_spools'
-		elif self.message.btn_data == 'any':
-			self.material = 'any'
+		elif self.message.btn_data == 'basic':
+			self.material = 'basic'
 		else:
 			self.material = self.message.btn_data
 		self.show_accept_quantity()

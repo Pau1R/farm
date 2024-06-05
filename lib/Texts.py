@@ -68,11 +68,10 @@ class Texts:
 		for order in orders:
 			if order.status == 'validate' and (order.assinged_designer_id == str(chat.user_id) or order.assinged_designer_id == 0):
 				buttons.append([str(order.id) + ': ' + order.name, order.id])
-		buttons.extend(['Назад'])
 		return buttons
 
-	def designer_order_validate_text(self, order):
-		text = f'Заказ № {order.id} "{order.name}" \nДата добавления: {order.date}'
+	def designer_order_validate_text(self, app, order):
+		text = f'Заказ № {order.id} "{order.name}" \nДата добавления: {app.functions.russian_date(order.date)}'
 		if order.quantity > 1:
 			text += f'\nКоличество экземпляров: {order.quantity}'
 		if not (order.conditions == '' or order.conditions == None):

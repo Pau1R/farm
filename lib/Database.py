@@ -251,8 +251,8 @@ class Database:
 			order.printer_type = line[16]
 			order.weight = int(line[17])
 			order.time = line[18]
-			order.completion_date = line[19]
-			order.start_datetime = line[20]
+			order.completion_date = self.string_to_date(line[19])
+			order.start_datetime = self.string_to_datetime(line[20])
 			order.support_time = int(line[21])
 			order.layer_hight = line[22]
 			order.price = int(line[23])
@@ -266,7 +266,7 @@ class Database:
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,?,"",0,"","",0,0,0,"","",0,"","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, datetime.today()))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","",0,0,0,"","",0,"","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
 		self.db.commit()
 		self.update_order(order)
 
@@ -471,7 +471,7 @@ class Database:
 			color = Color(self.app, int(line[0]))
 			color.date = self.string_to_date(line[1])
 			color.name = line[2]
-			color.parent = line[3]
+			color.parent_id = int(line[3])
 			color.samplePhoto = line[4]
 			self.app.equipment.colors.append(color)
 

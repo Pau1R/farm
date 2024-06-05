@@ -2,6 +2,7 @@ import sys
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
+from lib.client.Color import Client_color
 from lib.client.Texts import Texts
 import time
 import random
@@ -22,12 +23,15 @@ class Client_order:
 
 	order = None
 
+	client_color = None
+
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, address)
 		self.texts = Texts(app)
+		self.client_color = Client_color(app, chat, address + '/1')
 
 	def first_message(self, message):
 		self.message = message
@@ -40,20 +44,23 @@ class Client_order:
 		self.set_order()
 		self.GUI.clear_order_chat(self.order.id)
 
-		if message.data_special_format and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
-			self.last_data = message.data
-			if message.function == '1':
-				self.process_order()
-			elif message.function == '2':
-				self.process_supports()
-			elif message.function == '3':
-				self.process_pay()
-			elif message.function == '4':
-				self.process_cancel_confirmation()
-			elif message.function == '5':
-				self.process_confirmed_by_designer()
-			elif message.function == '6':
-				self.process_reject_reason()
+		if message.data_special_format:
+			if message.file3 == '' and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
+				self.last_data = message.data
+				if message.function == '1':
+					self.process_order()
+				elif message.function == '2':
+					self.process_supports()
+				elif message.function == '3':
+					self.process_pay()
+				elif message.function == '4':
+					self.process_cancel_confirmation()
+				elif message.function == '5':
+					self.process_confirmed_by_designer()
+				elif message.function == '6':
+					self.process_reject_reason()
+			elif message.file3 == '1':
+				self.client_color.new_message(message)
 		if message.type == 'text':
 			self.GUI.messages_append(message)
 
@@ -84,6 +91,12 @@ class Client_order:
 		free_start = order.is_free_start()
 		prepayed = order.is_prepayed()
 		color = self.app.equipment.color_logic.get_color_name(order.color_id)
+
+		plastic_type = order.plastic_type
+		if plastic_type:
+			if plastic_type == 'basic':
+				plastic_type = 'любой базовый'
+			plastic_type.lower()
 
 		status = ''
 		if order.status == 'validate':
@@ -119,8 +132,8 @@ class Client_order:
 			else:
 				text0 = 'Вес'
 			text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
-		if order.plastic_type != '':
-			text += f'Тип материала: {order.plastic_type.lower()}\n'
+		if plastic_type:
+			text += f'Тип материала: {plastic_type}\n'
 		if order.color_id != 0:
 			text += f'Цвет изделия: {color.lower()}\n'
 		if order.time > 0:
@@ -146,10 +159,10 @@ class Client_order:
 			# order.color_id = ''
 			# status = 'validated'
 			if order.status == 'validated':
-				if order.color_id == 0:
-					buttons.append(['Выбрать цвет', 'color'])
-				elif order.support_remover == '' and order.support_time > 0:
+				if order.support_remover == '' and order.support_time > 0:
 					buttons.append(['Выбрать кто уберет поддержки', 'supports'])
+				elif order.color_id == 0:
+					buttons.append(['Выбрать цвет', 'color'])
 				elif settings_set:
 					# Условия принятия заказа без предоплаты:
 					# 1) Стоимость заказа меньше лимита
@@ -167,7 +180,7 @@ class Client_order:
 		self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 
 	def show_supports(self):
-		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + self.order.get_supports_price() + ' рублей'
+		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + str(self.order.get_supports_price()) + ' рублей'
 		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Компания'], 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.id)
 
@@ -181,14 +194,16 @@ class Client_order:
 			price = order.get_prepayment_price()
 
 		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру телефона, карточки или счета, указанных ниже. В комментарии обязательно укажите код заказа: '
-		text += order.pay_code
+		text += str(order.pay_code)
 		self.GUI.tell(text)
 		self.GUI.tell('Сумма перевода: ' + str(int(price)))
 		self.GUI.tell('Получатель перевода: ' + self.app.settings.get('transfer_receiver'))
 		self.GUI.tell(self.app.settings.get('phone_number'))
 		self.GUI.tell(self.app.settings.get('card_number'))
 		self.GUI.tell(self.app.settings.get('account_number'))
-		text = 'Для зачисления средств может понадобиться несколько минут. После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
+		text = 'Для зачисления средств может понадобиться несколько минут.'
+		text += ' После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
+		text += ' В случае если ваш перевод не привязался к заказу напишите в поддержку.'
 		buttons = [['Предоплату сделал', 'prepayed']]
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 3, order.id)
@@ -237,8 +252,8 @@ class Client_order:
 	def process_order(self):
 		data = self.message.btn_data
 		if data == 'color':
-			self.chat.user.client_color.last_data = ''
-			self.chat.user.client_color.first_message(self.message)
+			self.client_color.last_data = ''
+			self.client_color.first_message(self.message)
 		elif data == 'supports':
 			self.show_supports()
 		elif data == 'continue':
@@ -282,17 +297,22 @@ class Client_order:
 					if chat.user_id == self.order.user_id:
 						chat.user.client_order.show_rejected_by_admin(self.order, self.reject_reason)
 						self.reject_reason = ''
+			if self.order.status == 'validated':
+				chat = self.app.get_chat(self.order.user_id) # if admin is looking at order
+				chat.user.penalty()
 			self.order.remove_reserve()
 			self.app.orders.remove(self.order)
 			self.app.db.remove_order(self.order)
 			self.order = None
 			self.chat.user.last_data = ''
-			self.chat.user.show_orders()
-			if self.order.status == 'validated':
-				chat = self.app.get_chat(self.order.user_id)
-				chat.user.penalty()
-			return
-		self.show_order()
+			if self.is_admin():
+				self.chat.user.admin.last_data = ''
+				self.chat.user.admin.show_orders()
+			else:
+				self.chat.user.last_data = ''
+				self.chat.user.show_orders()
+		else:
+			self.show_order()
 
 	def process_confirmed_by_designer(self):
 		if self.message.btn_data == 'now':

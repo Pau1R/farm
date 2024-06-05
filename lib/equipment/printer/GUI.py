@@ -104,7 +104,7 @@ class PrinterGUI:
 
 	def process_add_type(self):
 		for type_ in self.app.equipment.printer_types:
-			if type_.id == self.message.btn_data:
+			if type_.id == int(self.message.btn_data):
 				self.type_ = type_.name
 		self.show_add_name()
 

@@ -90,7 +90,7 @@ class App:
 
 # app structure for buttons:
 # 1 client 
-#	1 client_model
+#	1 their_model
 #	2 client_color
 #   3 client_order
 #   4 client_info
@@ -114,6 +114,5 @@ class App:
 
 
 # TODO: 
-# - restructure farm/lib/client folder
 # - internet order
 # - client images

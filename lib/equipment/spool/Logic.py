@@ -20,7 +20,7 @@ class Spool_logic:
 			spools[spool.type][spool.color_id] += spool.weight  # add spool weight
 		return spools # {'PETG': {1: 998, 5: 4500, 7: 1000, 2: 1000}, 'PLA': {6: 9000}, 'PC': {1: 4000}, 'ABS': {6: 1000}, 'TPE': {9: 900}}
 
-	def spools_average_price(self, materials): # materials: 'any' or 'PETG' or ['PETG', 'PLA', 'any',...]
+	def spools_average_price(self, materials): # materials: 'basic' or 'PETG' or ['PETG', 'PLA', 'basic',...]
 		materials = self.normalize_materials(materials)
 		price = 1
 		weight = 1
@@ -30,14 +30,15 @@ class Spool_logic:
 				weight += spool.weight
 		return int(price/weight)
 
-	def get_gram_price(self, color_id, plastic_type):
+	def get_gram_price(self, color_id, types):
+		plastic_types = self.normalize_materials(types)
 		if color_id != 0:
 			for spool in self.spools:
-				if spool.color_id == color_id and spool.type == plastic_type:
+				if spool.color_id == color_id and spool.type in plastic_types:
 					gram_price = spool.price/spool.weight
 					break
 		else:
-			gram_price = self.spools_average_price(plastic_type)
+			gram_price = self.spools_average_price(plastic_types)
 		return gram_price
 
 	def available_weight(self, spool, minimal_weight):
@@ -136,14 +137,14 @@ class Spool_logic:
 
 #---------------------------- CLIENT COLOR SELECTION ----------------------------
 
-	def get_in_stock_buttons(self, types, color_id, one_copy_weight, order_quantity):
+	def get_in_stock_buttons(self, types, one_copy_weight, order_quantity):
 		buttons = []
 		order_weight = one_copy_weight * order_quantity
 		for color in self.get_colors(types):
 			spools_ = self.satisfy(['stock'], types, color.id, order_weight, one_copy_weight)
 			spools_ = [sublist[0] for sublist in spools_]
 			if spools_:
-				buttons.append([color.color_logic.get_color_name(), color.id])
+				buttons.append([color.get_name(), color.id])
 		return buttons
 
 	def is_ordered(self, types, one_copy_weight, order_quantity):
@@ -181,7 +182,7 @@ class Spool_logic:
 			latest_dates[color] = latest_date
 
 		# convert to button format list
-		return [[self.color_logic.get_color_name(key) + '(' + self.app.functions.russian_date(value) + ')', key]
+		return [[self.color_logic.get_color_name(key) + ' (' + self.app.functions.russian_date_2(value) + ')', key]
 				for key, value in latest_dates.items()]
 
 #---------------------------- LOGIC ----------------------------
@@ -189,8 +190,8 @@ class Spool_logic:
 	def normalize_materials(self, val):
 		if type(val) == str:
 			val = [val]
-		elif 'any' in val:
-			val.remove('any')
+		if 'basic' in val:
+			val.remove('basic')
 			val.extend(self.app.settings.get('basic_plastic_types').split(','))
 		return list(set(val)) # remove duplicates
 

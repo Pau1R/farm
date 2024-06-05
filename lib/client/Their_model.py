@@ -1,11 +1,12 @@
 import sys
+from datetime import datetime
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Texts import Texts
 import time
 
-class Client_model:
+class Their_model:
 	address = ''
 
 	app = None
@@ -54,7 +55,7 @@ class Client_model:
 
 	def show_name(self):
 		self.chat.set_context(self.address, 1)
-		self.GUI.tell(self.texts.model_name)
+		self.GUI.tell('Напишите название вашей модели')
 
 	def show_quantity(self):
 		text = self.texts.model_quantity
@@ -130,6 +131,7 @@ class Client_model:
 		if self.message.type == 'document':
 			extention = self.message.file_name.split(".")[-1]
 			if extention in self.texts.supported_3d_extensions:
+				self.order.date = datetime.today()
 				self.order.print_status = 'preparing'
 				self.order.status = 'validate'
 				self.order.user_id = self.app.chat.user_id

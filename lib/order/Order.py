@@ -1,8 +1,10 @@
+from datetime import timedelta
 from datetime import datetime
 from datetime import date
 from lib.Gui import Gui
 import time
 import math
+import random
 
 class Order:
 	app = None
@@ -89,19 +91,24 @@ class Order:
 		print_cost = self.app.equipment.print_cost(self.printer_type)  									# cost of one hour for printer
 		time_price = (self.time / 60) * print_cost														# cost of all printer working time
 		supports_price = self.get_supports_price()
+		if self.support_remover == 'Компания':
+			supports_price = 0
 		rounded_price = math.ceil((plastic_price + time_price) / 10) * 10  # round to upper side
 		self.price = int(rounded_price + supports_price)
 		self.app.db.update_order(self)
 
 	def get_prepayment_price(self):
-		prepay_price = (self.prepayment_percent / 100) * self.price
-		prepay_price = math.ceil(prepay_price / 10) * 10
+		if self.price < 300:
+			prepay_price = self.price
+		else:
+			prepay_price = (self.prepayment_percent / 100) * self.price
+			prepay_price = math.ceil(prepay_price / 10) * 10
+		return prepay_price
 
 	def is_prepayed(self):
-		if self.is_free_start:
+		if self.is_free_start():
 			return True
-		prepay_price = (self.prepayment_percent / 100) * self.price
-		prepay_price = math.ceil(prepay_price / 10) * 10
+		prepay_price = self.get_prepayment_price()
 		if self.payed < prepay_price:
 			return False
 		return True
@@ -112,11 +119,9 @@ class Order:
 		return False
 
 	def get_supports_price(self):
-		price = 0
-		if self.support_remover == 'Компания':
-			setting = int(self.app.settings.get('support_remove_price'))
-			price = int(self.support_time * self.quantity * setting)
-			price = math.ceil(price / 10) * 10
+		setting = int(self.app.settings.get('support_remove_price'))
+		price = int(self.support_time * self.quantity * setting)
+		price = math.ceil(price / 10) * 10
 		return price
 
 	def set_pay_code(self):
@@ -170,7 +175,7 @@ class Order:
 		return limit
 
 	def plastic_types(self):
-		if self.type == 'any':
+		if self.type == 'basic':
 			return self.app.settings.get('basic_plastic_types').split(',')
 		return [self.type]
 

@@ -222,11 +222,11 @@ class Equipment:
 	def sort_spools(self):
 		self.spools.sort(key=self.get_object_id)
 
-	def create_new_color(self, name, parent, samplePhoto):
+	def create_new_color(self, name, parent_id, samplePhoto):
 		id = self.app.functions.get_next_free_id(self.colors)
 		color = Color(self.app, id)
 		color.name = name
-		color.parent = parent
+		color.parent_id = parent_id
 		color.samplePhoto = samplePhoto
 		self.db.add_color(color)
 		self.colors.append(color)

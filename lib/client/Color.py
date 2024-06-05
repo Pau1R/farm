@@ -86,7 +86,7 @@ class Client_color:
 		self.GUI.tell_buttons('Ожидающие поставки', buttons, buttons, 2, 0)
 
 	def show_order_colors(self):
-		buttons = self.spool_logic.get_in_stock_buttons(self.order.plastic_type, self.order.color_id, self.order.weight, self.order.quantity)
+		buttons = self.spool_logic.get_in_stock_buttons(self.order.plastic_type, self.order.weight, self.order.quantity)
 		if self.spool_logic.is_ordered(self.order.plastic_type, self.order.weight, self.order.quantity):
 			buttons.append(['Ожидающие поставки', 'ordered'])
 		buttons.append('Назад')
@@ -101,7 +101,7 @@ class Client_color:
 		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
 
 	def show_color(self, color_id, context_id):
-		color = self.app.equipment.color_logic.get_color(self.message.btn_data)
+		color = self.app.equipment.color_logic.get_color(int(self.message.btn_data))
 		text = color.get_name()
 		buttons = []
 		order_id = 0

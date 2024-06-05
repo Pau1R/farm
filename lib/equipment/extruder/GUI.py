@@ -15,7 +15,7 @@ class ExtruderGUI:
 
 	name = ''
 	maxTemp = 0
-	nozzleDiameter = 0
+	nozzleDiameter = 0.0
 
 	def __init__(self, app, chat, address):
 		self.app = app
@@ -118,11 +118,11 @@ class ExtruderGUI:
 		self.show_add_new_extruder_maxTemp()
 
 	def process_add_new_extruder_maxTemp(self):
-		self.maxTemp = self.message.btn_data
+		self.maxTemp = int(self.message.btn_data)
 		self.show_add_new_extruder_nozzleDiameter()
 
 	def process_add_new_extruder_nozzleDiameter(self):
-		self.nozzleDiameter = self.message.btn_data
+		self.nozzleDiameter = float(self.message.btn_data)
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):

@@ -7,8 +7,8 @@ from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Texts import Texts
 from lib.order.Order import Order
-from lib.client.Model import Client_model
-from lib.client.Order import Client_order
+from lib.client.Their_model import Their_model
+from lib.order.GUI import Client_order
 from lib.client.Info import Info
 
 class Client:
@@ -18,7 +18,7 @@ class Client:
 	chat = None
 	order = None
 	name = ''
-	# date_ = None
+
 	GUI = None
 	message = None
 	texts = None
@@ -26,9 +26,8 @@ class Client:
 	last_data = ''
 	
 	menu = None
-	client_model = None
+	their_model = None
 	client_order = None
-	# order_id = None
 
 	payId = ''
 	money_payed = 0.0
@@ -42,7 +41,7 @@ class Client:
 		self.GUI = Gui(app, chat, self.address)
 		self.order = Order(app, 1)
 
-		self.client_model = Client_model(app, chat, self.address + '/1')
+		self.their_model = Their_model(app, chat, self.address + '/1')
 		self.client_order = Client_order(app, chat, self.address + '/2')
 		self.info = Info(app, chat, self.address + '/3')
 
@@ -68,7 +67,7 @@ class Client:
 				elif message.function == '6':
 					self.process_order()
 			elif message.file2 == '1':
-				self.client_model.new_message(message)
+				self.their_model.new_message(message)
 			elif message.file2 == '2':
 				self.client_order.new_message(message)
 			elif message.file2 == '3':
@@ -83,12 +82,16 @@ class Client:
 		buttons = [['Сделать заказ', 'order'], ['Информация о студии', 'info']]
 		if len(self.get_orders(['validate', 'validated', 'prepayed'])) > 0:
 			buttons.insert(1, ['Мои заказы', 'orders'])
-		self.GUI.tell_buttons(self.texts.top_menu, buttons, buttons, 1, 0)
+		self.GUI.tell_buttons('Выберите действие', buttons, buttons, 1, 0)
 
 	def show_order_menu(self):
-		buttons = self.texts.order_buttons.copy()
+		# buttons = [['Выбрать готовую модель из каталога', 'farm model']]
+		buttons = [['Ввести артикул модели из каталога', 'farm model']]
+		buttons.append(['Распечатать ваш файл', 'user model'])
+		buttons.append(['Распечатать модель по ссылке из интернета', 'internet model'])
+		buttons.append(['Создать и распечатать модель по вашему чертежу', 'user drawing'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons(self.texts.order_menu, buttons, [], 2, 0)
+		self.GUI.tell_buttons('Выберите тип заказа', buttons, [], 2, 0)
 
 	def show_orders(self):
 		text = 'Мои заказы'
@@ -98,6 +101,8 @@ class Client:
 		orders.sort(key=self.get_object_date)
 		for order in orders:
 			buttons.append([order.name, order.id])
+		if not buttons:
+			self.show_top_menu()
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
 
@@ -122,7 +127,9 @@ class Client:
 		if self.message.btn_data == 'farm model':
 			self.GUI.tell('Здесь будут находится готовые модели')
 		elif self.message.btn_data == 'user model':
-			self.client_model.first_message(self.message)
+			self.their_model.first_message(self.message)
+		elif self.message.btn_data == 'internet model':
+			self.their_model.first_message(self.message)
 		elif self.message.btn_data == 'user drawing':
 			self.GUI.tell('Здесь вы можете загрузить свои чертежы или рисунки для создания по ним 3д модели.')
 		elif self.message.btn_data == 'Назад':
@@ -159,6 +166,7 @@ class Client:
 		self.orders_canceled += 1
 		if self.orders_canceled >= 3:
 			self.limit_date = date.today()
+		self.app.db.update_chat(self.chat)
 
 	def is_limited(self):
 		if self.orders_canceled >= 3:  # repeated order cancelation limit
