@@ -2,9 +2,9 @@ import sys
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.client.Order import Order
+from lib.order.Order import Order
 from lib.Texts import Texts
-from lib.employee.Designer_validate import Validate
+from lib.employee.designer.Validate import Validate
 
 class Designer:
 	address = ''

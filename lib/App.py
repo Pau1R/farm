@@ -3,12 +3,12 @@ from lib.equipment.Equipment import Equipment
 from lib.Chat import Chat
 from datetime import date
 from lib.Msg import Message
-from lib.client.Order import Order
-from lib.client.Order_logic import Order_logic
+from lib.order.Order import Order
+from lib.order.Logic import Order_logic
 from lib.equipment.printer.Logic import Printer_logic
 from lib.request.Request_logic import Request_logic
 # from lib.Test import Test
-from lib.Settings import Settings
+from lib.settings.Settings import Settings
 from lib.Clicker import Clicker
 import jsonpickle
 from datetime import date
@@ -111,3 +111,9 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
+
+
+# TODO: 
+# - restructure farm/lib/client folder
+# - internet order
+# - client images

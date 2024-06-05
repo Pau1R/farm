@@ -3,7 +3,7 @@ from datetime import date
 from datetime import datetime
 import os
 from lib.Chat import Chat
-from lib.client.Order import Order
+from lib.order.Order import Order
 from lib.equipment.container.Container import Container
 from lib.equipment.dryer.Dryer import Dryer
 from lib.equipment.extruder.Extruder import Extruder

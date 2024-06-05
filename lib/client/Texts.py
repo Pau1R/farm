@@ -9,10 +9,11 @@ class Texts:
 	top_menu = 'Выберите действие'
 	order_menu = 'Выберите тип заказа'
 	
-	order_buttons = [['Выбрать готовую модель из каталога', 'farm model']]
-	order_buttons.append(['Распечатать вашу модель', 'user model'])
-	order_buttons.append(['Распечатать модель из интернета', 'internet model'])
-	order_buttons.append(['Создать и распечатать модель по моему чертежу', 'user drawing'])
+	# order_buttons = [['Выбрать готовую модель из каталога', 'farm model']]
+	order_buttons = [['Ввести артикул модели из каталога', 'farm model']]
+	order_buttons.append(['Распечатать ваш файл', 'user model'])
+	order_buttons.append(['Распечатать модель по ссылке из интернета', 'internet model'])
+	order_buttons.append(['Создать и распечатать модель по вашему чертежу', 'user drawing'])
 
 	model_name = 'Напишите название вашей модели'
 

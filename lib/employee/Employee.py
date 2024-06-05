@@ -1,7 +1,7 @@
 from lib.employee.Owner import Owner
 from lib.employee.Admin import Admin
 from lib.employee.Operator import Operator
-from lib.employee.Designer import Designer
+from lib.employee.designer.Designer import Designer
 from lib.employee.Delivery import Delivery
 from lib.Gui import Gui
 

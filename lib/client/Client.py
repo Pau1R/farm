@@ -6,9 +6,9 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Texts import Texts
-from lib.client.Order import Order
-from lib.client.Client_model import Client_model
-from lib.client.Client_order import Client_order
+from lib.order.Order import Order
+from lib.client.Model import Client_model
+from lib.client.Order import Client_order
 from lib.client.Info import Info
 
 class Client:

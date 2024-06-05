@@ -1,5 +1,5 @@
 from lib.Gui import Gui
-from lib.client.Client_color import Client_color
+from lib.client.Color import Client_color
 import time
 
 class Info:

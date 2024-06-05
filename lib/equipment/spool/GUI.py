@@ -326,7 +326,7 @@ class SpoolGUI:
 			else:
 				self.show_top_menu()
 			self.spool = None
-		if self.spool != None and self.spool.status == 'ordered':
+		elif self.spool != None and self.spool.status == 'ordered':
 			self.show_ordered()
 		else:
 			self.show_top_menu()

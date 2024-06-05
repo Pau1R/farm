@@ -13,8 +13,8 @@ from lib.equipment.printer.GUI import PrinterGUI
 from lib.equipment.spool.GUI import SpoolGUI
 from lib.equipment.color.GUI import ColorGUI
 from lib.equipment.surface.GUI import SurfaceGUI
-from lib.employee.SettingsGUI import SettingsGUI
-from lib.client.Client_order import Client_order
+from lib.settings.GUI import SettingsGUI
+from lib.client.Order import Client_order
 from lib.request.RequestGUI import RequestGUI
 
 class Admin:
