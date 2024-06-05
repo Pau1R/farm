@@ -3,7 +3,6 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Color import Client_color
-from lib.client.Texts import Texts
 import time
 import random
 
@@ -17,7 +16,6 @@ class Client_order:
 	order_waiting = None
 	GUI = None
 	context = ''
-	texts = None
 	color = None
 	last_data = ''
 
@@ -30,7 +28,6 @@ class Client_order:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, address)
-		self.texts = Texts(app)
 		self.client_color = Client_color(app, chat, address + '/1')
 
 	def first_message(self, message):
@@ -177,7 +174,10 @@ class Client_order:
 
 		buttons.append('Отменить заказ')
 		buttons.append('Назад')
-		self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
+		if order.model_file:
+			self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
+		elif order.link:
+			self.GUI.tell_link_buttons(order.link, text, buttons, buttons, 1, order.id)
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + str(self.order.get_supports_price()) + ' рублей'
@@ -222,7 +222,7 @@ class Client_order:
 	def show_rejected_by_designer(self, order, reason):
 		text = f'Заказ {order.name} не прошел оценку.'
 		if reason != '':
-			text +=  f'Причина: {reason}'
+			text +=  f'\nПричина: {reason}'
 		self.GUI.tell(text)
 
 	def show_reject_reason(self):

@@ -39,6 +39,7 @@ class Order:
 	# files
 	sketches = []
 	model_file = ''
+	link = ''
 
 	# evaluation data and process
 	plastic_type = ''

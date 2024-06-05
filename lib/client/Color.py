@@ -2,7 +2,6 @@ import sys
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.client.Texts import Texts
 import time
 
 class Client_color:
@@ -13,7 +12,6 @@ class Client_color:
 	message = None
 	order = None
 	GUI = None
-	texts = None
 	colors = {}
 
 	last_data = ''
@@ -27,7 +25,6 @@ class Client_color:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(app)
 		self.spool_logic = app.equipment.spool_logic
 		self.color_logic = app.equipment.color_logic
 

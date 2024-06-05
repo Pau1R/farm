@@ -124,6 +124,7 @@ class Database:
 			support_remover TEXT,
 			sketches TEXT,
 			model_file TEXT,
+			link TEXT,
 			plastic_type TEXT,
 			printer_type TEXT,
 			weight DECIMAL,
@@ -247,26 +248,27 @@ class Database:
 			order.support_remover = line[12]
 			order.sketches = line[13]
 			order.model_file = line[14]
-			order.plastic_type = line[15]
-			order.printer_type = line[16]
-			order.weight = int(line[17])
-			order.time = line[18]
-			order.completion_date = self.string_to_date(line[19])
-			order.start_datetime = self.string_to_datetime(line[20])
-			order.support_time = int(line[21])
-			order.layer_hight = line[22]
-			order.price = int(line[23])
-			order.pay_code = 0 if line[24] == '' else int(line[24])
-			order.payed = line[25]
-			order.prepayment_percent = int(line[26])
-			order.booked = ast.literal_eval(line[27])
-			order.booked_time = int(line[28])
-			order.delivery_code = int(line[29])
-			order.delivery_user_id = int(line[30])
+			order.link = line[15]
+			order.plastic_type = line[16]
+			order.printer_type = line[17]
+			order.weight = int(line[18])
+			order.time = line[19]
+			order.completion_date = self.string_to_date(line[20])
+			order.start_datetime = self.string_to_datetime(line[21])
+			order.support_time = int(line[22])
+			order.layer_hight = line[23]
+			order.price = int(line[24])
+			order.pay_code = 0 if line[25] == '' else int(line[25])
+			order.payed = line[26]
+			order.prepayment_percent = int(line[27])
+			order.booked = ast.literal_eval(line[28])
+			order.booked_time = int(line[29])
+			order.delivery_code = int(line[30])
+			order.delivery_user_id = int(line[31])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","",0,0,0,"","",0,"","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","",0,0,0,"","",0,"","","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
 		self.db.commit()
 		self.update_order(order)
 
@@ -284,6 +286,7 @@ class Database:
 		values += 'support_remover = "' + str(order.support_remover) + '", '
 		values += 'sketches = "' + str(order.sketches) + '", '
 		values += 'model_file = "' + order.model_file + '", '
+		values += 'link = "' + order.link + '", '
 		values += 'plastic_type = "' + order.plastic_type + '", '
 		values += 'printer_type = "' + order.printer_type + '", '
 		values += 'weight = "' + str(order.weight) + '", '

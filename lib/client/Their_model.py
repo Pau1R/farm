@@ -3,7 +3,6 @@ from datetime import datetime
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.client.Texts import Texts
 import time
 
 class Their_model:
@@ -15,12 +14,13 @@ class Their_model:
 	GUI = None
 	texts = None
 
+	supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
+
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(app)
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
@@ -58,13 +58,13 @@ class Their_model:
 		self.GUI.tell('Напишите название вашей модели')
 
 	def show_quantity(self):
-		text = self.texts.model_quantity
-		buttons = self.texts.model_quantity_buttons.copy()
+		text = 'Сколько экземпляров вам нужно?'
+		buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 		self.GUI.tell_buttons(text, buttons, ['1', '2'], 2, self.order.id)
 
 	def show_conditions(self):
-		text = self.texts.model_conditions
-		buttons = self.texts.model_conditions_buttons.copy()
+		text = 'В каких условиях будет эксплуатироваться модель?'
+		buttons = ['в доме', 'на улице', 'в автомобиле', 'не знаю']
 		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
 
 	def show_comment(self):
@@ -74,7 +74,8 @@ class Their_model:
 
 	def show_file(self):
 		self.chat.set_context(self.address, 5)
-		self.GUI.tell(self.texts.file)
+		text = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(self.supported_files)
+		self.GUI.tell(text)
 
 	def show_extention_error(self):
 		self.GUI.tell('Неверный формат файла')
@@ -86,7 +87,9 @@ class Their_model:
 		self.chat.user.show_top_menu()
 
 	def show_limited(self):
-		self.GUI.tell('Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите несколько дней')
+		text = 'Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите несколько дней.'
+		text = ' Оценка производится вручную, а дизайнер ценит свое время.'
+		self.GUI.tell(text)
 		time.sleep(5)
 		self.chat.user.show_top_menu()
 
@@ -127,10 +130,10 @@ class Their_model:
 		# self.order.name = 'название модели'
 		# self.order.conditions = 'В доме'
 		# self.order.quantity = 3
-
+		
 		if self.message.type == 'document':
 			extention = self.message.file_name.split(".")[-1]
-			if extention in self.texts.supported_3d_extensions:
+			if extention in self.supported_files:
 				self.order.date = datetime.today()
 				self.order.print_status = 'preparing'
 				self.order.status = 'validate'

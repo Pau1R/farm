@@ -5,9 +5,9 @@ from datetime import date
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.client.Texts import Texts
 from lib.order.Order import Order
 from lib.client.Their_model import Their_model
+from lib.client.Internet_model import Internet_model
 from lib.order.GUI import Client_order
 from lib.client.Info import Info
 
@@ -21,7 +21,6 @@ class Client:
 
 	GUI = None
 	message = None
-	texts = None
 
 	last_data = ''
 	
@@ -37,13 +36,13 @@ class Client:
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
-		self.texts = Texts(app)
 		self.GUI = Gui(app, chat, self.address)
 		self.order = Order(app, 1)
 
 		self.their_model = Their_model(app, chat, self.address + '/1')
-		self.client_order = Client_order(app, chat, self.address + '/2')
-		self.info = Info(app, chat, self.address + '/3')
+		self.internet_model = Internet_model(app, chat, self.address + '/2')
+		self.client_order = Client_order(app, chat, self.address + '/3')
+		self.info = Info(app, chat, self.address + '/4')
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -69,8 +68,10 @@ class Client:
 			elif message.file2 == '1':
 				self.their_model.new_message(message)
 			elif message.file2 == '2':
-				self.client_order.new_message(message)
+				self.internet_model.new_message(message)
 			elif message.file2 == '3':
+				self.client_order.new_message(message)
+			elif message.file2 == '4':
 				self.info.new_message(message)
 		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
@@ -129,7 +130,7 @@ class Client:
 		elif self.message.btn_data == 'user model':
 			self.their_model.first_message(self.message)
 		elif self.message.btn_data == 'internet model':
-			self.their_model.first_message(self.message)
+			self.internet_model.first_message(self.message)
 		elif self.message.btn_data == 'user drawing':
 			self.GUI.tell('Здесь вы можете загрузить свои чертежы или рисунки для создания по ним 3д модели.')
 		elif self.message.btn_data == 'Назад':

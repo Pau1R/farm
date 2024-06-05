@@ -71,6 +71,10 @@ class Gui:
 	def tell_contact_permanent(self, phone_number, first_name):
 		message = Message(self.app.bot.send_contact(self.chat.user_id, phone_number, first_name))
 
+	def tell_link_buttons(self, link, text, bts, strict_, function_id, object_id):
+		text = text + '\n\n' + link
+		self.tell_buttons(text, bts, strict_, function_id, object_id)
+
 	def tell_document(self, document, caption):
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption))
 		self.messages_append(message)

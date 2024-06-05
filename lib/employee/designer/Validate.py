@@ -74,6 +74,7 @@ class Validate:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
+		self.chat.context = ''
 		text = self.texts.designer_orders_validate_text(self.order_timer, self.app.orders)
 		buttons = self.texts.designer_orders_validate_btns(self.app.orders, self.app.chat)
 		if not buttons:
@@ -84,7 +85,10 @@ class Validate:
 	def show_validate(self):
 		text = self.texts.designer_order_validate_text(self.app, self.order)
 		buttons = [['Принять модель', 'accept'], ['Отказать','reject'], ['Назад']]
-		self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.id)
+		if self.order.model_file:
+			self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.id)
+		elif self.order.link:
+			self.GUI.tell_link_buttons(self.order.link, text, buttons, buttons, 2, self.order.id)
 
 	def show_accept(self):
 		buttons = []
@@ -140,6 +144,7 @@ class Validate:
 		self.GUI.tell_buttons('Подтвердите валидацию', buttons, [], 11, self.order.id)
 
 	def show_reject(self):
+		self.chat.set_context(self.address, 12)
 		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 12, self.order.id)
 
 	def show_new_order(self, order):
@@ -266,6 +271,7 @@ class Validate:
 		user = self.get_user(self.order.user_id)
 		user.client_order.show_rejected_by_designer(self.order, reason)
 		self.app.orders.remove(self.order)
+		self.app.db.remove_order(self.order)
 		self.order == None
 		self.show_top_menu()
 
