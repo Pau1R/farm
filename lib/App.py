@@ -113,6 +113,5 @@ class App:
 #	5 Delivery
 
 
-# TODO: 
-# - internet order
-# - client images
+# TODO:
+# - All leftover client order types

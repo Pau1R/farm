@@ -1,3 +1,5 @@
+from datetime import timedelta
+from datetime import datetime
 from datetime import date
 
 class Functions:
@@ -18,8 +20,14 @@ class Functions:
 	def russian_date(self, date):
 		if date == None:
 			return ''
-		elif date.day == date.today().day and date.month == date.today().month:
+		if isinstance(date, datetime):
+			date = date.date()
+		if date == date.today():
 			return 'сегодня'
+		elif date == date.today() + timedelta(days=1):
+			return 'завтра'
+		elif date == date.today() + timedelta(days=2):
+			return 'послезавтра'
 		else:
 			return str(date.day) + ' ' + self.months[date.month]
 
@@ -30,10 +38,11 @@ class Functions:
 			return self.russian_date(date_)
 
 	def get_weight_string(self, weight):
-		if weight % 1000 == 0:
-			return str(weight // 1000) + ' кг'
-		else:
-			return '{:.2f} кг'.format(weight / 1000)
+	    if weight % 1000 == 0:
+	        return str(weight // 1000) + ' кг'
+	    else:
+	        weight_str = '{:.2f}'.format(weight / 1000).rstrip('0').rstrip('.')
+	        return weight_str + ' кг'
 
 	def get_next_free_id(self, array):
 		ids = []

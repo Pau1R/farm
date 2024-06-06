@@ -12,6 +12,6 @@ class Printer_logic:
 	def get_printers_by_type(self, type_):
 		printers = []
 		for printer in self.app.equipment.printers:
-			if printer.type_ == type_:
+			if printer.type_ == type_ or type_ == '*':
 				printers.append(printer)
 		return printers

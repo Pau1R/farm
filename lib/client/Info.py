@@ -1,6 +1,7 @@
+from datetime import datetime, date, timedelta
+import time
 from lib.Gui import Gui
 from lib.client.Color import Client_color
-import time
 
 class Info:
 	address = ''
@@ -53,7 +54,7 @@ class Info:
 		text = 'Информация о студии'
 		buttons = []
 		buttons.append(['Доступные цвета и типы пластика', 'colors'])
-		buttons.append(['Получение заказов', 'receive'])
+		buttons.append(['Получение заказов и срок выполнения', 'receive'])
 		buttons.append(['Технические подробности', 'tech'])
 		buttons.append(['Дисклеймер', 'disclaimer'])
 		buttons.append(['Поддержка', 'request'])
@@ -61,9 +62,11 @@ class Info:
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_receive(self):
-		text = 'Среднее время выполнения заказа: 2-3 дня\n\n'
-		text += 'Пункт выдачи: г. Стерлитамак, ул. Сакко и Ванцетти, 63, "Бизнес-контакт". График работы: ежедневно с 9:00 до 21:00.\n\n'
-		text += 'Доставка по странам СНГ службой boxberry за счет клиента'
+		start_date = self.app.order_logic.get_completion_date(0, '*')
+		start_day = self.app.functions.russian_date(start_date)
+		text = 'Пункт выдачи: г. Стерлитамак, ул. Сакко и Ванцетти, 63, "Бизнес-контакт". График работы: ежедневно с 9:00 до 21:00.\n\n'
+		text += 'Доставка по странам СНГ службой boxberry за счет клиента.\n\n'
+		text += 'Дата запуска заказа в печать с учетом текущей загруженности: ' + start_day
 		buttons = ['Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
@@ -74,7 +77,7 @@ class Info:
 		buttons = ['Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
 
-	def show_disclaimer(self):
+	def show_disclaimer(self): # TODO: rethink
 		text = """
 Дисклеймер:
 1) не даю гарантии на изделие
@@ -92,7 +95,6 @@ class Info:
 
 	def show_support_contact(self, text):
 		self.GUI.tell_permanent(text)
-		self.GUI.tell_contact_permanent('+375299967110', 'Павел')
 
 	def show_support_reply(self, text):
 		self.GUI.tell_permanent(text)

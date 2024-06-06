@@ -12,7 +12,6 @@ class Their_model:
 	chat = None
 	order = None
 	GUI = None
-	texts = None
 
 	supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
@@ -48,6 +47,8 @@ class Their_model:
 				self.process_comment()
 			elif message.function == '5':
 				self.process_file()
+			elif message.function == '6':
+				self.process_confirmation()
 		if message.type == 'text' or self.message.type == 'document':
 			self.GUI.messages_append(message)
 
@@ -84,7 +85,6 @@ class Their_model:
 	def show_wait_for_designer(self):
 		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
 		time.sleep(3)
-		self.chat.user.show_top_menu()
 
 	def show_limited(self):
 		text = 'Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите несколько дней.'
@@ -97,6 +97,11 @@ class Their_model:
 		self.GUI.tell('У вас 3 непредоплаченных заказа, больше нельзя =)')
 		time.sleep(5)
 		self.chat.user.show_top_menu()
+
+	def show_confirmation(self):
+		text = 'Подтвердите создание заказа'
+		buttons = [['Подтверждаю', 'confirm'], ['Удалить заказ', 'remove']]
+		self.GUI.tell_buttons(text, buttons, buttons, 6, self.order.id)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -123,7 +128,13 @@ class Their_model:
 		self.show_file()
 
 	def process_file(self):
+		if self.message.type == 'document' and self.message.file_name.split(".")[-1] in self.supported_files:
+			self.order.model_file = self.message.file_id
+			self.show_confirmation()
+		else:
+			self.show_extention_error()
 
+	def process_confirmation(self):
 		# self.message.file_name = 'hi.stl'
 		# self.message.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
 		# self.message.type = 'document'
@@ -131,22 +142,23 @@ class Their_model:
 		# self.order.conditions = 'В доме'
 		# self.order.quantity = 3
 		
-		if self.message.type == 'document':
-			extention = self.message.file_name.split(".")[-1]
-			if extention in self.supported_files:
-				self.order.date = datetime.today()
-				self.order.print_status = 'preparing'
-				self.order.status = 'validate'
-				self.order.user_id = self.app.chat.user_id
-				self.order.model_file = self.message.file_id
-				# self.order.tell_designer()
-				self.app.orders.append(self.order)
-				self.app.db.create_order(self.order)
-				self.show_wait_for_designer()
-				for chat in self.app.chats:
-					if chat.is_employee and 'Дизайнер' in chat.user.roles:
-						chat.user.designer.validate.show_new_order(self.order)
-				return
-		self.show_extention_error()
+		data = self.message.btn_data
+		if data == 'confirm':
+			self.order.date = datetime.today()
+			self.order.print_status = 'preparing'
+			self.order.status = 'validate'
+			self.order.user_id = self.app.chat.user_id
+			# self.order.tell_designer()
+			# TODO: check for order.id conflicts
+			self.app.orders.append(self.order)
+			self.app.db.create_order(self.order)
+			self.show_wait_for_designer()
+			for chat in self.app.chats:
+				if chat.is_employee and 'Дизайнер' in chat.user.roles:
+					chat.user.designer.validate.show_new_order(self.order)
+		else:
+			self.chat.user.reset_order()
+			
+		self.chat.user.show_top_menu()
 		
 		# self.GUI.tell_document('BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ', 'this is caption text')

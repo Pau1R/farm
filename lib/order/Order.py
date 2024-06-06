@@ -1,8 +1,5 @@
-from datetime import timedelta
-from datetime import datetime
-from datetime import date
+from datetime import timedelta, datetime, date, time
 from lib.Gui import Gui
-import time
 import math
 import random
 
@@ -64,13 +61,11 @@ class Order:
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
+		if id == 0:
+			self.id = self.get_next_free_id(self.app.orders)
 		self.date = datetime.today()
 		self.spools = self.app.equipment.spools
 		self.spool_logic = self.app.equipment.spool_logic
-
-	def reset(self):
-		self.id = self.get_next_free_id(self.app.orders)
-		self.status = 'creating'
 
 	def get_next_free_id(self, orders):
 		ids = []
@@ -184,13 +179,7 @@ class Order:
 		return element.date
 
 	def set_completion_date(self):
-		average_load = self.app.printer_logic.get_average_load(self.printer_type)	# average time to begin this order
-		end_time = average_load + self.time											# add this order time
-		end_time += time.time() / 60 - 9 * 60										# take in account time of day, starting from 9 am
-		end_time += 60 * 5															# add buffer time of 5 hours (near time)
-		days = end_time / (60 * 10)													# get amount of days to finish this order. Daily work hours: 10
-		days = int(days * 1.2)														# add buffer to days (far time)
-		self.completion_date = date.today() + timedelta(days=days)
+		self.completion_date = self.app.order_logic.get_completion_date(self.time, self.printer_type)
 		self.app.db.update_order(self)
 
 	def order_payed(self, amount):

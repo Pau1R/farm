@@ -116,7 +116,7 @@ class RequestGUI:
 #---------------------------- LOGIC ----------------------------
 
 	def send_chat(self):
-		text = 'По поводу вашего обращения напишите в чат поддержки:'
+		text = 'По поводу вашего обращения напишите в чат: @str3d_chat'
 		chat = self.app.get_chat(self.request.user_id)
 		chat.user.info.show_support_contact(text)
 

@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime, date
+from datetime import time as date_time
 import time
 
 class Order_logic:
@@ -41,7 +43,7 @@ class Order_logic:
 	def count_all_time(self, printer_type):
 		scheduled_time = 0
 		for order in self.orders:
-			if order.print_status in ['in_line', 'printing'] and order.printer_type == printer_type:
+			if order.print_status in ['in_line', 'printing'] and (order.printer_type == printer_type or printer_type == '*'):
 				then = order.start_datetime
 				now = datetime.today()
 				used_time = 0
@@ -53,3 +55,21 @@ class Order_logic:
 					used_time += (now.hour * 60 + now.minute) - 9 * 60 # Count last day.
 				scheduled_time += order.time - used_time
 		return scheduled_time
+
+	def get_completion_date(self, order_time, printer_type):
+		average_load = self.app.printer_logic.get_average_load(printer_type)		# average time to begin this order
+		end_time = average_load + order_time										# add order time
+		add_days = 0
+		difference = datetime.today() - datetime.combine(date.today(), date_time(9, 0))
+		difference = difference.total_seconds()
+		if difference > 60 * 10:													# take in account if current day working hours have ended
+			difference = 0
+			add_days = 1
+		if difference < 0 :
+			difference = 0
+		end_time += difference														# take in account time of day, starting from 9 am
+		end_time += 60 * 5															# add buffer time of 5 hours (near time)
+		days = end_time / (60 * 10)													# get amount of days to finish this order. Daily work hours: 10
+		days += add_days
+		days = int(days * 1.2)														# add buffer to days (far time)
+		return date.today() + timedelta(days=days)

@@ -102,32 +102,32 @@ class Spool_logic:
 #---------------------------- CLIENT VIEW FILAMENTS ----------------------------
 
 	def get_all_buttons(self, status):  # get all spools of status and convert them to unique buttons
-	    spools_ = {}
-	    
-	    for spool in self.app.equipment.spools:
-	        if spool.status != status:
-	            continue
-	        type_color = (spool.type, spool.color_id)
-	        if type_color not in spools_:
-	            spools_[type_color] = (0, spool.delivery_date_estimate)
-	        total_weight, earliest_date = spools_[type_color]
-	        total_weight += spool.weight
+		spools_ = {}
+		
+		for spool in self.app.equipment.spools:
+			if spool.status != status:
+				continue
+			type_color = (spool.type, spool.color_id)
+			if type_color not in spools_:
+				spools_[type_color] = (0, spool.delivery_date_estimate)
+			total_weight, earliest_date = spools_[type_color]
+			total_weight += spool.weight
 
-	        if earliest_date is None or (spool.delivery_date_estimate is not None and spool.delivery_date_estimate < earliest_date):
-	            earliest_date = spool.delivery_date_estimate
+			if earliest_date is None or (spool.delivery_date_estimate is not None and spool.delivery_date_estimate < earliest_date):
+				earliest_date = spool.delivery_date_estimate
 
-	        spools_[type_color] = (total_weight, earliest_date)
-	    
-	    buttons = [
-	        [
-	            f"{type_} {self.color_logic.get_color_name(color_id)}: {self.app.functions.get_weight_string(weight)}" +
-	            (f" ({self.app.functions.russian_date_2(date)})" if status == 'ordered' else ''), 
-	            color_id
-	        ]
-	        for (type_, color_id), (weight, date) in spools_.items()
-	    ]
-	    
-	    return buttons
+			spools_[type_color] = (total_weight, earliest_date)
+		
+		buttons = [
+			[
+				f"{type_} {self.color_logic.get_color_name(color_id)}: {self.app.functions.get_weight_string(weight)}" +
+				(f" ({self.app.functions.russian_date_2(date)})" if status == 'ordered' else ''), 
+				color_id
+			]
+			for (type_, color_id), (weight, date) in spools_.items()
+		]
+		buttons.sort(key=self.get_list_element_0)
+		return buttons
 
 	def is_anything_ordered(self):
 		for spool in self.spools:
@@ -207,3 +207,6 @@ class Spool_logic:
 		for spool in self.spools:
 			if spool.id == int(id):
 				return spool
+
+	def get_list_element_0(self, lst):
+		return lst[0]

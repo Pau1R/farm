@@ -6,10 +6,15 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
-from lib.client.Their_model import Their_model
-from lib.client.Internet_model import Internet_model
 from lib.order.GUI import Client_order
 from lib.client.Info import Info
+
+from lib.client.place_order.Article import Farm_model
+from lib.client.place_order.Stl import Their_model
+from lib.client.place_order.Link import Internet_model
+from lib.client.place_order.Sketch import Their_sketch
+from lib.client.place_order.Item import Their_item
+from lib.client.place_order.Production import Production
 
 class Client:
 	address = '1'
@@ -37,12 +42,17 @@ class Client:
 		self.app = app
 		self.chat = chat
 		self.GUI = Gui(app, chat, self.address)
-		self.order = Order(app, 1)
+		self.reset_order()
 
-		self.their_model = Their_model(app, chat, self.address + '/1')
-		self.internet_model = Internet_model(app, chat, self.address + '/2')
-		self.client_order = Client_order(app, chat, self.address + '/3')
-		self.info = Info(app, chat, self.address + '/4')
+		self.client_order = Client_order(app, chat, self.address + '/1')
+		self.info = Info(app, chat, self.address + '/2')
+
+		self.farm_model = Farm_model(app, chat, self.address + '/3')
+		self.their_model = Their_model(app, chat, self.address + '/4')
+		self.internet_model = Internet_model(app, chat, self.address + '/5')
+		self.their_sketch = Their_sketch(app, chat, self.address + '/6')
+		self.their_item = Their_item(app, chat, self.address + '/7')
+		self.production = Production(app, chat, self.address + '/8')
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -50,7 +60,7 @@ class Client:
 
 		if message.text == '/start':
 			self.last_data = ''
-			self.order.reset()
+			self.reset_order()
 			self.show_top_menu()
 		elif message.data_special_format:
 			if message.file2 == '' and (message.data == '' or message.data != self.last_data):
@@ -66,13 +76,21 @@ class Client:
 				elif message.function == '6':
 					self.process_order()
 			elif message.file2 == '1':
-				self.their_model.new_message(message)
-			elif message.file2 == '2':
-				self.internet_model.new_message(message)
-			elif message.file2 == '3':
 				self.client_order.new_message(message)
-			elif message.file2 == '4':
+			elif message.file2 == '2':
 				self.info.new_message(message)
+			elif message.file2 == '3':
+				self.farm_model.new_message(message)
+			elif message.file2 == '4':
+				self.their_model.new_message(message)
+			elif message.file2 == '5':
+				self.internet_model.new_message(message)
+			elif message.file2 == '6':
+				self.their_sketch.new_message(message)
+			elif message.file2 == '7':
+				self.their_item.new_message(message)
+			elif message.file2 == '8':
+				self.production.new_message(message)
 		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
 
@@ -86,11 +104,13 @@ class Client:
 		self.GUI.tell_buttons('Выберите действие', buttons, buttons, 1, 0)
 
 	def show_order_menu(self):
-		# buttons = [['Выбрать готовую модель из каталога', 'farm model']]
-		buttons = [['Ввести артикул модели из каталога', 'farm model']]
+		buttons = []
+		# buttons.append(['Ввести артикул из каталога str3d.ru', 'farm model'])
 		buttons.append(['Распечатать ваш файл', 'user model'])
 		buttons.append(['Распечатать модель по ссылке из интернета', 'internet model'])
-		buttons.append(['Создать и распечатать модель по вашему чертежу', 'user drawing'])
+		buttons.append(['Создать и распечатать модель по вашему чертежу', 'sketch'])
+		buttons.append(['Создать копию вашего предмета', 'user item'])
+		buttons.append(['Мелкосерийное производство', 'production'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите тип заказа', buttons, [], 2, 0)
 
@@ -126,13 +146,17 @@ class Client:
 
 	def process_order_menu(self):
 		if self.message.btn_data == 'farm model':
-			self.GUI.tell('Здесь будут находится готовые модели')
+			self.farm_model.first_message(self.message)
 		elif self.message.btn_data == 'user model':
 			self.their_model.first_message(self.message)
 		elif self.message.btn_data == 'internet model':
 			self.internet_model.first_message(self.message)
-		elif self.message.btn_data == 'user drawing':
-			self.GUI.tell('Здесь вы можете загрузить свои чертежы или рисунки для создания по ним 3д модели.')
+		elif self.message.btn_data == 'sketch':
+			self.their_sketch.first_message(self.message)
+		elif self.message.btn_data == 'user item':
+			self.their_item.first_message(self.message)
+		elif self.message.btn_data == 'production':
+			self.production.first_message(self.message)
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 
@@ -188,3 +212,6 @@ class Client:
 		if counter >= 3: # maximum allowed unprepaid orders
 			return True
 		return False
+
+	def reset_order(self):
+		self.order = Order(self.app, 0)

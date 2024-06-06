@@ -58,7 +58,7 @@ class Internet_model:
 
 	def show_limited(self):
 		text = 'Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите несколько дней.'
-		text = ' Оценка производится вручную, а дизайнер ценит свое время.'
+		text += ' Оценка производится вручную, а дизайнер ценит свое время.'
 		self.GUI.tell(text)
 		time.sleep(5)
 		self.chat.user.show_top_menu()
@@ -88,3 +88,5 @@ class Internet_model:
 			if chat.is_employee and 'Дизайнер' in chat.user.roles:
 				chat.user.designer.validate.show_new_order(self.order)
 		return
+
+	# TODO: add order confirmation
