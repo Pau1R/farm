@@ -113,6 +113,7 @@ class Database:
 			name TEXT,
 			created DATETIME,
 			user_id INTEGER,
+			type TEXT,
 			print_status TEXT,
 			status TEXT,
 			assinged_designer_id TEXT,
@@ -237,44 +238,46 @@ class Database:
 			order.name = line[1]
 			order.date = self.string_to_datetime(line[2])
 			order.user_id = int(line[3])
-			order.print_status = line[4]
-			order.status = line[5]
-			order.assinged_designer_id = int(line[6])
-			order.priority = int(line[7])
-			order.quantity = int(line[8])
-			order.conditions = line[9]
-			order.comment = line[10]
-			order.color_id = int(line[11])
-			order.support_remover = line[12]
-			order.sketches = line[13]
-			order.model_file = line[14]
-			order.link = line[15]
-			order.plastic_type = line[16]
-			order.printer_type = line[17]
-			order.weight = int(line[18])
-			order.time = line[19]
-			order.completion_date = self.string_to_date(line[20])
-			order.start_datetime = self.string_to_datetime(line[21])
-			order.support_time = int(line[22])
-			order.layer_hight = line[23]
-			order.price = int(line[24])
-			order.pay_code = 0 if line[25] == '' else int(line[25])
-			order.payed = line[26]
-			order.prepayment_percent = int(line[27])
-			order.booked = ast.literal_eval(line[28])
-			order.booked_time = int(line[29])
-			order.delivery_code = int(line[30])
-			order.delivery_user_id = int(line[31])
+			order.type = line[4]
+			order.print_status = line[5]
+			order.status = line[6]
+			order.assinged_designer_id = int(line[7])
+			order.priority = int(line[8])
+			order.quantity = int(line[9])
+			order.conditions = line[10]
+			order.comment = line[11]
+			order.color_id = int(line[12])
+			order.support_remover = line[13]
+			order.sketches = ast.literal_eval(line[14])
+			order.model_file = line[15]
+			order.link = line[16]
+			order.plastic_type = line[17]
+			order.printer_type = line[18]
+			order.weight = int(line[19])
+			order.time = line[20]
+			order.completion_date = self.string_to_date(line[21])
+			order.start_datetime = self.string_to_datetime(line[22])
+			order.support_time = int(line[23])
+			order.layer_hight = line[24]
+			order.price = int(line[25])
+			order.pay_code = 0 if line[25] == '' else int(line[26])
+			order.payed = line[27]
+			order.prepayment_percent = int(line[28])
+			order.booked = ast.literal_eval(line[29])
+			order.booked_time = int(line[30])
+			order.delivery_code = int(line[31])
+			order.delivery_user_id = int(line [32])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","",0,0,0,"","",0,"","","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
 		self.db.commit()
 		self.update_order(order)
 
 	def update_order(self, order):
 		values = 'name = "' + order.name + '", '
 		values += 'user_id = "' + str(order.user_id) + '", '
+		values += 'type = "' + order.type + '", '
 		values += 'print_status = "' + order.print_status + '", '
 		values += 'status = "' + order.status + '", '
 		values += 'assinged_designer_id = "' + str(order.assinged_designer_id) + '", '

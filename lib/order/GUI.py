@@ -174,10 +174,15 @@ class Client_order:
 
 		buttons.append('Отменить заказ')
 		buttons.append('Назад')
-		if order.model_file:
+		type_ = order.type
+		if type_ == 'stl':
 			self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
-		elif order.link:
+		elif type_ == 'link':
 			self.GUI.tell_link_buttons(order.link, text, buttons, buttons, 1, order.id)
+		elif type_ == 'sketch':
+			for file in order.sketches:
+				self.GUI.tell_file(file[0], file[1], '')
+			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + str(self.order.get_supports_price()) + ' рублей'

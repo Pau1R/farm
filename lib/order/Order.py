@@ -13,6 +13,7 @@ class Order:
 	name = ''
 	date = None
 	user_id = 1
+	type = ''
 	print_status = '' # preparing, in_line, printing, printed
 	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
 	# who can change order status to another:
@@ -61,25 +62,9 @@ class Order:
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
-		if id == 0:
-			self.id = self.get_next_free_id(self.app.orders)
 		self.date = datetime.today()
 		self.spools = self.app.equipment.spools
 		self.spool_logic = self.app.equipment.spool_logic
-
-	def get_next_free_id(self, orders):
-		ids = []
-		for order in orders:
-			ids.append(int(order.id))
-		ids.sort()
-		ids = list(dict.fromkeys(ids))
-		id = 1
-		for elem in ids:
-			if elem == id:
-				id += 1
-			else:
-				break
-		return id
 
 	def set_price(self):
 		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic

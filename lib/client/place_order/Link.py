@@ -21,12 +21,7 @@ class Internet_model:
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
-		if self.chat.user.is_limited():
-			self.show_limited()
-		elif self.chat.user.is_unprepaided_orders_limit_reached():
-			self.show_unprepaided_orders_limit_reached()
-		else:
-			self.show_name()
+		self.show_name()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -37,7 +32,14 @@ class Internet_model:
 			if message.function == '1':
 				self.process_name()
 			elif message.function == '2':
+				self.process_quantity()
+			elif message.function == '3':
 				self.process_link()
+			elif message.function == '4':
+				self.process_comment()
+			elif message.function == '5':
+				self.process_confirmation()
+
 		if message.type == 'text' or self.message.type == 'document':
 			self.GUI.messages_append(message)
 
@@ -47,46 +49,64 @@ class Internet_model:
 		self.chat.set_context(self.address, 1)
 		self.GUI.tell('Напишите название для вашего заказа')
 
+	def show_quantity(self):
+		text = 'Сколько экземпляров вам нужно?'
+		buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+		self.GUI.tell_buttons(text, buttons, ['1', '2'], 2, self.order.id)
+
 	def show_link(self):
-		self.chat.set_context(self.address, 2)
+		self.chat.set_context(self.address, 3)
 		self.GUI.tell('Отправьте ссылку на модель')
+
+	def show_comment(self):
+		self.chat.set_context(self.address, 4)
+		buttons = ['Комментариев к заказу не имею']
+		self.GUI.tell_buttons('Напишите комментарий', buttons, [], 4, self.order.id)
+
+	def show_confirmation(self):
+		text = 'Подтвердите создание заказа'
+		buttons = [['Подтверждаю', 'confirm'], ['Удалить заказ', 'remove']]
+		self.GUI.tell_buttons(text, buttons, buttons, 5, self.order.id)
 
 	def show_wait_for_designer(self):
 		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
 		time.sleep(3)
-		self.chat.user.show_top_menu()
-
-	def show_limited(self):
-		text = 'Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите несколько дней.'
-		text += ' Оценка производится вручную, а дизайнер ценит свое время.'
-		self.GUI.tell(text)
-		time.sleep(5)
-		self.chat.user.show_top_menu()
-
-	def show_unprepaided_orders_limit_reached(self):
-		self.GUI.tell('У вас 3 непредоплаченных заказа, больше нельзя =)')
-		time.sleep(5)
-		self.chat.user.show_top_menu()
 
 #---------------------------- PROCESS ----------------------------
 
 	def process_name(self):
 		self.order.name = self.message.text
-		self.show_link()
+		self.show_quantity()
+
+	def process_quantity(self):
+		try:
+			self.order.quantity = int(self.message.btn_data)
+			self.show_link()
+		except:
+			self.show_quantity()
 
 	def process_link(self):
 		self.order.link = self.message.text
-		self.order.date = datetime.today()
-		self.order.print_status = 'preparing'
-		self.order.status = 'validate'
-		self.order.user_id = self.app.chat.user_id
-		# self.order.tell_designer()
-		self.app.orders.append(self.order)
-		self.app.db.create_order(self.order)
-		self.show_wait_for_designer()
-		for chat in self.app.chats:
-			if chat.is_employee and 'Дизайнер' in chat.user.roles:
-				chat.user.designer.validate.show_new_order(self.order)
-		return
+		self.show_comment()
+	
+	def process_comment(self):
+		self.chat.context = ''
+		if self.message.btn_data != 'Комментариев к заказу не имею':
+			self.order.comment = self.message.text
+		self.show_confirmation()
 
-	# TODO: add order confirmation
+	def process_confirmation(self):
+		data = self.message.btn_data
+		if data == 'confirm':
+			self.order.date = datetime.today()
+			self.order.print_status = 'preparing'
+			self.order.status = 'validate'
+			self.order.user_id = self.app.chat.user_id
+			self.app.orders_append(self.order)
+			self.app.db.create_order(self.order)
+			self.show_wait_for_designer()
+			for chat in self.app.chats:
+				if chat.is_employee and 'Дизайнер' in chat.user.roles:
+					chat.user.designer.validate.show_new_order(self.order)
+		self.chat.user.reset_order()
+		self.chat.user.show_top_menu()

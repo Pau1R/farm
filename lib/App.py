@@ -6,7 +6,7 @@ from lib.Msg import Message
 from lib.order.Order import Order
 from lib.order.Logic import Order_logic
 from lib.equipment.printer.Logic import Printer_logic
-from lib.request.Request_logic import Request_logic
+from lib.request.Logic import Request_logic
 # from lib.Test import Test
 from lib.settings.Settings import Settings
 from lib.Clicker import Clicker
@@ -87,6 +87,25 @@ class App:
 					if role in chat.user.roles:
 						chats.append(chat)
 		return chats
+
+	def orders_append(self, order):
+		order.id = self.get_next_free_id()
+		self.orders.append(order)
+
+	def get_next_free_id(self):
+		ids = []
+		for order in self.orders:
+			ids.append(int(order.id))
+		ids.sort()
+		ids = list(dict.fromkeys(ids))
+		id = 1
+		for elem in ids:
+			if elem == id:
+				id += 1
+			else:
+				break
+		return id
+
 
 # app structure for buttons:
 # 1 client 

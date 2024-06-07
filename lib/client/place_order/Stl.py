@@ -82,26 +82,14 @@ class Their_model:
 		self.GUI.tell('Неверный формат файла')
 		self.show_file()
 
-	def show_wait_for_designer(self):
-		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
-		time.sleep(3)
-
-	def show_limited(self):
-		text = 'Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите несколько дней.'
-		text = ' Оценка производится вручную, а дизайнер ценит свое время.'
-		self.GUI.tell(text)
-		time.sleep(5)
-		self.chat.user.show_top_menu()
-
-	def show_unprepaided_orders_limit_reached(self):
-		self.GUI.tell('У вас 3 непредоплаченных заказа, больше нельзя =)')
-		time.sleep(5)
-		self.chat.user.show_top_menu()
-
 	def show_confirmation(self):
 		text = 'Подтвердите создание заказа'
 		buttons = [['Подтверждаю', 'confirm'], ['Удалить заказ', 'remove']]
 		self.GUI.tell_buttons(text, buttons, buttons, 6, self.order.id)
+
+	def show_wait_for_designer(self):
+		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
+		time.sleep(3)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -112,7 +100,8 @@ class Their_model:
 	def process_quantity(self):
 		try:
 			self.order.quantity = int(self.message.btn_data)
-			self.show_conditions()
+			# self.show_conditions()
+			self.show_comment()
 		except:
 			self.show_quantity()
 
@@ -148,17 +137,13 @@ class Their_model:
 			self.order.print_status = 'preparing'
 			self.order.status = 'validate'
 			self.order.user_id = self.app.chat.user_id
-			# self.order.tell_designer()
-			# TODO: check for order.id conflicts
-			self.app.orders.append(self.order)
+			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)
 			self.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
 					chat.user.designer.validate.show_new_order(self.order)
-		else:
-			self.chat.user.reset_order()
-			
+		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()
 		
 		# self.GUI.tell_document('BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ', 'this is caption text')

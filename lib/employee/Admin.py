@@ -15,7 +15,7 @@ from lib.equipment.color.GUI import ColorGUI
 from lib.equipment.surface.GUI import SurfaceGUI
 from lib.settings.GUI import SettingsGUI
 from lib.order.GUI import Client_order
-from lib.request.RequestGUI import RequestGUI
+from lib.request.GUI import RequestGUI
 
 class Admin:
 	address = ''

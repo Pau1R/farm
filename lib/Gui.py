@@ -75,6 +75,12 @@ class Gui:
 		text = text + '\n\n' + link
 		self.tell_buttons(text, bts, strict_, function_id, object_id)
 
+	def tell_file(self, file_id, file_type, caption):
+		if file_type == 'document':
+			self.tell_document(file_id, caption)
+		elif file_type == 'photo':
+			self.tell_photo(caption, file_id)
+
 	def tell_document(self, document, caption):
 		message = Message(self.app.bot.send_document(self.chat.user_id, document=document, caption=caption))
 		self.messages_append(message)

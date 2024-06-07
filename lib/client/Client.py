@@ -106,10 +106,10 @@ class Client:
 	def show_order_menu(self):
 		buttons = []
 		# buttons.append(['Ввести артикул из каталога str3d.ru', 'farm model'])
-		buttons.append(['Распечатать ваш файл', 'user model'])
-		buttons.append(['Распечатать модель по ссылке из интернета', 'internet model'])
+		buttons.append(['Распечатать ваш файл', 'stl'])
+		buttons.append(['Распечатать модель по ссылке из интернета', 'link'])
 		buttons.append(['Создать и распечатать модель по вашему чертежу', 'sketch'])
-		buttons.append(['Создать копию вашего предмета', 'user item'])
+		buttons.append(['Создать копию вашего предмета', 'item'])
 		buttons.append(['Мелкосерийное производство', 'production'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите тип заказа', buttons, [], 2, 0)
@@ -130,34 +130,54 @@ class Client:
 	def show_becomes_employee(self):
 		self.GUI.tell('Вы стали сотрудником, поздравляем!')
 
+	def show_limited(self):
+		text = 'Вы слишком много раз отменили оцененные заказы, внесите предоплату за любой заказ либо подождите сутки'
+		text = ' Оценка производится вручную, а дизайнер ценит свое время.'
+		self.GUI.tell(text)
+		time.sleep(5)
+		self.show_top_menu()
+
+	def show_unprepaided_orders_limit_reached(self):
+		self.GUI.tell('У вас 3 непредоплаченных заказа, больше нельзя =)')
+		time.sleep(5)
+		self.show_top_menu()
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
+		data = self.message.btn_data
 		self.chat.context = ''
 		if self.message.text == 'я_хочу_стать_сотрудником':
 			self.chat.get_employed = True
 			self.GUI.tell('Ждите подтверждения')
-		elif self.message.btn_data == 'order':
+		elif data == 'order':
 			self.show_order_menu()
-		elif self.message.btn_data == 'info':
+		elif data == 'info':
 			self.info.first_message(self.message)
-		elif self.message.btn_data == 'orders':
+		elif data == 'orders':
 			self.show_orders()
 
 	def process_order_menu(self):
-		if self.message.btn_data == 'farm model':
+		data = self.message.btn_data
+		if self.cannot_make_orders(data):
+			return
+		if not data:
+			self.show_top_menu()
+			return
+		self.order.type = data
+		if data == 'farm model':
 			self.farm_model.first_message(self.message)
-		elif self.message.btn_data == 'user model':
+		elif data == 'stl':
 			self.their_model.first_message(self.message)
-		elif self.message.btn_data == 'internet model':
+		elif data == 'link':
 			self.internet_model.first_message(self.message)
-		elif self.message.btn_data == 'sketch':
+		elif data == 'sketch':
 			self.their_sketch.first_message(self.message)
-		elif self.message.btn_data == 'user item':
+		elif data == 'item':
 			self.their_item.first_message(self.message)
-		elif self.message.btn_data == 'production':
+		elif data == 'production':
 			self.production.first_message(self.message)
-		elif self.message.btn_data == 'Назад':
+		elif data == 'Назад':
 			self.show_top_menu()
 
 	def process_orders(self):
@@ -193,10 +213,20 @@ class Client:
 			self.limit_date = date.today()
 		self.app.db.update_chat(self.chat)
 
+	def cannot_make_orders(self, data):
+		if data in ['stl', 'link', 'sketch', 'item']:
+			if self.is_limited():
+				self.show_limited()
+				return True
+			elif self.is_unprepaided_orders_limit_reached():
+				self.show_unprepaided_orders_limit_reached()
+				return True
+		return False
+
 	def is_limited(self):
 		if self.orders_canceled >= 3:  # repeated order cancelation limit
 			period = (date.today() - self.limit_date).days
-			if period > 2:  # days to limit placing orders
+			if period >= 1:  # days to limit placing orders
 				self.orders_canceled -= 1 # give one chance to place order
 				self.limit_date = date.today()
 			else:
