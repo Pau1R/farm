@@ -142,6 +142,10 @@ class Client:
 		time.sleep(5)
 		self.show_top_menu()
 
+	def show_wait_for_designer(self):
+		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
+		time.sleep(3)
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):

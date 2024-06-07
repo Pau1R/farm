@@ -68,10 +68,6 @@ class Internet_model:
 		buttons = [['Подтверждаю', 'confirm'], ['Удалить заказ', 'remove']]
 		self.GUI.tell_buttons(text, buttons, buttons, 5, self.order.id)
 
-	def show_wait_for_designer(self):
-		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
-		time.sleep(3)
-
 #---------------------------- PROCESS ----------------------------
 
 	def process_name(self):
@@ -104,7 +100,7 @@ class Internet_model:
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)
-			self.show_wait_for_designer()
+			self.chat.user.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
 					chat.user.designer.validate.show_new_order(self.order)
