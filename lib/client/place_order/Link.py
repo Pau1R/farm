@@ -5,7 +5,7 @@ from lib.Msg import Message
 from lib.Gui import Gui
 import time
 
-class Internet_model:
+class Link:
 	address = ''
 
 	app = None
@@ -21,7 +21,7 @@ class Internet_model:
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
-		self.show_name()
+		self.show_link()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -30,11 +30,11 @@ class Internet_model:
 		if message.data_special_format and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
 			self.last_data = message.data
 			if message.function == '1':
-				self.process_name()
+				self.process_link()
 			elif message.function == '2':
 				self.process_quantity()
 			elif message.function == '3':
-				self.process_link()
+				self.process_name()
 			elif message.function == '4':
 				self.process_comment()
 			elif message.function == '5':
@@ -45,18 +45,18 @@ class Internet_model:
 
 #---------------------------- SHOW ----------------------------
 
-	def show_name(self):
+	def show_link(self):
 		self.chat.set_context(self.address, 1)
-		self.GUI.tell('Напишите название для вашего заказа')
+		self.GUI.tell('Отправьте ссылку на модель из интернета')
 
 	def show_quantity(self):
 		text = 'Сколько экземпляров вам нужно?'
 		buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 		self.GUI.tell_buttons(text, buttons, ['1', '2'], 2, self.order.id)
 
-	def show_link(self):
+	def show_name(self):
 		self.chat.set_context(self.address, 3)
-		self.GUI.tell('Отправьте ссылку на модель')
+		self.GUI.tell('Напишите название вашего заказа')
 
 	def show_comment(self):
 		self.chat.set_context(self.address, 4)
@@ -70,21 +70,21 @@ class Internet_model:
 
 #---------------------------- PROCESS ----------------------------
 
-	def process_name(self):
-		self.order.name = self.message.text
+	def process_link(self):
+		self.order.link = self.message.text
 		self.show_quantity()
 
 	def process_quantity(self):
 		try:
 			self.order.quantity = int(self.message.btn_data)
-			self.show_link()
+			self.show_name()
 		except:
 			self.show_quantity()
-
-	def process_link(self):
-		self.order.link = self.message.text
-		self.show_comment()
 	
+	def process_name(self):
+		self.order.name = self.message.text
+		self.show_comment()
+
 	def process_comment(self):
 		self.chat.context = ''
 		if self.message.btn_data != 'Комментариев к заказу не имею':
@@ -96,7 +96,7 @@ class Internet_model:
 		if data == 'confirm':
 			self.order.date = datetime.today()
 			# self.order.physical_status = 'preparing'
-			self.order.status = 'validate'
+			self.order.logical_status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)

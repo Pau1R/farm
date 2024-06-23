@@ -30,27 +30,41 @@ class Order_logic:
 				orders.append(order)
 		return orders
 
-	def get_orders_by_status(self, status):
-		orders = []
-		for order in self.orders:
-			if order.logical_status == status:
-				orders.append(order)
-		return orders
-
-	def get_orders_for_validation(self):
-		orders = []
-		for order in self.orders:
-			if order.logical_status == 'validate':
-				orders.append(order)
-		return orders
-
-	def get_orders_for_validation_buttons(self, user_id, type_):
-		buttons = []
-		orders = self.get_orders_for_validation()
-		orders.sort(key=self.get_object_date)
+	def get_orders_by_type(self, orders, type_):
+		if not orders:
+			orders = self.orders
+		orders_ = []
 		for order in orders:
-			if order.type == type_ and (order.assinged_designer_id == user_id or order.assinged_designer_id == 0):
-				buttons.append([str(order.id) + ': ' + order.name, order.id])
+			designer = order.assinged_designer_id
+			if order.type == type_:
+				orders_.append(order)
+		return orders_
+
+	def get_orders_by_status(self, orders, status):
+		if not orders:
+			orders = self.orders
+		orders_ = []
+		for order in orders:
+			designer = order.assinged_designer_id
+			if order.logical_status == status:
+				orders_.append(order)
+		return orders_
+
+	def get_orders_by_user_id(self, orders, user_id):
+		if not orders:
+			orders = self.orders
+		orders_ = []
+		for order in orders:
+			designer = order.assinged_designer_id
+			if not user_id or not designer or designer == user_id:
+				orders_.append(order)
+		return orders_
+
+	def convert_orders_to_buttons(self, orders):
+		orders.copy().sort(key=self.get_object_date)
+		buttons = []
+		for order in orders:
+			buttons.append([str(order.id) + ': ' + order.name, order.id])
 		return buttons
 
 	def get_order_by_pay_code(self, pay_code):

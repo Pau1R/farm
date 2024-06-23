@@ -118,13 +118,13 @@ class Their_item:
 		data = self.message.btn_data
 		if data == 'confirm':
 			self.order.date = datetime.today()
-			self.order.status = 'validate'
+			self.order.logical_status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)
 			self.chat.user.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
-					chat.user.designer.validate.show_new_order(self.order)
+					chat.user.designer.stl.show_new_order(self.order)
 		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()

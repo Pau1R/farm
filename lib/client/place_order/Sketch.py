@@ -108,7 +108,7 @@ class Their_sketch:
 		if data == 'confirm':
 			self.order.date = datetime.today()
 			# self.order.physical_status = 'preparing'
-			self.order.status = 'validate'
+			self.order.logical_status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)

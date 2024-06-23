@@ -57,8 +57,8 @@ class App:
 		self.request_logic = Request_logic(self)
 		# test = Test(self.db, self)
 
-		testing = True
-		# self.testing = False
+		# testing = True
+		self.testing = False
 		if self.testing:
 			self.testing()
 
@@ -131,7 +131,7 @@ class App:
 	            for order in self.orders:
 	                if order.id == 12:
 	                    stl.order = order
-	            stl.show_gcode()
+	            stl.process_validate()
 
 # app structure for buttons:
 # 1 client 

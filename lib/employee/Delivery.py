@@ -65,9 +65,9 @@ class Delivery:
 	def show_top_menu(self):
 		text = f'Здравствуйте, {self.chat.user_name}. Выберите действие'
 		buttons = []
-		if self.app.order_logic.get_orders_by_status('in_pick-up'):
+		if self.app.order_logic.get_orders_by_status('in_pick-up', ''):
 			buttons.append('Выдать заказ')
-		if self.app.order_logic.get_orders_by_status('waiting_for_item'):
+		if self.app.order_logic.get_orders_by_status('waiting_for_item', ''):
 			buttons.append('Принять предмет')
 		if not buttons:
 			buttons.append('Обновить')
@@ -156,7 +156,7 @@ class Delivery:
 		if data == 'issued' or data == 'payed':
 			self.order_issued(self.order)
 		elif data == 'refused':
-			self.order.status = 'client_refused' # client doesn't get refund for prepayment
+			self.order.logical_status = 'client_refused' # client doesn't get refund for prepayment
 			self.show_top_menu()
 
 	def process_order_payed(self):
@@ -216,13 +216,13 @@ class Delivery:
 
 	def process_item_receive(self):
 		if self.message.btn_data == 'Задача выполнена':
-			self.order.status = 'item_received' # TODO: think of status. Save to db
+			self.order.logical_status = 'item_received' # TODO: think of status. Save to db
 			self.show_top_menu()
 
 #---------------------------- LOGIC ----------------------------
 
 	def order_issued(self, order):
-		self.order.status = 'issued'
+		self.order.logical_status = 'issued'
 		time.sleep(5)
 		self.show_top_menu()
 

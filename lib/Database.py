@@ -146,6 +146,7 @@ class Database:
 			id INTEGER PRIMARY KEY,
 			order_id INTEGER,
 			file_id TEXT,
+			screenshot TEXT,
 			status TEXT,
 			duration INTEGER"""  # in_line, printing, printed
 		setting = """
@@ -328,18 +329,20 @@ class Database:
 			gcode = Gcode(self.app, line[0])
 			gcode.order_id = line[1]
 			gcode.file_id = line[2]
-			gcode.status = line[3]
-			gcode.duration = line[4]
+			gcode.screenshot = line[3]
+			gcode.status = line[4]
+			gcode.duration = line[5]
 			self.app.gcodes.append(gcode)
 
 	def create_gcode(self, gcode):
-		self.cursor.execute('INSERT INTO gcode VALUES (?,0,"","",0)', (gcode.id,))
+		self.cursor.execute('INSERT INTO gcode VALUES (?,0,"","","",0)', (gcode.id,))
 		self.db.commit()
 		self.update_gcode(gcode)
 
 	def update_gcode(self, gcode):
 		values = 'order_id = "' + str(gcode.order_id) + '", '
 		values += 'file_id = "' + gcode.file_id + '", '
+		values += 'screenshot = "' + gcode.screenshot + '", '
 		values += 'status = "' + gcode.status + '", '
 		values += 'duration = "' + str(gcode.duration) + '" '
 		self.cursor.execute('UPDATE gcode SET ' + values + ' WHERE id = ' + str(gcode.id))

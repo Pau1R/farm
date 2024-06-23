@@ -5,11 +5,11 @@ class Gcode:
 	id = 0
 	order_id = 0
 	file_id = ''
-	screanshot = ''
+	screenshot = ''
 	status = ''
 	duration = 0
 
-	quantity = 1 # temporal value for created gcodes
+	quantity = 1 # temporary value for created gcodes
 
 	def __init__(self, app, id):
 		self.app = app

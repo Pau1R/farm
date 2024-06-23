@@ -9,9 +9,9 @@ from lib.order.Order import Order
 from lib.order.GUI import Order_GUI
 from lib.client.Info import Info
 
-from lib.client.place_order.Article import Farm_model
+# from lib.client.place_order.Article import Farm_model
 from lib.client.place_order.Stl import Their_model
-from lib.client.place_order.Link import Internet_model
+from lib.client.place_order.Link import Link
 from lib.client.place_order.Sketch import Their_sketch
 from lib.client.place_order.Item import Their_item
 from lib.client.place_order.Production import Production
@@ -47,9 +47,9 @@ class Client:
 		self.order_GUI = Order_GUI(app, chat, self.address + '/1')
 		self.info = Info(app, chat, self.address + '/2')
 
-		self.farm_model = Farm_model(app, chat, self.address + '/3')
+		# self.farm_model = Farm_model(app, chat, self.address + '/3')
 		self.their_model = Their_model(app, chat, self.address + '/4')
-		self.internet_model = Internet_model(app, chat, self.address + '/5')
+		self.link = Link(app, chat, self.address + '/5')
 		self.their_sketch = Their_sketch(app, chat, self.address + '/6')
 		self.their_item = Their_item(app, chat, self.address + '/7')
 		self.production = Production(app, chat, self.address + '/8')
@@ -79,12 +79,12 @@ class Client:
 				self.order_GUI.new_message(message)
 			elif message.file2 == '2':
 				self.info.new_message(message)
-			elif message.file2 == '3':
-				self.farm_model.new_message(message)
+			# elif message.file2 == '3':
+			# 	self.farm_model.new_message(message)
 			elif message.file2 == '4':
 				self.their_model.new_message(message)
 			elif message.file2 == '5':
-				self.internet_model.new_message(message)
+				self.link.new_message(message)
 			elif message.file2 == '6':
 				self.their_sketch.new_message(message)
 			elif message.file2 == '7':
@@ -106,13 +106,13 @@ class Client:
 	def show_order_menu(self):
 		buttons = []
 		# buttons.append(['Ввести артикул из каталога str3d.ru', 'farm model'])
-		buttons.append(['Распечатать ваш файл', 'stl'])
-		buttons.append(['Распечатать модель по ссылке из интернета', 'link'])
-		buttons.append(['Создать и распечатать модель по вашему чертежу', 'sketch'])
-		buttons.append(['Создать копию вашего предмета', 'item'])
-		buttons.append(['Мелкосерийное производство (больше 10 единиц)', 'production'])
+		buttons.append(['stl файл', 'stl'])
+		buttons.append(['Модель из интернета', 'link'])
+		buttons.append(['Печать по чертежу', 'sketch'])
+		buttons.append(['Копия предмета', 'item'])
+		buttons.append(['Мелкосерийное производство (>10 единиц)', 'production'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Выберите тип заказа', buttons, [], 2, 0)
+		self.GUI.tell_buttons('Выберите тип заказа', buttons, buttons, 2, 0)
 
 	def show_orders(self):
 		text = 'Мои заказы'
@@ -168,12 +168,12 @@ class Client:
 		if not data:
 			self.show_top_menu()
 			return
-		if data == 'farm model':
-			self.farm_model.first_message(self.message)
-		elif data == 'stl':
+		# if data == 'farm model':
+		# 	self.farm_model.first_message(self.message)
+		if data == 'stl':
 			self.their_model.first_message(self.message)
 		elif data == 'link':
-			self.internet_model.first_message(self.message)
+			self.link.first_message(self.message)
 		elif data == 'sketch':
 			self.their_sketch.first_message(self.message)
 		elif data == 'item':
@@ -207,7 +207,7 @@ class Client:
 		orders = []
 		for order in self.app.orders:
 			if order.user_id == self.chat.user_id:
-				if order.status == statuses or (statuses == [] or order.status in statuses):
+				if order.logical_status == statuses or (statuses == [] or order.logical_status in statuses):
 					orders.append(order)
 		return orders
 

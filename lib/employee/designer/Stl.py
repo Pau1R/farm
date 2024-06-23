@@ -95,7 +95,10 @@ class Stl:
 		text = f'Выберите модель для валидации'
 		if self.app.orders == []:
 			text = 'Модели отсутствуют'
-		buttons = self.app.order_logic.get_orders_for_validation_buttons(self.chat.user_id, 'stl')
+		orders = self.app.order_logic.get_orders_by_type('', 'stl')
+		orders = self.app.order_logic.get_orders_by_status(orders, 'validate')
+		orders = self.app.order_logic.get_orders_by_user_id(orders, self.chat.user_id)
+		buttons = self.app.order_logic.convert_orders_to_buttons(orders)
 		if buttons:
 			buttons.extend(['Назад'])
 			self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
@@ -290,7 +293,7 @@ class Stl:
 		self.chat.context = ''
 		file_id = self.message.file_id
 		if self.message.type in ['photo'] and file_id:
-			self.gcode.screanshot = file_id
+			self.gcode.screenshot = file_id
 			self.show_gcode_quantity()
 		else:
 			self.show_gcode_screenshot()
@@ -334,8 +337,8 @@ class Stl:
 			gcode_.quantity = 1
 			gcode_.duration = 200
 			gcode_.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
+			gcode_.screenshot = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
 			self.gcodes.append(gcode_)
-			self.screanshot = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
 
 		if self.message.btn_data == 'Отмена':
 			self.show_validate()
@@ -345,7 +348,7 @@ class Stl:
 					gcode = Gcode(self.app, 0)
 					gcode.order_id = self.order.id
 					gcode.file_id = temp_gcode.file_id
-					gcode.screanshot = temp_gcode.screanshot
+					gcode.screenshot = temp_gcode.screenshot
 					self.app.gcodes_append(gcode)
 					self.app.db.create_gcode(gcode)
 			self.order.weight = self.table_weight / self.table_quantity

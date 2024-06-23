@@ -75,12 +75,18 @@ class Designer:
 			text += 'Задачи отсутствуют'
 
 		buttons = []
-		# buttons.append(['Настройка параметрических моделей','parametric'])
-		buttons.append(['Валидация файла модели', 'stl'])
-		buttons.append(['Валидация модели из интернета', 'link'])
-		buttons.append(['Разработка модели по чертежу', 'design'])
-		buttons.append(['Оценка пригодности предмета к копированию', 'item'])
-		buttons.append(['Заявка на мелкосерийное производство', 'production'])
+		all_orders = self.app.order_logic.get_orders_by_status('', 'validate')
+			# buttons.append(['Настройка параметрических моделей','parametric'])
+		if self.app.order_logic.get_orders_by_type(all_orders, 'stl'):
+			buttons.append(['Валидация файла модели', 'stl'])
+		if self.app.order_logic.get_orders_by_type(all_orders, 'link'):
+			buttons.append(['Валидация модели из интернета', 'link'])
+		if self.app.order_logic.get_orders_by_type(all_orders, 'design'):
+			buttons.append(['Разработка модели по чертежу', 'design'])
+		if self.app.order_logic.get_orders_by_type(all_orders, 'item'):
+			buttons.append(['Оценка пригодности предмета к копированию', 'item'])
+		if self.app.order_logic.get_orders_by_type(all_orders, 'production'):
+			buttons.append(['Заявка на мелкосерийное производство', 'production'])
 
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')

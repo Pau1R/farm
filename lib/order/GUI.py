@@ -96,29 +96,29 @@ class Order_GUI:
 			plastic_type.lower()
 
 		status = ''
-		if order.status == 'validate':
+		if order.logical_status == 'validate':
 			status = 'Ожидание дизайнера'
-		elif order.status == 'validated':
+		elif order.logical_status == 'validated':
 			status = 'Ожидание действий клиента'
-		elif order.status == 'waiting_for_item':
+		elif order.logical_status == 'waiting_for_item':
 			status = 'Ожидание доставки предмета клиентом'
-			# TODO: delivery item receive, order.status rethink for client item order
-		elif order.status == 'prepayed':
+			# TODO: delivery item receive, order.logical_status rethink for client item order
+		elif order.logical_status == 'prepayed':
 			status = 'Выполняется'
-		elif order.status == 'no_spools':
+		elif order.logical_status == 'no_spools':
 			status = 'Приостановлен (отсутствует пластик)'
-		elif order.status == 'in_pick-up':
+		elif order.logical_status == 'in_pick-up':
 			status = 'Ожидает в пункте выдачи'
-		elif order.status == 'issued':
+		elif order.logical_status == 'issued':
 			status = 'Выдан клиенту'
 
 		# set text
 		text = order.name + '\n\n'
 		text += f'Статус: {status.upper()}\n'
 		if order.delivery_code > 0:
-			if order.status == 'in_pick-up':
+			if order.logical_status == 'in_pick-up':
 				text += f'Код получения'
-			elif order.status == 'waiting_for_item':
+			elif order.logical_status == 'waiting_for_item':
 				text += f'Код предмета'
 			text += f': {order.delivery_code}\n\n'
 		text += f'Дата создания: {self.app.functions.russian_date(order.date)}\n'
@@ -168,14 +168,14 @@ class Order_GUI:
 					buttons.append(['Выбрать цвет', 'color'])
 				elif not free_start and not prepayed:
 					buttons.append(['Внести предоплату', 'pay'])
-				elif free_start and order.status == 'validated':
+				elif free_start and order.logical_status == 'validated':
 					buttons.append(['Подтвердить и передать на выполнение', 'continue'])
 				elif prepayed and not order.is_payed():
 					buttons.append(['Оплатить полностью', 'pay'])
 			elif type_ == 'sketch' or type_ == 'item':
 				if order.color_id == 0:
 					buttons.append(['Выбрать цвет', 'color'])
-				elif free_start and order.status == 'validated':
+				elif free_start and order.logical_status == 'validated':
 					buttons.append(['Подтвердить заказ', 'continue'])
 				elif prepayed and not order.is_payed():
 					buttons.append(['Оплатить полностью', 'pay'])
@@ -293,7 +293,7 @@ class Order_GUI:
 		elif data == 'continue':
 			if type_ == 'stl' or type_ == 'link':
 				self.order.physical_status = 'in_line'
-			self.order.status = 'prepayed'
+			self.order.logical_status = 'prepayed'
 		elif data == 'pay':
 			self.show_pay()
 		elif data == 'Отменить заказ':
@@ -332,7 +332,7 @@ class Order_GUI:
 					if chat.user_id == self.order.user_id:
 						chat.user.order_GUI.show_rejected_by_admin(self.order, self.reject_reason)
 						self.reject_reason = ''
-			if self.order.status == 'validated':
+			if self.order.logical_status == 'validated':
 				chat = self.app.get_chat(self.order.user_id) # if admin is looking at order
 				chat.user.penalty()
 			self.order.remove_reserve()
