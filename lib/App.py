@@ -5,6 +5,8 @@ from datetime import date
 from lib.Msg import Message
 from lib.order.Order import Order
 from lib.order.Logic import Order_logic
+from lib.order.gcode.Gcode import Gcode
+from lib.order.gcode.Logic import Gcode_logic
 from lib.equipment.printer.Logic import Printer_logic
 from lib.request.Logic import Request_logic
 # from lib.Test import Test
@@ -30,6 +32,8 @@ class App:
 
 	orders = []
 	order_logic = None
+	gcodes = []
+	gcode_logic = None
 	
 	printer_logic = None
 
@@ -44,12 +48,19 @@ class App:
 		self.equipment.init(self, self.db)
 		self.db.get_chats()
 		self.db.get_orders()
+		self.db.get_gcodes()
 		self.settings = Settings(self)
 		self.order_logic = Order_logic(self)
+		self.gcode_logic = Gcode_logic(self)
 		self.clicker = Clicker(self)
 		self.printer_logic = Printer_logic(self)
 		self.request_logic = Request_logic(self)
 		# test = Test(self.db, self)
+
+		testing = True
+		# self.testing = False
+		if self.testing:
+			self.testing()
 
 	def new_message(self, message):
 		self.clicker.click()
@@ -89,13 +100,17 @@ class App:
 		return chats
 
 	def orders_append(self, order):
-		order.id = self.get_next_free_id()
+		order.id = self.get_next_free_id(self.orders)
 		self.orders.append(order)
 
-	def get_next_free_id(self):
+	def gcodes_append(self, gcode):
+		gcode.id = self.get_next_free_id(self.gcodes)
+		self.gcodes.append(gcode)
+
+	def get_next_free_id(self, list_):
 		ids = []
-		for order in self.orders:
-			ids.append(int(order.id))
+		for element in list_:
+			ids.append(int(element.id))
 		ids.sort()
 		ids = list(dict.fromkeys(ids))
 		id = 1
@@ -107,11 +122,22 @@ class App:
 		return id
 
 
+	def testing(self):
+	    for chat in self.chats:
+	        if chat.user_id == 7333126996:
+	            stl = chat.user.designer.stl
+	            stl.message = Message('')
+	            stl.message.btn_data = 'accept'
+	            for order in self.orders:
+	                if order.id == 12:
+	                    stl.order = order
+	            stl.show_gcode()
+
 # app structure for buttons:
 # 1 client 
 #	1 their_model
 #	2 client_color
-#   3 client_order
+#   3 order_GUI
 #   4 client_info
 # 1 Employee
 #	1 Owner

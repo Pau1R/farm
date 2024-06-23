@@ -60,7 +60,7 @@ class Their_item:
 		text = 'Сфотографируйте предмет со всех сторон и загрузите фото.\n\n'
 		text += 'Требования к фото:\n'
 		text += '1) предмет должен быть в фокусе\n'
-		text += '2) фотографии должно быть не размыты, перед фотографированием протрите линзу камеры\n'
+		text += '2) фотографии должны быть не размыты, перед фотографированием протрите линзу камеры сухой и чистой тканью\n'
 		text += '3) на фотографиях должны быть видны все особенности предмета\n\n'
 		text += 'Если есть возможность также сфотографируйте места крепления предмета к другим предметам'
 		if self.order.sketches:
@@ -118,7 +118,6 @@ class Their_item:
 		data = self.message.btn_data
 		if data == 'confirm':
 			self.order.date = datetime.today()
-			self.order.print_status = 'preparing'
 			self.order.status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)

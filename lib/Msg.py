@@ -29,6 +29,9 @@ class Message:
 		# self.user_id = message.from_user.id
 		# self.chat_id = message.chat.id
 
+		if isinstance(message, str):
+			return
+
 		try:
 			self.chat_id = int(message.json['chat']['id'])
 		except:

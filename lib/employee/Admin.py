@@ -14,7 +14,7 @@ from lib.equipment.spool.GUI import SpoolGUI
 from lib.equipment.color.GUI import ColorGUI
 from lib.equipment.surface.GUI import SurfaceGUI
 from lib.settings.GUI import SettingsGUI
-from lib.order.GUI import Client_order
+from lib.order.GUI import Order_GUI
 from lib.request.GUI import RequestGUI
 
 class Admin:
@@ -58,7 +58,7 @@ class Admin:
 		self.surfaceGUI = SurfaceGUI(app, chat, address + '/9')
 		self.settingsGUI = SettingsGUI(app, chat, address + '/10')
 		
-		self.client_order = Client_order(app, chat, address + '/11')
+		self.order_GUI = Order_GUI(app, chat, address + '/11')
 		self.requestGUI = RequestGUI(app, chat, address + '/12')
 
 	def first_message(self, message):
@@ -102,7 +102,7 @@ class Admin:
 			elif message.file3 == '10':
 				self.settingsGUI.new_message(message)
 			elif message.file3 == '11':
-				self.client_order.new_message(message)
+				self.order_GUI.new_message(message)
 			elif message.file3 == '12':
 				self.requestGUI.new_message(message)
 		if message.type == 'text' and message.file3 == '':
@@ -156,8 +156,8 @@ class Admin:
 			self.show_top_menu()
 		else:
 			self.message.instance_id = self.message.btn_data
-			self.client_order.last_data = ''
-			self.client_order.first_message(self.message)
+			self.order_GUI.last_data = ''
+			self.order_GUI.first_message(self.message)
 
 	def process_equipment(self):
 		if self.message.btn_data == 'Ящики':

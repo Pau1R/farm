@@ -42,7 +42,7 @@ class Their_model:
 			elif message.function == '2':
 				self.process_quantity()
 			elif message.function == '3':
-				self.process_conditions()
+				self.process_quality()
 			elif message.function == '4':
 				self.process_comment()
 			elif message.function == '5':
@@ -63,9 +63,9 @@ class Their_model:
 		buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 		self.GUI.tell_buttons(text, buttons, ['1', '2'], 2, self.order.id)
 
-	def show_conditions(self):
-		text = 'В каких условиях будет эксплуатироваться модель?'
-		buttons = ['в доме', 'на улице', 'в автомобиле', 'не знаю']
+	def show_quality(self):
+		text = 'Какое качество печати вам нужно?'
+		buttons = [['максимально дешевое', 'cheap'], ['оптимальное цена/качество','optimal'], ['максимальное качество', 'quality'], ['максимальная прочность', 'durability']]
 		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
 
 	def show_comment(self):
@@ -96,15 +96,15 @@ class Their_model:
 	def process_quantity(self):
 		try:
 			self.order.quantity = int(self.message.btn_data)
-			# self.show_conditions()
-			self.show_comment()
+			self.show_quality()
+			# self.show_comment()
 		except:
 			self.show_quantity()
 
-	def process_conditions(self):
+	def process_quality(self):
 		if self.message.btn_data == '':
-			self.show_conditions()
-		self.order.conditions = self.message.btn_data
+			self.show_quality()
+		self.order.quality = self.message.btn_data
 		self.show_comment()
 
 	def process_comment(self):
@@ -124,21 +124,20 @@ class Their_model:
 		# self.message.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
 		# self.message.type = 'document'
 		# self.order.name = 'название модели'
-		# self.order.conditions = 'В доме'
+		# self.order.quality = 'В доме'
 		# self.order.quantity = 3
 		
 		data = self.message.btn_data
 		if data == 'confirm':
 			self.order.date = datetime.today()
-			self.order.print_status = 'preparing'
-			self.order.status = 'validate'
+			self.order.logical_status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)
 			self.chat.user.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
-					chat.user.designer.validate.show_new_order(self.order)
+					chat.user.designer.stl.show_new_order(self.order)
 		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()
 		

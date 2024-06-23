@@ -4,7 +4,11 @@ from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.Texts import Texts
-from lib.employee.designer.Validate import Validate
+from lib.employee.designer.Stl import Stl
+from lib.employee.designer.Link import Link
+from lib.employee.designer.Sketch import Sketch
+from lib.employee.designer.Item import Item
+from lib.employee.designer.Production import Production
 
 class Designer:
 	address = ''
@@ -19,16 +23,25 @@ class Designer:
 	
 	last_data = ''
 
-	validate = None
+	stl = None
+	link = None
+	sketch = None
+	item = None
+	production = None
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
 		self.address = address
 		self.orders = app.orders
-		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(chat, '1/4')
-		self.validate = Validate(app, chat)
+		self.GUI = Gui(app, chat, address)
+		self.texts = Texts(chat, address)
+
+		self.stl = Stl(app, chat, address + '/1')
+		self.link = Link(app, chat, address + '/2')
+		self.sketch = Sketch(app, chat, address + '/3')
+		self.item = Item(app, chat, address + '/4')
+		self.production = Production(app, chat, address + '/5')
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -45,7 +58,7 @@ class Designer:
 				if message.function == '2':
 					self.process_orders_design()
 			elif message.file3 == '1':
-				self.validate.new_message(message)
+				self.stl.new_message(message)
 
 #---------------------------- SHOW ----------------------------
 
@@ -54,61 +67,66 @@ class Designer:
 		text = f'Здравствуйте, дизайнер {self.chat.user_name}. '
 		amount = 0
 		for order in self.orders:
-			if order.status == 'validate':
+			if order.logical_status == 'validate':
 				amount += 1
 		if amount > 0:
 			text += f'Задач в очереди: {amount}'
 		else:
 			text += 'Задачи отсутствуют'
-		buttons = [['Разработка моделей по чертежу', 'design']] 
-		buttons.append(['Валидация моделей', 'validate'])
-		buttons.append(['Настройка параметрических моделей','parametric'])
+
+		buttons = []
+		# buttons.append(['Настройка параметрических моделей','parametric'])
+		buttons.append(['Валидация файла модели', 'stl'])
+		buttons.append(['Валидация модели из интернета', 'link'])
+		buttons.append(['Разработка модели по чертежу', 'design'])
+		buttons.append(['Оценка пригодности предмета к копированию', 'item'])
+		buttons.append(['Заявка на мелкосерийное производство', 'production'])
+
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, ['Назад'], 1, 0)
+		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
-	def show_orders_design(self):
-		self.last_data = ''
-		text = self.texts.designer_orders_design_text(self.order_timer, self.app.orders)
-		buttons = self.texts.designer_orders_design_btns(self.order)
-		self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
+	# def show_orders_design(self):
+	# 	self.last_data = ''
+	# 	text = self.texts.designer_orders_design_text(self.order_timer, self.app.orders)
+	# 	buttons = self.texts.designer_orders_design_btns(self.order)
+	# 	self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
 
-	def show_order(self):
-		self.last_data = ''
-		text = self.texts.designer_order_text(self.order)
-		buttons = self.texts.designer_order_btns(self.order_timer, self.order)
-		self.GUI.tell_buttons(text, buttons, ['Назад'], 3, self.order.id)
+	# def show_order(self):
+	# 	self.last_data = ''
+	# 	text = self.texts.designer_order_text(self.order)
+	# 	buttons = self.texts.designer_order_btns(self.order_timer, self.order)
+	# 	self.GUI.tell_buttons(text, buttons, ['Назад'], 3, self.order.id)
 		
-	def show_finished_orders(self):
-		self.last_data = ''
-		buttons = []
-		buttons.extend(['Назад'])
-		self.GUI.tell_buttons('', buttons, ['Назад'], 4, 0)
+	# def show_finished_orders(self):
+	# 	self.last_data = ''
+	# 	buttons = []
+	# 	buttons.extend(['Назад'])
+	# 	self.GUI.tell_buttons('', buttons, ['Назад'], 4, 0)
 
 #---------------------------- PROCESS ----------------------------
 	
 	def process_top_menu(self):
-		if self.message.btn_data == 'Назад':
+		data = self.message.btn_data
+		if data == 'Назад':
 			self.message.text = '/start'
 			self.chat.user.new_message(self.message)
-		if self.message.btn_data == 'design':
-			self.show_orders_design()
-		if self.message.btn_data == 'validate':
-			self.validate.last_data = ''
-			self.validate.first_message(self.message)
-		if self.message.btn_data == 'parametric':
-			self.show_orders_parametric()
-		if self.message.btn_data == 'finished':
-			self.show_finished_orders()
-
-	def process_orders_design(self):
-		if self.message.btn_data == 'Назад':
-			self.show_top_menu()
-		for order in self.app.orders:
-			if order.id == self.message.instance_id:
-				self.order = order
-				self.show_order()
-
-	def process_finished_orders(self):
-		if self.message.btn_data == 'Назад':
-			self.show_top_menu()
+		elif data == 'stl':
+			self.stl.last_data = ''
+			self.stl.first_message(self.message)
+		elif data == 'link':
+			self.link.last_data = ''
+			self.link.first_message(self.message)
+		elif data == 'sketch':
+			self.sketch.last_data = ''
+			self.sketch.first_message(self.message)
+		elif data == 'item':
+			self.item.last_data = ''
+			self.item.first_message(self.message)
+		elif data == 'production':
+			self.production.last_data = ''
+			self.production.first_message(self.message)
+		# if data == 'parametric':
+		# 	self.show_orders_parametric()
+		# if data == 'finished':
+		# 	self.show_finished_orders()

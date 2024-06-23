@@ -6,7 +6,7 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
-from lib.order.GUI import Client_order
+from lib.order.GUI import Order_GUI
 from lib.client.Info import Info
 
 from lib.client.place_order.Article import Farm_model
@@ -31,7 +31,7 @@ class Client:
 	
 	menu = None
 	their_model = None
-	client_order = None
+	order_GUI = None
 
 	payId = ''
 	money_payed = 0.0
@@ -44,7 +44,7 @@ class Client:
 		self.GUI = Gui(app, chat, self.address)
 		self.reset_order()
 
-		self.client_order = Client_order(app, chat, self.address + '/1')
+		self.order_GUI = Order_GUI(app, chat, self.address + '/1')
 		self.info = Info(app, chat, self.address + '/2')
 
 		self.farm_model = Farm_model(app, chat, self.address + '/3')
@@ -76,7 +76,7 @@ class Client:
 				elif message.function == '6':
 					self.process_order()
 			elif message.file2 == '1':
-				self.client_order.new_message(message)
+				self.order_GUI.new_message(message)
 			elif message.file2 == '2':
 				self.info.new_message(message)
 			elif message.file2 == '3':
@@ -110,7 +110,7 @@ class Client:
 		buttons.append(['Распечатать модель по ссылке из интернета', 'link'])
 		buttons.append(['Создать и распечатать модель по вашему чертежу', 'sketch'])
 		buttons.append(['Создать копию вашего предмета', 'item'])
-		buttons.append(['Мелкосерийное производство', 'production'])
+		buttons.append(['Мелкосерийное производство (больше 10 единиц)', 'production'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите тип заказа', buttons, [], 2, 0)
 
@@ -168,7 +168,6 @@ class Client:
 		if not data:
 			self.show_top_menu()
 			return
-		self.order.type = data
 		if data == 'farm model':
 			self.farm_model.first_message(self.message)
 		elif data == 'stl':
@@ -183,14 +182,18 @@ class Client:
 			self.production.first_message(self.message)
 		elif data == 'Назад':
 			self.show_top_menu()
+		else:
+			return
+		self.order.type = data
+		self.order.physical_status = 'prepare'
 
 	def process_orders(self):
 		if self.message.btn_data == 'Назад':
 			self.show_top_menu()
 		else:
 			self.message.instance_id = int(self.message.btn_data)
-			self.client_order.last_data = ''
-			self.client_order.first_message(self.message)
+			self.order_GUI.last_data = ''
+			self.order_GUI.first_message(self.message)
 
 #---------------------------- LOGIC ----------------------------
 

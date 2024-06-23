@@ -16,7 +16,7 @@ class Order_logic:
 				if now > order.booked_time + 1800: # 30 minutes to prepay
 					order.remove_reserve()
 					chat = self.app.get_chat(order.user_id)
-					chat.user.client_order.show_booking_canceled(self)
+					chat.user.order_GUI.show_booking_canceled(self)
 
 	def get_order_by_id(self, order_id):
 		for order in self.orders:
@@ -29,6 +29,29 @@ class Order_logic:
 			if order.user_id == user_id:
 				orders.append(order)
 		return orders
+
+	def get_orders_by_status(self, status):
+		orders = []
+		for order in self.orders:
+			if order.logical_status == status:
+				orders.append(order)
+		return orders
+
+	def get_orders_for_validation(self):
+		orders = []
+		for order in self.orders:
+			if order.logical_status == 'validate':
+				orders.append(order)
+		return orders
+
+	def get_orders_for_validation_buttons(self, user_id, type_):
+		buttons = []
+		orders = self.get_orders_for_validation()
+		orders.sort(key=self.get_object_date)
+		for order in orders:
+			if order.type == type_ and (order.assinged_designer_id == user_id or order.assinged_designer_id == 0):
+				buttons.append([str(order.id) + ': ' + order.name, order.id])
+		return buttons
 
 	def get_order_by_pay_code(self, pay_code):
 		for order in self.orders:
@@ -43,7 +66,7 @@ class Order_logic:
 	def count_all_time(self, printer_type):
 		scheduled_time = 0
 		for order in self.orders:
-			if order.print_status in ['in_line', 'printing'] and (order.printer_type == printer_type or printer_type == '*'):
+			if order.physical_status in ['in_line', 'printing'] and (order.printer_type == printer_type or printer_type == '*'):
 				then = order.start_datetime
 				now = datetime.today()
 				used_time = 0
@@ -53,7 +76,8 @@ class Order_logic:
 					used_time = (9 + 10) * 60 - (then.hour * 60) + then.minute # Count first day.  starts at 9 am for a 10 hour shift
 					used_time += ((now - then).days - 1) * 10 * 60 # count days in between
 					used_time += (now.hour * 60 + now.minute) - 9 * 60 # Count last day.
-				scheduled_time += order.time - used_time
+				# scheduled_time += order.time - used_time
+				scheduled_time += 50 - used_time # TODO: redo time calculation using gcode table
 		return scheduled_time
 
 	def get_completion_date(self, order_time, printer_type):
@@ -73,3 +97,6 @@ class Order_logic:
 		days += add_days
 		days = int(days * 1.2)														# add buffer to days (far time)
 		return date.today() + timedelta(days=days)
+
+	def get_object_date(self, object):
+		return object.date

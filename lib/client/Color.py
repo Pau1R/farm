@@ -111,7 +111,7 @@ class Client_color:
 	def show_booked(self):
 		if self.order.is_free_start():
 			text = 'Заказ принят и помещен в очередь на печать'
-			self.order.print_status = 'in_line'
+			self.order.physical_status = 'in_line'
 		else:
 			text = 'Цвет забронирован. Если в течении 30 минут не будет внесена предоплата, бронь отменится'
 		buttons = [['Хорошо','ok']]
@@ -139,8 +139,8 @@ class Client_color:
 	def process_order_colors(self):
 		data = self.message.btn_data
 		if data == 'Назад':
-			self.chat.user.client_order.last_data = ''
-			self.chat.user.client_order.first_message(self.message)
+			self.chat.user.order_GUI.last_data = ''
+			self.chat.user.order_GUI.first_message(self.message)
 		elif data == 'ordered':
 			self.show_order_colors_ordered()
 		else:
@@ -182,5 +182,5 @@ class Client_color:
 
 	def process_booked(self):
 		if self.message.btn_data == 'ok':
-			self.chat.user.client_order.last_data = ''
-			self.chat.user.client_order.first_message(self.message)
+			self.chat.user.order_GUI.last_data = ''
+			self.chat.user.order_GUI.first_message(self.message)

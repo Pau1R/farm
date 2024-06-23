@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 from lib.Chat import Chat
 from lib.order.Order import Order
+from lib.order.gcode.Gcode import Gcode
 from lib.equipment.container.Container import Container
 from lib.equipment.dryer.Dryer import Dryer
 from lib.equipment.extruder.Extruder import Extruder
@@ -114,12 +115,12 @@ class Database:
 			created DATETIME,
 			user_id INTEGER,
 			type TEXT,
-			print_status TEXT,
-			status TEXT,
+			physical_status TEXT,
+			logical_status TEXT,
 			assinged_designer_id TEXT,
 			priority INTEGER,
 			quantity INTEGER,
-			conditions TEXT,
+			quality TEXT,
 			comment TEXT,
 			color_id INTEGER,
 			support_remover TEXT,
@@ -129,7 +130,6 @@ class Database:
 			plastic_type TEXT,
 			printer_type TEXT,
 			weight DECIMAL,
-			time DECIMAL,
 			completion_date DATE,
 			start_datetime DATETIME,
 			support_time DECIMAL,
@@ -141,7 +141,13 @@ class Database:
 			booked TEXT,
 			booked_time INTEGER,
 			delivery_code INTEGER,
-			delivery_user_id INTEGER """
+			delivery_user_id INTEGER """  # time DECIMAL,
+		gcode = """
+			id INTEGER PRIMARY KEY,
+			order_id INTEGER,
+			file_id TEXT,
+			status TEXT,
+			duration INTEGER"""  # in_line, printing, printed
 		setting = """
 			id INTEGER,
 			name TEXT PRIMARY KEY,
@@ -165,6 +171,7 @@ class Database:
 		self.cursor.execute(create + 'color (' + color + ')')
 		self.cursor.execute(create + 'surface (' + surface + ')')
 		self.cursor.execute(create + 'order_ (' + order + ')')
+		self.cursor.execute(create + 'gcode (' + gcode + ')')
 		self.cursor.execute(create + 'setting (' + setting + ')')
 		self.cursor.execute(create + 'request (' + request + ')')
 		self.db.commit()
@@ -239,12 +246,12 @@ class Database:
 			order.date = self.string_to_datetime(line[2])
 			order.user_id = int(line[3])
 			order.type = line[4]
-			order.print_status = line[5]
-			order.status = line[6]
+			order.physical_status = line[5]
+			order.logical_status = line[6]
 			order.assinged_designer_id = int(line[7])
 			order.priority = int(line[8])
 			order.quantity = int(line[9])
-			order.conditions = line[10]
+			order.quality = line[10]
 			order.comment = line[11]
 			order.color_id = int(line[12])
 			order.support_remover = line[13]
@@ -254,23 +261,24 @@ class Database:
 			order.plastic_type = line[17]
 			order.printer_type = line[18]
 			order.weight = int(line[19])
-			order.time = line[20]
-			order.completion_date = self.string_to_date(line[21])
-			order.start_datetime = self.string_to_datetime(line[22])
-			order.support_time = int(line[23])
-			order.layer_hight = line[24]
-			order.price = int(line[25])
-			order.pay_code = 0 if line[25] == '' else int(line[26])
-			order.payed = line[27]
-			order.prepayment_percent = int(line[28])
-			order.booked = ast.literal_eval(line[29])
-			order.booked_time = int(line[30])
-			order.delivery_code = int(line[31])
-			order.delivery_user_id = int(line [32])
+			# order.time = line[20]
+			order.completion_date = self.string_to_date(line[20])
+			order.start_datetime = self.string_to_datetime(line[21])
+			order.support_time = int(line[22])
+			order.layer_hight = line[23]
+			order.price = int(line[24])
+			order.pay_code = 0 if line[25] == '' else int(line[25])
+			order.payed = line[26]
+			order.prepayment_percent = int(line[27])
+			order.booked = ast.literal_eval(line[28])
+			order.booked_time = int(line[29])
+			order.delivery_code = int(line[30])
+			order.delivery_user_id = int(line [31])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
+		# self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","","","",0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
 		self.db.commit()
 		self.update_order(order)
 
@@ -278,12 +286,12 @@ class Database:
 		values = 'name = "' + order.name + '", '
 		values += 'user_id = "' + str(order.user_id) + '", '
 		values += 'type = "' + order.type + '", '
-		values += 'print_status = "' + order.print_status + '", '
-		values += 'status = "' + order.status + '", '
+		values += 'physical_status = "' + order.physical_status + '", '
+		values += 'logical_status = "' + order.logical_status + '", '
 		values += 'assinged_designer_id = "' + str(order.assinged_designer_id) + '", '
 		values += 'priority = "' + str(order.priority) + '", '
 		values += 'quantity = "' + str(order.quantity) + '", '
-		values += 'conditions = "' + order.conditions + '", '
+		values += 'quality = "' + order.quality + '", '
 		values += 'comment = "' + order.comment + '", '
 		values += 'color_id = "' + str(order.color_id) + '", '
 		values += 'support_remover = "' + str(order.support_remover) + '", '
@@ -293,7 +301,7 @@ class Database:
 		values += 'plastic_type = "' + order.plastic_type + '", '
 		values += 'printer_type = "' + order.printer_type + '", '
 		values += 'weight = "' + str(order.weight) + '", '
-		values += 'time = "' + str(order.time) + '", '
+		# values += 'time = "' + str(order.time) + '", '
 		values += 'completion_date = "' + str(order.completion_date) + '", '
 		values += 'start_datetime = "' + str(order.start_datetime) + '", '
 		values += 'support_time = "' + str(order.support_time) + '", '
@@ -311,6 +319,34 @@ class Database:
 
 	def remove_order(self, order):
 		self.cursor.execute('DELETE FROM order_ WHERE id=?', (order.id,))
+		self.db.commit()
+
+	def get_gcodes(self):
+		self.cursor.execute('SELECT * FROM gcode')
+		sql = self.cursor.fetchall()
+		for line in sql:
+			gcode = Gcode(self.app, line[0])
+			gcode.order_id = line[1]
+			gcode.file_id = line[2]
+			gcode.status = line[3]
+			gcode.duration = line[4]
+			self.app.gcodes.append(gcode)
+
+	def create_gcode(self, gcode):
+		self.cursor.execute('INSERT INTO gcode VALUES (?,0,"","",0)', (gcode.id,))
+		self.db.commit()
+		self.update_gcode(gcode)
+
+	def update_gcode(self, gcode):
+		values = 'order_id = "' + str(gcode.order_id) + '", '
+		values += 'file_id = "' + gcode.file_id + '", '
+		values += 'status = "' + gcode.status + '", '
+		values += 'duration = "' + str(gcode.duration) + '" '
+		self.cursor.execute('UPDATE gcode SET ' + values + ' WHERE id = ' + str(gcode.id))
+		self.db.commit()
+
+	def remove_gcode(self, gcode):
+		self.cursor.execute('DELETE FROM gcode WHERE id=?', (gcode.id,))
 		self.db.commit()
 
 #---------------------------- EQUIPMENT ----------------------------

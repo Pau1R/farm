@@ -6,7 +6,7 @@ from lib.client.Color import Client_color
 import time
 import random
 
-class Client_order:
+class Order_GUI:
 	address = ''
 	
 	app = None
@@ -100,6 +100,9 @@ class Client_order:
 			status = 'Ожидание дизайнера'
 		elif order.status == 'validated':
 			status = 'Ожидание действий клиента'
+		elif order.status == 'waiting_for_item':
+			status = 'Ожидание доставки предмета клиентом'
+			# TODO: delivery item receive, order.status rethink for client item order
 		elif order.status == 'prepayed':
 			status = 'Выполняется'
 		elif order.status == 'no_spools':
@@ -112,8 +115,12 @@ class Client_order:
 		# set text
 		text = order.name + '\n\n'
 		text += f'Статус: {status.upper()}\n'
-		if order.status == 'in_pick-up' and order.delivery_code > 0:
-			text += f'Код получения: {order.delivery_code}\n\n'
+		if order.delivery_code > 0:
+			if order.status == 'in_pick-up':
+				text += f'Код получения'
+			elif order.status == 'waiting_for_item':
+				text += f'Код предмета'
+			text += f': {order.delivery_code}\n\n'
 		text += f'Дата создания: {self.app.functions.russian_date(order.date)}\n'
 		if order.price > 0:
 			if settings_set:
@@ -133,12 +140,12 @@ class Client_order:
 			text += f'Тип материала: {plastic_type}\n'
 		if order.color_id != 0:
 			text += f'Цвет изделия: {color.lower()}\n'
-		if order.time > 0:
-			text += f'Длительность печати'
-			if order.time > 119: # if 2 hours or more show only hours amount
-				text += f' (часов): {int(order.time/60)}\n'
-			else:
-				text += f': {int(order.time)} минут\n'
+		# if order.time > 0:
+		# 	text += f'Длительность печати'
+		# 	if order.time > 119: # if 2 hours or more show only hours amount
+		# 		text += f' (часов): {int(order.time/60)}\n'
+		# 	else:
+		# 		text += f': {int(order.time)} минут\n'
 		if order.completion_date:
 			date = self.app.functions.russian_date(order.completion_date)
 			text += f'Дата готовности (примерно): {date}'
@@ -153,36 +160,58 @@ class Client_order:
 		# set buttons
 		buttons = []
 		if not self.is_admin():
-			# order.color_id = ''
-			# status = 'validated'
-			if order.status == 'validated':
+			type_ = order.type
+			if type_ == 'stl' or type_ == 'link':
 				if order.support_remover == '' and order.support_time > 0:
 					buttons.append(['Выбрать кто уберет поддержки', 'supports'])
 				elif order.color_id == 0:
 					buttons.append(['Выбрать цвет', 'color'])
-				elif settings_set:
-					# Условия принятия заказа без предоплаты:
-					# 1) Стоимость заказа меньше лимита
-					# 2) Стоимость заказа меньше половины стоимости выполненных заказов
-					if free_start:
-						buttons.append(['Подтвердить и передать на выполнение', 'continue'])
-					else:
-						if prepayed:
-							buttons.append(['Оплатить полностью', 'pay'])
-						else:
-							buttons.append(['Внести предоплату', 'pay'])
+				elif not free_start and not prepayed:
+					buttons.append(['Внести предоплату', 'pay'])
+				elif free_start and order.status == 'validated':
+					buttons.append(['Подтвердить и передать на выполнение', 'continue'])
+				elif prepayed and not order.is_payed():
+					buttons.append(['Оплатить полностью', 'pay'])
+			elif type_ == 'sketch' or type_ == 'item':
+				if order.color_id == 0:
+					buttons.append(['Выбрать цвет', 'color'])
+				elif free_start and order.status == 'validated':
+					buttons.append(['Подтвердить заказ', 'continue'])
+				elif prepayed and not order.is_payed():
+					buttons.append(['Оплатить полностью', 'pay'])
+				elif not free_start and not prepayed:
+					buttons.append(['Внести предоплату', 'pay'])
 
 		buttons.append('Отменить заказ')
 		buttons.append('Назад')
-		type_ = order.type
 		if type_ == 'stl':
 			self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 		elif type_ == 'link':
 			self.GUI.tell_link_buttons(order.link, text, buttons, buttons, 1, order.id)
-		elif type_ == 'sketch':
+		elif type_ == 'sketch' or type_ == 'item':
 			for file in order.sketches:
 				self.GUI.tell_file(file[0], file[1], '')
 			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
+
+		# buttons for stl, link: 
+		# - supports, color
+		#   - pay, continue
+		# - cancel, back
+
+		# buttons for sketch:
+		# - color
+		#   - pay, continue
+		#     - confirm, redo
+		#       - supports
+		# - cancel, back
+
+		# buttons for item:
+		# - color
+		#   - pay, continue
+		# - cancel, back
+
+		# buttons for production: TODO: think over
+
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + str(self.order.get_supports_price()) + ' рублей'
@@ -262,7 +291,8 @@ class Client_order:
 		elif data == 'supports':
 			self.show_supports()
 		elif data == 'continue':
-			self.order.print_status = 'in_line'
+			if type_ == 'stl' or type_ == 'link':
+				self.order.physical_status = 'in_line'
 			self.order.status = 'prepayed'
 		elif data == 'pay':
 			self.show_pay()
@@ -300,7 +330,7 @@ class Client_order:
 			if self.is_admin():
 				for chat in self.app.chats:
 					if chat.user_id == self.order.user_id:
-						chat.user.client_order.show_rejected_by_admin(self.order, self.reject_reason)
+						chat.user.order_GUI.show_rejected_by_admin(self.order, self.reject_reason)
 						self.reject_reason = ''
 			if self.order.status == 'validated':
 				chat = self.app.get_chat(self.order.user_id) # if admin is looking at order

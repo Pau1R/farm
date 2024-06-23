@@ -107,7 +107,7 @@ class Their_sketch:
 		data = self.message.btn_data
 		if data == 'confirm':
 			self.order.date = datetime.today()
-			self.order.print_status = 'preparing'
+			# self.order.physical_status = 'preparing'
 			self.order.status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)

@@ -14,8 +14,8 @@ class Order:
 	date = None
 	user_id = 1
 	type = ''
-	print_status = '' # preparing, in_line, printing, printed
-	status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
+	physical_status = '' # preparing, in_line, printing, printed
+	logical_status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
 	# who can change order status to another:
 	# - client:
 	#   - creating: validate
@@ -29,7 +29,7 @@ class Order:
 
 	# user settings
 	quantity = 1
-	conditions = ''
+	quality = ''
 	comment = ''
 	color_id = 0
 	support_remover = ''
@@ -43,7 +43,6 @@ class Order:
 	plastic_type = ''
 	printer_type = ''
 	weight = 0
-	time = 0.0
 	completion_date = None
 	start_datetime = None # date and time when order started printing
 	support_time = 0
@@ -70,7 +69,8 @@ class Order:
 		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic
 		plastic_price = self.weight * self.quantity * gram_price  										# total plastic price for order
 		print_cost = self.app.equipment.print_cost(self.printer_type)  									# cost of one hour for printer
-		time_price = (self.time / 60) * print_cost														# cost of all printer working time
+		# time_price = (self.time / 60) * print_cost														# cost of all printer working time
+		time_price = (50 / 60) * print_cost														# cost of all printer working time  TODO
 		supports_price = self.get_supports_price()
 		if self.support_remover == 'Компания':
 			supports_price = 0
@@ -164,13 +164,14 @@ class Order:
 		return element.date
 
 	def set_completion_date(self):
-		self.completion_date = self.app.order_logic.get_completion_date(self.time, self.printer_type)
+		self.completion_date = self.app.order_logic.get_completion_date(50, self.printer_type) # TODO
+		# self.completion_date = self.app.order_logic.get_completion_date(self.time, self.printer_type)
 		self.app.db.update_order(self)
 
 	def order_payed(self, amount):
 		self.payed += amount
-		self.print_status = 'in_line'
 		if self.is_prepayed():
+			self.physical_status = 'in_line'
 			chat = self.app.get_chat(self.user_id)
 			chat.user.orders_canceled = 0
 			if self.status == 'in_pick-up' and self.delivery_user_id != 0:
@@ -178,18 +179,17 @@ class Order:
 				chat.user.delivery.show_order_payed(self)
 
 	def set_delivery_code(self):
-		if self.delivery_code == 0:
-			used_codes = [0]
-			code = 0
-			code_upper = 99
-			if len(self.app.orders) > 80:
-				code_upper = 999
-			for order_ in self.app.orders:
-				used_codes.append(order_.delivery_code)
-			while code in used_codes:
-				code = random.randint(10, code_upper)
-			self.delivery_code = code
-			self.app.db.update_order(self)
+		used_codes = [0]
+		code = 0
+		code_upper = 99
+		if len(self.app.orders) > 80:
+			code_upper = 999
+		for order_ in self.app.orders:
+			used_codes.append(order_.delivery_code)
+		while code in used_codes:
+			code = random.randint(10, code_upper)
+		self.delivery_code = code
+		self.app.db.update_order(self)
 
 	def remaining_payment(self):
 		return self.price - self.payed

@@ -208,7 +208,7 @@ class Delivery:
 		data = self.message.btn_data
 		if data == 'confirm':
 			self.order.order_payed(self.accepted_money)
-			# TODO: save to db
+			self.app.db.update_order(self.order)
 			self.update_pay_status()
 		else:
 			self.accepted_money = 0
