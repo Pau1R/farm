@@ -77,7 +77,7 @@ class Designer:
 		if self.app.order_logic.get_orders_by_type(all_orders, 'stl'):
 			buttons.append(['Валидация файла модели', 'stl'])
 		if self.app.order_logic.get_orders_by_type(all_orders, 'link'):
-			buttons.append(['Валидация модели из интернета', 'link'])
+			buttons.append(['Валидация ссылки', 'link'])
 		if self.app.order_logic.get_orders_by_type(all_orders, 'design'):
 			buttons.append(['Разработка модели по чертежу', 'design'])
 		if self.app.order_logic.get_orders_by_type(all_orders, 'item'):

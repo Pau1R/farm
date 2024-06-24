@@ -11,8 +11,7 @@ from lib.client.Info import Info
 
 # from lib.client.place_order.Article import Farm_model
 from lib.client.place_order.Stl_link import Stl_link
-from lib.client.place_order.Sketch import Their_sketch
-from lib.client.place_order.Item import Their_item
+from lib.client.place_order.Sketch_item import Sketch_item
 from lib.client.place_order.Production import Production
 
 class Client:
@@ -48,9 +47,8 @@ class Client:
 
 		# self.farm_model = Farm_model(app, chat, self.address + '/3')
 		self.stl_link = Stl_link(app, chat, self.address + '/4')
-		self.their_sketch = Their_sketch(app, chat, self.address + '/5')
-		self.their_item = Their_item(app, chat, self.address + '/6')
-		self.production = Production(app, chat, self.address + '/7')
+		self.sketch_item = Sketch_item(app, chat, self.address + '/5')
+		self.production = Production(app, chat, self.address + '/6')
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -82,10 +80,8 @@ class Client:
 			elif message.file2 == '4':
 				self.stl_link.new_message(message)
 			elif message.file2 == '5':
-				self.their_sketch.new_message(message)
+				self.sketch_item.new_message(message)
 			elif message.file2 == '6':
-				self.their_item.new_message(message)
-			elif message.file2 == '7':
 				self.production.new_message(message)
 		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
@@ -140,6 +136,11 @@ class Client:
 
 	def show_wait_for_designer(self):
 		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
+		text = 'После оценки будет известна предварительная стоимость заказа.'
+		text += ' Итоговая стоимость станет известна после создания модели и выбора цвета изделия клиентом'
+		self.GUI.tell(text)
+		if self.order.type == 'item':
+			'После оценки вам нужно будет принести ваш предмет в пункт выдачи. Адрес и график находятся в разделе информации.'
 		time.sleep(3)
 
 #---------------------------- PROCESS ----------------------------
@@ -170,10 +171,8 @@ class Client:
 		# 	self.farm_model.first_message(self.message)
 		if data in ['stl','link']:
 			self.stl_link.first_message(self.message)
-		elif data == 'sketch':
-			self.their_sketch.first_message(self.message)
-		elif data == 'item':
-			self.their_item.first_message(self.message)
+		elif data in ['sketch','item']:
+			self.sketch_item.first_message(self.message)
 		elif data == 'production':
 			self.production.first_message(self.message)
 		elif data == 'Назад':
