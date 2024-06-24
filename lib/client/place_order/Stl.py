@@ -38,15 +38,15 @@ class Their_model:
 		if message.data_special_format and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
 			self.last_data = message.data
 			if message.function == '1':
-				self.process_name()
+				self.process_file()
 			elif message.function == '2':
 				self.process_quantity()
 			elif message.function == '3':
 				self.process_quality()
 			elif message.function == '4':
-				self.process_comment()
+				self.process_name()
 			elif message.function == '5':
-				self.process_file()
+				self.process_comment()
 			elif message.function == '6':
 				self.process_confirmation()
 		if message.type == 'text' or self.message.type == 'document':
@@ -54,9 +54,14 @@ class Their_model:
 
 #---------------------------- SHOW ----------------------------
 
-	def show_name(self):
+	def show_file(self):
 		self.chat.set_context(self.address, 1)
-		self.GUI.tell('Напишите название вашей модели')
+		text = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(self.supported_files)
+		self.GUI.tell(text)
+
+	def show_extention_error(self):
+		self.GUI.tell('Неверный формат файла')
+		self.show_file()
 
 	def show_quantity(self):
 		text = 'Сколько экземпляров вам нужно?'
@@ -68,19 +73,14 @@ class Their_model:
 		buttons = [['максимально дешевое', 'cheap'], ['оптимальное цена/качество','optimal'], ['максимальное качество', 'quality'], ['максимальная прочность', 'durability']]
 		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
 
-	def show_comment(self):
+	def show_name(self):
 		self.chat.set_context(self.address, 4)
+		self.GUI.tell('Напишите название вашей модели')
+
+	def show_comment(self):
+		self.chat.set_context(self.address, 5)
 		buttons = ['Комментариев к заказу не имею']
 		self.GUI.tell_buttons('Напишите комментарий', buttons, [], 4, self.order.id)
-
-	def show_file(self):
-		self.chat.set_context(self.address, 5)
-		text = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(self.supported_files)
-		self.GUI.tell(text)
-
-	def show_extention_error(self):
-		self.GUI.tell('Неверный формат файла')
-		self.show_file()
 
 	def show_confirmation(self):
 		text = 'Подтвердите создание заказа'
@@ -89,9 +89,12 @@ class Their_model:
 
 #---------------------------- PROCESS ----------------------------
 
-	def process_name(self):
-		self.order.name = self.message.text
-		self.show_quantity()
+	def process_file(self):
+		if self.message.type == 'document' and self.message.file_name.split(".")[-1] in self.supported_files:
+			self.order.model_file = self.message.file_id
+			self.show_confirmation()
+		else:
+			self.show_extention_error()
 
 	def process_quantity(self):
 		try:
@@ -107,17 +110,14 @@ class Their_model:
 		self.order.quality = self.message.btn_data
 		self.show_comment()
 
+	def process_name(self):
+		self.order.name = self.message.text
+		self.show_quantity()
+
 	def process_comment(self):
 		if self.message.btn_data != 'Комментариев к заказу не имею':
 			self.order.comment = self.message.text
 		self.show_file()
-
-	def process_file(self):
-		if self.message.type == 'document' and self.message.file_name.split(".")[-1] in self.supported_files:
-			self.order.model_file = self.message.file_id
-			self.show_confirmation()
-		else:
-			self.show_extention_error()
 
 	def process_confirmation(self):
 		# self.message.file_name = 'hi.stl'

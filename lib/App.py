@@ -9,12 +9,13 @@ from lib.order.gcode.Gcode import Gcode
 from lib.order.gcode.Logic import Gcode_logic
 from lib.equipment.printer.Logic import Printer_logic
 from lib.request.Logic import Request_logic
-# from lib.Test import Test
 from lib.settings.Settings import Settings
 from lib.Clicker import Clicker
 import jsonpickle
 from datetime import date
 from lib.Functions import Functions
+
+from lib.Test import Test
 
 class App:
 	bot = None
@@ -55,12 +56,8 @@ class App:
 		self.clicker = Clicker(self)
 		self.printer_logic = Printer_logic(self)
 		self.request_logic = Request_logic(self)
-		# test = Test(self.db, self)
-
-		# testing = True
-		self.testing = False
-		if self.testing:
-			self.testing()
+		
+		# test = Test(self)
 
 	def new_message(self, message):
 		self.clicker.click()
@@ -120,18 +117,6 @@ class App:
 			else:
 				break
 		return id
-
-
-	def testing(self):
-	    for chat in self.chats:
-	        if chat.user_id == 7333126996:
-	            stl = chat.user.designer.stl
-	            stl.message = Message('')
-	            stl.message.btn_data = 'accept'
-	            for order in self.orders:
-	                if order.id == 12:
-	                    stl.order = order
-	            stl.process_validate()
 
 # app structure for buttons:
 # 1 client 

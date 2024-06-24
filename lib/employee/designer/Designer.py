@@ -4,8 +4,8 @@ from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.Texts import Texts
-from lib.employee.designer.Stl import Stl
-from lib.employee.designer.Link import Link
+from lib.employee.designer.Stl_link import Stl_link
+# from lib.employee.designer.Link import Link
 from lib.employee.designer.Sketch import Sketch
 from lib.employee.designer.Item import Item
 from lib.employee.designer.Production import Production
@@ -23,8 +23,7 @@ class Designer:
 	
 	last_data = ''
 
-	stl = None
-	link = None
+	stl_link = None
 	sketch = None
 	item = None
 	production = None
@@ -37,11 +36,10 @@ class Designer:
 		self.GUI = Gui(app, chat, address)
 		self.texts = Texts(chat, address)
 
-		self.stl = Stl(app, chat, address + '/1')
-		self.link = Link(app, chat, address + '/2')
-		self.sketch = Sketch(app, chat, address + '/3')
-		self.item = Item(app, chat, address + '/4')
-		self.production = Production(app, chat, address + '/5')
+		self.stl_link = Stl_link(app, chat, address + '/1')
+		self.sketch = Sketch(app, chat, address + '/2')
+		self.item = Item(app, chat, address + '/3')
+		self.production = Production(app, chat, address + '/4')
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -58,7 +56,7 @@ class Designer:
 				if message.function == '2':
 					self.process_orders_design()
 			elif message.file3 == '1':
-				self.stl.new_message(message)
+				self.stl_link.new_message(message)
 
 #---------------------------- SHOW ----------------------------
 
@@ -117,12 +115,9 @@ class Designer:
 		if data == 'Назад':
 			self.message.text = '/start'
 			self.chat.user.new_message(self.message)
-		elif data == 'stl':
-			self.stl.last_data = ''
-			self.stl.first_message(self.message)
-		elif data == 'link':
-			self.link.last_data = ''
-			self.link.first_message(self.message)
+		elif data in ['stl','link']:
+			self.stl_link.last_data = ''
+			self.stl_link.first_message(self.message, data)
 		elif data == 'sketch':
 			self.sketch.last_data = ''
 			self.sketch.first_message(self.message)
