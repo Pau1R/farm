@@ -10,8 +10,7 @@ from lib.order.GUI import Order_GUI
 from lib.client.Info import Info
 
 # from lib.client.place_order.Article import Farm_model
-from lib.client.place_order.Stl import Their_model
-from lib.client.place_order.Link import Link
+from lib.client.place_order.Stl_link import Stl_link
 from lib.client.place_order.Sketch import Their_sketch
 from lib.client.place_order.Item import Their_item
 from lib.client.place_order.Production import Production
@@ -30,7 +29,7 @@ class Client:
 	last_data = ''
 	
 	menu = None
-	their_model = None
+	stl_link = None
 	order_GUI = None
 
 	payId = ''
@@ -48,11 +47,10 @@ class Client:
 		self.info = Info(app, chat, self.address + '/2')
 
 		# self.farm_model = Farm_model(app, chat, self.address + '/3')
-		self.their_model = Their_model(app, chat, self.address + '/4')
-		self.link = Link(app, chat, self.address + '/5')
-		self.their_sketch = Their_sketch(app, chat, self.address + '/6')
-		self.their_item = Their_item(app, chat, self.address + '/7')
-		self.production = Production(app, chat, self.address + '/8')
+		self.stl_link = Stl_link(app, chat, self.address + '/4')
+		self.their_sketch = Their_sketch(app, chat, self.address + '/5')
+		self.their_item = Their_item(app, chat, self.address + '/6')
+		self.production = Production(app, chat, self.address + '/7')
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -82,14 +80,12 @@ class Client:
 			# elif message.file2 == '3':
 			# 	self.farm_model.new_message(message)
 			elif message.file2 == '4':
-				self.their_model.new_message(message)
+				self.stl_link.new_message(message)
 			elif message.file2 == '5':
-				self.link.new_message(message)
-			elif message.file2 == '6':
 				self.their_sketch.new_message(message)
-			elif message.file2 == '7':
+			elif message.file2 == '6':
 				self.their_item.new_message(message)
-			elif message.file2 == '8':
+			elif message.file2 == '7':
 				self.production.new_message(message)
 		if message.type == 'text' and message.file2 == '' and message.text != '/start':
 			self.GUI.messages_append(message)
@@ -168,12 +164,12 @@ class Client:
 		if not data:
 			self.show_top_menu()
 			return
+		self.order.type = data
+		self.order.physical_status = 'prepare'
 		# if data == 'farm model':
 		# 	self.farm_model.first_message(self.message)
-		if data == 'stl':
-			self.their_model.first_message(self.message)
-		elif data == 'link':
-			self.link.first_message(self.message)
+		if data in ['stl','link']:
+			self.stl_link.first_message(self.message)
 		elif data == 'sketch':
 			self.their_sketch.first_message(self.message)
 		elif data == 'item':
@@ -184,8 +180,6 @@ class Client:
 			self.show_top_menu()
 		else:
 			return
-		self.order.type = data
-		self.order.physical_status = 'prepare'
 
 	def process_orders(self):
 		if self.message.btn_data == 'Назад':

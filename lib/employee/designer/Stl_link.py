@@ -1,6 +1,5 @@
 import sys
 sys.path.append('../lib')
-# from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.employee.designer.GUI.Gcode import Gcode_gui
@@ -75,8 +74,6 @@ class Stl_link:
 	def show_top_menu(self):
 		self.chat.context = ''
 		text = f'Выберите заказ'
-		# if self.app.orders == []:
-		# 	text = 'Модели отсутствуют'
 		orders = self.app.order_logic.get_orders_by_type('', self.type)
 		orders = self.app.order_logic.get_orders_by_status(orders, 'validate')
 		orders = self.app.order_logic.get_orders_by_user_id(orders, self.chat.user_id)
@@ -143,11 +140,14 @@ class Stl_link:
 		self.chat.set_context(self.address, 8)
 		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 8, self.order.id)
 
-	def show_new_stl(self, order):
-		self.GUI.tell('Новое задание - валидация файла: ' + order.name)
-
-	def show_new_link(self, order):
-		self.GUI.tell('Новое задание - валидация ссылки: ' + order.name)
+	def show_new_order(self, order):
+		text = 'Новое задание - валидация '
+		if order.type == 'stl':
+			text += 'файла'
+		elif order.type == 'link':
+			text += 'ссылки'
+		text += ': ' + order.name
+		self.GUI.tell(text)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -231,6 +231,7 @@ class Stl_link:
 			self.show_top_menu()
 
 	def process_reject(self):
+		self.chat.context = ''
 		if self.message.btn_data == 'none':
 			reason = ''
 		else:

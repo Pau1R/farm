@@ -5,13 +5,15 @@ from lib.Msg import Message
 from lib.Gui import Gui
 import time
 
-class Link:
+class Stl_link:
 	address = ''
 
 	app = None
 	chat = None
 	order = None
 	GUI = None
+
+	supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
 	def __init__(self, app, chat, address):
 		self.app = app
@@ -21,7 +23,12 @@ class Link:
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
-		self.show_link()
+		if self.chat.user.is_limited():
+			self.show_limited()
+		elif self.chat.user.is_unprepaided_orders_limit_reached():
+			self.show_unprepaided_orders_limit_reached()
+		else:
+			self.show_top_menu()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -30,7 +37,7 @@ class Link:
 		if message.data_special_format and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
 			self.last_data = message.data
 			if message.function == '1':
-				self.process_link()
+				self.process_top_menu()
 			elif message.function == '2':
 				self.process_quantity()
 			elif message.function == '3':
@@ -41,15 +48,22 @@ class Link:
 				self.process_comment()
 			elif message.function == '6':
 				self.process_confirmation()
-
 		if message.type == 'text' or self.message.type == 'document':
 			self.GUI.messages_append(message)
 
 #---------------------------- SHOW ----------------------------
 
-	def show_link(self):
+	def show_top_menu(self):
 		self.chat.set_context(self.address, 1)
-		self.GUI.tell('Отправьте ссылку на модель из интернета')
+		if self.order.type == 'stl':
+			text = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(self.supported_files)
+		elif self.order.type == 'link':
+			text = 'Отправьте ссылку на модель из интернета'
+		self.GUI.tell(text)
+
+	def show_extention_error(self):
+		self.GUI.tell('Неверный формат файла')
+		self.show_top_menu()
 
 	def show_quantity(self):
 		text = 'Сколько экземпляров вам нужно?'
@@ -63,7 +77,7 @@ class Link:
 
 	def show_name(self):
 		self.chat.set_context(self.address, 4)
-		self.GUI.tell('Напишите название вашего заказа')
+		self.GUI.tell('Напишите название вашей модели')
 
 	def show_comment(self):
 		self.chat.set_context(self.address, 5)
@@ -77,9 +91,17 @@ class Link:
 
 #---------------------------- PROCESS ----------------------------
 
-	def process_link(self):
-		self.order.link = self.message.text
-		self.show_quantity()
+	def process_top_menu(self):
+		self.chat.context = ''
+		if self.order.type == 'stl':
+			if self.message.type == 'document' and self.message.file_name.split(".")[-1] in self.supported_files:
+				self.order.model_file = self.message.file_id
+				self.show_quantity()
+			else:
+				self.show_extention_error()
+		elif self.order.type == 'link' and self.message.type == 'text':
+			self.order.link = self.message.text
+			self.show_quantity()
 
 	def process_quantity(self):
 		try:
@@ -95,6 +117,7 @@ class Link:
 		self.show_name()
 
 	def process_name(self):
+		self.chat.context = ''
 		self.order.name = self.message.text
 		self.show_comment()
 
@@ -105,10 +128,16 @@ class Link:
 		self.show_confirmation()
 
 	def process_confirmation(self):
+		# self.message.file_name = 'hi.stl'
+		# self.message.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
+		# self.message.type = 'document'
+		# self.order.name = 'название модели'
+		# self.order.quality = 'В доме'
+		# self.order.quantity = 3
+		
 		data = self.message.btn_data
 		if data == 'confirm':
 			self.order.date = datetime.today()
-			# self.order.physical_status = 'preparing'
 			self.order.logical_status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
@@ -116,6 +145,8 @@ class Link:
 			self.chat.user.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
-					chat.user.designer.link.show_new_order(self.order)
+					chat.user.designer.stl_link.show_new_order(self.order)
 		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()
+		
+		# self.GUI.tell_document('BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ', 'this is caption text')

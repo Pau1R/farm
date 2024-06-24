@@ -26,6 +26,7 @@ class Gcode_gui:
 
 	def first_message(self, message):
 		self.gcodes = []
+		self.last_data = ''
 		self.show_top_menu()
 
 	def new_message(self, message):
@@ -84,6 +85,7 @@ class Gcode_gui:
 	def process_top_menu(self):
 		self.chat.context = ''
 		if self.message.btn_data == 'uploaded':
+			self.parent.last_data = ''
 			self.parent.process_gcode_gui(self.gcodes)
 		else:
 			file_id = self.message.file_id

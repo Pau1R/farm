@@ -5,7 +5,6 @@ from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.Texts import Texts
 from lib.employee.designer.Stl_link import Stl_link
-# from lib.employee.designer.Link import Link
 from lib.employee.designer.Sketch import Sketch
 from lib.employee.designer.Item import Item
 from lib.employee.designer.Production import Production
