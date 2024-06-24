@@ -141,7 +141,3 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
-
-
-# TODO:
-# - All leftover client order types
