@@ -96,6 +96,12 @@ class Client:
 		self.GUI.tell_buttons('Выберите действие', buttons, buttons, 1, 0)
 
 	def show_order_menu(self):
+		if self.is_limited():
+			self.show_limited()
+			self.show_top_menu()
+		elif self.is_unprepaided_orders_limit_reached():
+			self.show_unprepaided_orders_limit_reached()
+			self.show_top_menu()
 		buttons = []
 		# buttons.append(['Ввести артикул из каталога str3d.ru', 'farm model'])
 		buttons.append(['stl файл', 'stl'])

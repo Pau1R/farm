@@ -24,12 +24,7 @@ class Stl_link:
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
-		if self.chat.user.is_limited():
-			self.show_limited()
-		elif self.chat.user.is_unprepaided_orders_limit_reached():
-			self.show_unprepaided_orders_limit_reached()
-		else:
-			self.show_top_menu()
+		self.show_top_menu()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
