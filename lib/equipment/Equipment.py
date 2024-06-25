@@ -185,7 +185,7 @@ class Equipment:
 	def sort_printers(self):
 		self.printers.sort(key=self.get_object_id)
 
-	def print_cost(self, type_):
+	def printer_cost(self, type_):
 		for printer in self.printer_types:
 			if printer.name == type_:
 				return printer.hour_cost

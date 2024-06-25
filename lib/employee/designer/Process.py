@@ -4,10 +4,12 @@ from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.employee.designer.GUI.Gcode import Gcode_gui
 
-class Stl_link:
+class Process:
 	address = ''
+	
 	type = ''
-
+	status = ''
+	
 	app = None
 	chat = None
 	GUI = None
@@ -15,7 +17,6 @@ class Stl_link:
 	last_data = ''
 
 	order = None
-	orders = []
 	order_timer = ''
 
 	weight = 1
@@ -25,7 +26,11 @@ class Stl_link:
 	material = ''
 	price = 0
 
+	design_time = 0
+	print_time = 0
+
 	gcode_gui = None
+	gcodes = []
 
 	def __init__(self, app, chat, address):
 		self.app = app
@@ -34,9 +39,10 @@ class Stl_link:
 		self.GUI = Gui(app, chat, address)
 		self.gcode_gui = Gcode_gui(app, chat, address + '/1', self)
 
-	def first_message(self, message, type_):
+	def first_message(self, message, type_, status):
 		self.reset_values()
 		self.type = type_
+		self.status = status
 		self.show_top_menu()
 
 	def new_message(self, message):
@@ -49,20 +55,22 @@ class Stl_link:
 				if message.function == '1':
 					self.process_top_menu()
 				elif message.function == '2':
-					self.process_validate()
+					self.process_order()
 				elif message.function == '3':
-					self.process_accept()
+					self.process_design_time()
 				elif message.function == '4':
-					self.process_plastic_type()
-				# elif message.function == '5':
-				# 	self.process_quantity()
+					self.process_print_time()
 				elif message.function == '5':
-					self.process_weight()
+					self.process_printer_type()
 				elif message.function == '6':
-					self.process_supports()
+					self.process_plastic_type()
 				elif message.function == '7':
-					self.process_confirmation()
+					self.process_weight()
 				elif message.function == '8':
+					self.process_supports()
+				elif message.function == '9':
+					self.process_confirmation()
+				elif message.function == '10':
 					self.process_reject()
 			elif message.file4 == '1':
 				self.gcode_gui.new_message(message)
@@ -74,36 +82,66 @@ class Stl_link:
 	def show_top_menu(self):
 		self.chat.context = ''
 		text = f'Выберите заказ'
-		orders = self.app.order_logic.get_orders_by_type('', self.type)
-		orders = self.app.order_logic.get_orders_by_status(orders, 'validate')
-		orders = self.app.order_logic.get_orders_by_user_id(orders, self.chat.user_id)
-		buttons = self.app.order_logic.convert_orders_to_buttons(orders)
+		logic = self.app.order_logic
+		orders = logic.get_orders_by_type(self.app.orders, self.type)
+		orders = logic.get_orders_by_status(orders, self.status)
+		orders = logic.get_orders_by_user_id(orders, self.chat.user_id)
+		buttons = logic.convert_orders_to_buttons(orders)
 		if buttons:
 			buttons.extend(['Назад'])
 			self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 		else:
 			self.chat.user.designer.first_message(self.message)
 
-	def show_validate(self):
+	def show_order(self):
 		text = f'Заказ № {self.order.id} "{self.order.name}" \nДата добавления: {self.app.functions.russian_date(self.order.date)}'
 		if self.order.quantity > 1:
 			text += f'\nКоличество экземпляров: {self.order.quantity}'
-		if self.order.quality:
-			text += f'\nКачество печати: {self.order.quality}' 
+		quality = self.order.quality
+		if quality:
+			if quality == 'cheap':
+				quality = 'максимально дешевое'
+			elif quality == 'optimal':
+				quality = 'оптимальное цена/качество'
+			elif quality == 'quality':
+				quality = 'максимальное качество'
+			elif quality == 'durability':
+				quality = 'максимальная прочность'
+			text += f'\nКачество печати: {quality}' 
 		if self.order.comment:
 			text += f'\nКомментарий клиента: {self.order.comment}'
 
 		buttons = [['Принять модель', 'accept'], ['Отказать','reject'], ['Назад']]
-		if self.order.model_file:
+		if self.order.type == 'stl':
 			self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.id)
-		elif self.order.link:
+		elif self.order.type == 'link':
 			self.GUI.tell_link_buttons(self.order.link, text, buttons, buttons, 2, self.order.id)
+		elif self.order.type in ['sketch', 'item']:
+			for file in self.order.sketches:
+				self.GUI.tell_file(file[0], file[1], '')
+			self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.id)
 
-	def show_accept(self):
+	def show_design_time(self):
+		text = 'Сколько часов ушло на разработку модели и слайсинг?'
+		if self.order.logical_status == 'prevalidate':
+			text = 'Примерно сколько часов нужно на разработку модели и слайсинг?'
+		buttons = ['0.25','0.5','0.75','1','1.5','2','2.5','3','3.5','4','4.5','5','5.5','6','6.5','7','7.5','8','9','10']
+		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
+
+	def show_print_time(self):
+		text = 'Примерно сколько времено нужно на печать (с запасом)'
+		if self.order.quantity > 1:
+			text += ' одного экземпляра?'
+		else:
+			text += '?'
+		buttons = ['0.5','1','1.5','2','2.5','3','4','5','6','7','9','11','13','16','19','22','26','30','35','40','50','70','100']
+		self.GUI.tell_buttons(text, buttons, [], 4, self.order.id)
+
+	def show_printer_type(self):
 		buttons = []
 		for type_ in self.app.equipment.printer_types:
 			buttons.append([type_.name, type_.id])
-		self.GUI.tell_buttons('Выберите тип принтера', buttons, buttons, 3, 0)
+		self.GUI.tell_buttons('Выберите тип принтера', buttons, buttons, 5, self.order.id)
 
 	def show_plastic_type(self):
 		buttons = []
@@ -114,31 +152,49 @@ class Stl_link:
 		text = f'Выберите тип пластика'
 		buttons.append(['любой базовый', 'basic'])
 		buttons.append(['Подходящего пластика нет', 'unavailable'])
-		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
+		self.GUI.tell_buttons(text, buttons, buttons, 6, self.order.id)
 
 	def show_weight(self):
-		self.chat.set_context(self.address, 5)
+		self.chat.set_context(self.address, 7)
+		text = 'Введите вес'
+		if self.order.logical_status == 'prevalidate':
+			text = 'Введите примерный вес (с хорошим запасом)'
 		if self.order.quantity > 1:
-			text = 'Введите вес одного экземпляра в граммах'
-		else:
-			text = 'Введите вес стола в граммах'
+			text += ' одного экземпляра в граммах'
 		self.GUI.tell(text)
 
 	def show_supports(self):
 		text = 'Сколько нужно минут на удаление поддержек'
+		if self.order.logical_status == 'prevalidate':
+			text = 'Примерно сколько нужно минут на удаление поддержек'
 		if self.order.quantity > 1:
 			text += ' с одного экземпляра'
 		buttons = ['0.5','1','2','3','5','10','15','20']
 		buttons.append(['Поддержки не нужны', 'no_supports'])
-		self.GUI.tell_buttons(text + '?', buttons, [], 6, self.order.id)
+		self.GUI.tell_buttons(text + '?', buttons, [['Поддержки не нужны', 'no_supports']], 8, self.order.id)
 
 	def show_confirmation(self):
 		buttons = ['Подтвердить', 'Отмена']
-		self.GUI.tell_buttons('Подтвердите валидацию', buttons, [], 7, self.order.id)
+		self.GUI.tell_buttons('Подтвердите валидацию', buttons, [], 9, self.order.id)
 
 	def show_reject(self):
-		self.chat.set_context(self.address, 8)
-		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 8, self.order.id)
+		self.chat.set_context(self.address, 10)
+		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 10, self.order.id)
+
+	# sketch and item:
+	# предварительная оценка:
+	# - возможно ли распечатать
+	# - примерная длительность разработки модели
+	# - примерный вес изделия (с запасом)
+	# - примерное время печати изделия
+	# - тип пластика
+
+	# реакция клиента:
+	# - выбор цвета, бронь пластика и предоплата
+	
+	# разработка модели
+
+	# внесение конкретных данных (стандартная валидация)
 
 	def show_new_order(self, order):
 		text = 'Новое задание - валидация '
@@ -153,28 +209,39 @@ class Stl_link:
 
 	def process_top_menu(self):
 		if self.message.btn_data == 'Назад':
+			self.chat.user.designer.last_data = ''
 			self.chat.user.designer.first_message(self.message)
 		else:
 			for order in self.app.orders:
 				if order.id == int(self.message.btn_data):
 					self.order = order
 					self.gcode_gui.order = order
-					self.show_validate()
+					self.show_order()
 
-	def process_validate(self):
+	def process_order(self):
 		if self.message.btn_data == 'Назад':
 			self.order = None
 			self.show_top_menu()
 		elif self.message.btn_data == 'accept':
-			self.show_accept()
+			if self.order.type in ['sketch','item']:
+				self.show_design_time()
+			else:
+				self.show_printer_type()
 		elif self.message.btn_data == 'reject':
 			self.show_reject()
 
-	def process_accept(self):
+	def process_design_time(self):
+		try:
+			self.design_time = int(float(self.message.btn_data) * 60)
+			self.show_printer_type()
+		except:
+			self.show_design_time()
+
+	def process_printer_type(self):
 		for type_ in self.app.equipment.printer_types:
 			if type_.id == int(self.message.btn_data):
 				self.printer_type = type_.name
-		self.show_plastic_type()
+				self.show_plastic_type()
 
 	def process_plastic_type(self):
 		if self.message.btn_data == 'unavailable':
@@ -184,7 +251,17 @@ class Stl_link:
 			self.material = 'basic'
 		else:
 			self.material = self.message.btn_data
-		self.show_quantity()
+		if self.order.logical_status == 'prevalidate':
+			self.show_print_time()
+		else:
+			self.show_weight()
+
+	def process_print_time(self):
+		try:
+			self.print_time = int(float(self.message.btn_data) * 60)
+			self.show_weight()
+		except:
+			self.show_print_time()
 
 	def process_weight(self):
 		self.chat.context = ''
@@ -200,7 +277,10 @@ class Stl_link:
 		else:
 			self.supports = True
 			self.support_minutes = int(self.message.btn_data)
-		self.gcode_gui.first_message(self.message)
+		if self.order.logical_status == 'prevalidate':
+			self.show_confirmation()
+		else:
+			self.gcode_gui.first_message(self.message)
 
 	def process_gcode_gui(self, gcodes):
 		self.gcodes = gcodes
@@ -208,21 +288,24 @@ class Stl_link:
 
 	def process_confirmation(self):
 		if self.message.btn_data == 'Отмена':
-			self.show_validate()
+			self.show_order()
 		else:
 			for temp_gcode in self.gcodes:
 				for i in range(1, temp_gcode.quantity + 1):
+					self.print_time = 0
 					gcode = Gcode(self.app, 0)
 					gcode.order_id = self.order.id
 					gcode.file_id = temp_gcode.file_id
 					gcode.screenshot = temp_gcode.screenshot
 					self.app.gcodes_append(gcode)
 					self.app.db.create_gcode(gcode)
+			self.order.design_time = self.design_time
+			self.order.print_time = self.print_time
 			self.order.weight = self.weight
 			self.order.support_time = self.support_minutes
 			self.order.plastic_type = self.material
 			self.order.printer_type = self.printer_type
-			self.order.price = self.price
+			# self.order.price = self.price
 			self.order.set_price()
 			user = self.get_user(self.order.user_id)
 			self.order.logical_status = 'validated'
@@ -259,3 +342,5 @@ class Stl_link:
 		self.material = ''
 		self.price = 0
 		self.gcodes = []
+		self.design_time = 0
+		self.print_time = 0

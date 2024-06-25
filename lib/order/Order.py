@@ -40,6 +40,8 @@ class Order:
 	link = ''
 
 	# evaluation data and process
+	design_time = 0  # TODO:
+	print_time = 0   #       add to db
 	plastic_type = ''
 	printer_type = ''
 	weight = 0
@@ -68,15 +70,21 @@ class Order:
 	def set_price(self):
 		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic
 		plastic_price = self.weight * self.quantity * gram_price  										# total plastic price for order
-		print_cost = self.app.equipment.print_cost(self.printer_type)  									# cost of one hour for printer
-		# time_price = (self.time / 60) * print_cost														# cost of all printer working time
-		time_price = (50 / 60) * print_cost														# cost of all printer working time  TODO
+		design_price = self.design_time / 60 * 1000														# cost for 3d design, 1000 rub
+		printer_cost = self.app.equipment.printer_cost(self.printer_type)  								# cost of one hour for printer
+		time_price = (self.get_printing_time() / 60) * printer_cost										# cost of all printer working time
 		supports_price = self.get_supports_price()
 		if self.support_remover == 'Компания':
 			supports_price = 0
-		rounded_price = math.ceil((plastic_price + time_price) / 10) * 10  # round to upper side
+		rounded_price = math.ceil((plastic_price + design_price + time_price) / 10) * 10  # round to upper side
 		self.price = int(rounded_price + supports_price)
 		self.app.db.update_order(self)
+
+	def get_printing_time(self):
+		gcode_time = self.app.gcode_logic.get_all_time(self)
+		if gcode_time == 0:
+			return self.print_time
+		return gcode_time
 
 	def get_prepayment_price(self):
 		if self.price < 300:

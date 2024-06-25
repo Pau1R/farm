@@ -31,28 +31,26 @@ class Order_logic:
 		return orders
 
 	def get_orders_by_type(self, orders, type_):
-		if not orders:
-			orders = self.orders
+		if type(type_) == str:
+			type_ = [type_]
 		orders_ = []
 		for order in orders:
 			designer = order.assinged_designer_id
-			if order.type == type_:
+			if order.type in type_:
 				orders_.append(order)
 		return orders_
 
 	def get_orders_by_status(self, orders, status):
-		if not orders:
-			orders = self.orders
+		if type(status) == str:
+			status = [status]
 		orders_ = []
 		for order in orders:
 			designer = order.assinged_designer_id
-			if order.logical_status == status:
+			if order.logical_status in status:
 				orders_.append(order)
 		return orders_
 
 	def get_orders_by_user_id(self, orders, user_id):
-		if not orders:
-			orders = self.orders
 		orders_ = []
 		for order in orders:
 			designer = order.assinged_designer_id

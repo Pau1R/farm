@@ -127,6 +127,8 @@ class Database:
 			sketches TEXT,
 			model_file TEXT,
 			link TEXT,
+			design_time INTEGER,
+			print_time INTEGER,
 			plastic_type TEXT,
 			printer_type TEXT,
 			weight DECIMAL,
@@ -259,27 +261,27 @@ class Database:
 			order.sketches = ast.literal_eval(line[14])
 			order.model_file = line[15]
 			order.link = line[16]
-			order.plastic_type = line[17]
-			order.printer_type = line[18]
-			order.weight = int(line[19])
-			# order.time = line[20]
-			order.completion_date = self.string_to_date(line[20])
-			order.start_datetime = self.string_to_datetime(line[21])
-			order.support_time = int(line[22])
-			order.layer_hight = line[23]
-			order.price = int(line[24])
-			order.pay_code = 0 if line[25] == '' else int(line[25])
-			order.payed = line[26]
-			order.prepayment_percent = int(line[27])
-			order.booked = ast.literal_eval(line[28])
-			order.booked_time = int(line[29])
-			order.delivery_code = int(line[30])
-			order.delivery_user_id = int(line [31])
+			order.design_time = line[17]
+			order.print_time = line[18]
+			order.plastic_type = line[19]
+			order.printer_type = line[20]
+			order.weight = int(line[21])
+			order.completion_date = self.string_to_date(line[22])
+			order.start_datetime = self.string_to_datetime(line[23])
+			order.support_time = int(line[24])
+			order.layer_hight = line[25]
+			order.price = int(line[26])
+			order.pay_code = 0 if line[27] == '' else int(line[27])
+			order.payed = line[28]
+			order.prepayment_percent = int(line[29])
+			order.booked = ast.literal_eval(line[30])
+			order.booked_time = int(line[31])
+			order.delivery_code = int(line[32])
+			order.delivery_user_id = int(line [33])
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		# self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","","","",0,0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
-		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","","","",0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
+		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","",0,0,"","",0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
 		self.db.commit()
 		self.update_order(order)
 
@@ -299,10 +301,11 @@ class Database:
 		values += 'sketches = "' + str(order.sketches) + '", '
 		values += 'model_file = "' + order.model_file + '", '
 		values += 'link = "' + order.link + '", '
+		values += 'design_time = "' + str(order.design_time) + '", '
+		values += 'print_time = "' + str(order.print_time) + '", '
 		values += 'plastic_type = "' + order.plastic_type + '", '
 		values += 'printer_type = "' + order.printer_type + '", '
 		values += 'weight = "' + str(order.weight) + '", '
-		# values += 'time = "' + str(order.time) + '", '
 		values += 'completion_date = "' + str(order.completion_date) + '", '
 		values += 'start_datetime = "' + str(order.start_datetime) + '", '
 		values += 'support_time = "' + str(order.support_time) + '", '

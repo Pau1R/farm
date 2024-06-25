@@ -11,22 +11,21 @@ class Test:
 	def testing(self):
 		for chat in self.app.chats:
 			if chat.user_id == 7333126996:
-				stl = chat.user.designer.stl
+				validate = chat.user.designer.validate
 				for order in self.app.orders:
-					if order.id == 12:
-						stl.order = order
-						stl.gcode_gui.order = order
+					if order.id == 1:
+						validate.order = order
+						validate.gcode_gui.order = order
 						# stl.gcode_gui.
 
-				stl.table_weight = 200
-				stl.support_minutes = 1
-				stl.material = 'basic'
-				stl.printer_type = 'Bambu lab P1S'
+				validate.type = 'sketch'
+				validate.status = 'prevalidate'
+				validate.show_top_menu()
 				
-				stl.message = Message('')
-				stl.message.btn_data = '2'
+				# validate.message = Message('')
+				# validate.message.btn_data = '2'
 				
-				stl.process_supports()
+				# validate.process_supports()
 				# gcode_ = Gcode(self.app, 0)
 				# gcode_.quantity = 1
 				# gcode_.duration = 200

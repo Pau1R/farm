@@ -106,7 +106,10 @@ class Values:
 		data = self.message.btn_data
 		if data == 'confirm':
 			self.order.date = datetime.today()
-			self.order.logical_status = 'validate'
+			if self.order.type in ['sketch','item']:
+				self.order.logical_status = 'prevalidate'
+			else:
+				self.order.logical_status = 'validate'
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)
