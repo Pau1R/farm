@@ -141,3 +141,9 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
+
+# TODO:
+# - rename file Values.py and Process.py
+# - add support to change order values for admin
+# - refine order statuses movement
+# - refactor order GUI

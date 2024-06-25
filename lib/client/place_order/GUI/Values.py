@@ -93,6 +93,8 @@ class Values:
 		self.chat.context = ''
 		if self.message.btn_data != 'none':
 			self.order.comment = self.message.text
+		else:
+			self.order.comment = ''
 		self.show_confirmation()
 
 	def process_confirmation(self):
@@ -114,9 +116,9 @@ class Values:
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)
 			self.chat.user.show_wait_for_designer()
-			# for chat in self.app.chats:
-			# 	if chat.is_employee and 'Дизайнер' in chat.user.roles:
-			# 		chat.user.designer.sketch_item.show_new_order(self.order)
+			for chat in self.app.chats:
+				if chat.is_employee and 'Дизайнер' in chat.user.roles:
+					chat.user.designer.process.show_new_order(self.order)
 		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()
 

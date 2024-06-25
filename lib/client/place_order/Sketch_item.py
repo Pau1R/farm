@@ -24,6 +24,7 @@ class Sketch_item:
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
+		self.order.sketches = []
 		self.show_top_menu()
 
 	def new_message(self, message):

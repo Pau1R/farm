@@ -110,8 +110,13 @@ class Process:
 			text += f'\nКачество печати: {quality}' 
 		if self.order.comment:
 			text += f'\nКомментарий клиента: {self.order.comment}'
-
-		buttons = [['Принять модель', 'accept'], ['Отказать','reject'], ['Назад']]
+		buttons = []
+		if self.order.assinged_designer_id:
+			buttons.append(['Принять модель', 'accept'])
+			buttons.append(['Отказать','reject'])
+		else:
+			buttons.append(['Взять в работу', 'take'])
+		buttons.append('Назад')
 		if self.order.type == 'stl':
 			self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.id)
 		elif self.order.type == 'link':
@@ -179,22 +184,16 @@ class Process:
 
 	def show_reject(self):
 		self.chat.set_context(self.address, 10)
-		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 10, self.order.id)
+		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none'], 'Назад'], [], 10, self.order.id)
 
 	# sketch and item:
-	# предварительная оценка:
-	# - возможно ли распечатать
-	# - примерная длительность разработки модели
-	# - примерный вес изделия (с запасом)
-	# - примерное время печати изделия
-	# - тип пластика
 
 	# реакция клиента:
 	# - выбор цвета, бронь пластика и предоплата
 	
 	# разработка модели
 
-	# внесение конкретных данных (стандартная валидация)
+	# внесение конкретизированных данных (стандартная валидация)
 
 	def show_new_order(self, order):
 		text = 'Новое задание - валидация '
@@ -202,6 +201,12 @@ class Process:
 			text += 'файла'
 		elif order.type == 'link':
 			text += 'ссылки'
+		elif order.type == 'sketch':
+			text += 'чертежа'
+		elif order.type == 'item':
+			text += 'предмета по фотографиям'
+		elif order.type == 'production':
+			text += 'мелкосерийного заказа'
 		text += ': ' + order.name
 		self.GUI.tell(text)
 
@@ -222,6 +227,10 @@ class Process:
 		if self.message.btn_data == 'Назад':
 			self.order = None
 			self.show_top_menu()
+		elif self.message.btn_data == 'take':
+			self.order.assinged_designer_id = self.chat.user_id
+			self.app.db.update_order(self.order)
+			self.show_order()
 		elif self.message.btn_data == 'accept':
 			if self.order.type in ['sketch','item']:
 				self.show_design_time()
@@ -315,11 +324,14 @@ class Process:
 
 	def process_reject(self):
 		self.chat.context = ''
-		if self.message.btn_data == 'none':
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_order()
+			return
+		elif data == 'none':
 			reason = ''
 		else:
 			reason = self.message.text
-		# self.order.logical_status = 'rejected'
 		user = self.get_user(self.order.user_id)
 		user.order_GUI.show_rejected_by_designer(self.order, reason)
 		self.app.orders.remove(self.order)

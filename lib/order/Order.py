@@ -40,8 +40,8 @@ class Order:
 	link = ''
 
 	# evaluation data and process
-	design_time = 0  # TODO:
-	print_time = 0   #       add to db
+	design_time = 0
+	print_time = 0
 	plastic_type = ''
 	printer_type = ''
 	weight = 0

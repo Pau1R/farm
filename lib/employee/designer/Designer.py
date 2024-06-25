@@ -5,8 +5,6 @@ from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.Texts import Texts
 from lib.employee.designer.Process import Process
-# from lib.employee.designer.Sketch_item import Sketch_item
-# from lib.employee.designer.Item import Item
 from lib.employee.designer.Production import Production
 import ast
 
@@ -73,7 +71,9 @@ class Designer:
 
 		buttons = []
 		orders_validate = logic.get_orders_by_status(self.orders, 'validate')
+		orders_validate = logic.get_orders_by_user_id(orders_validate, self.chat.user_id)
 		orders_prevalidate = logic.get_orders_by_status(self.orders, 'prevalidate')
+		orders_prevalidate = logic.get_orders_by_user_id(orders_prevalidate, self.chat.user_id)
 			# buttons.append(['Настройка параметрических моделей','parametric'])
 		if logic.get_orders_by_type(orders_validate, 'stl'):
 			buttons.append(['Валидация файла модели', ['stl', 'validate']])
