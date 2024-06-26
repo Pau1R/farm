@@ -41,11 +41,12 @@ class Order_GUI:
 		self.set_order()
 		self.GUI.clear_order_chat(self.order.id)
 
-		data = message.data
+		file = self.chat.next_level_id(self)
 		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (data == '' or data != self.last_data):	# process user button presses and skip repeated button presses
-				self.last_data = data
+			if file == '1':
+				self.client_color.new_message(message)
+			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_order()
 				elif function == '2':
@@ -58,10 +59,7 @@ class Order_GUI:
 					self.process_confirmed_by_designer()
 				elif function == '6':
 					self.process_reject_reason()
-			elif message.file3 == '1':
-				self.client_color.new_message(message)
-		if message.type == 'text':
-			self.GUI.messages_append(message)
+		self.chat.add_if_text(self)
 
 	def set_order(self):
 		try:

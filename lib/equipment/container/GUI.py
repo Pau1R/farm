@@ -29,24 +29,23 @@ class ContainerGUI:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
+		file = self.chat.next_level_id(self)
 		function = message.function
-		if message.data_special_format and (data == '' or data != self.last_data):
-			self.last_data = data
-			if function == '1':
-				self.process_top_menu()
-			elif function == '2':
-				self.process_container()
-			elif function == '3':
-				self.process_add_new_container()
-			elif function == '4':
-				self.process_add_new_container_capacity()
-			elif function == '5':
-				self.process_add_confirmation()
-			elif function == '6':
-				self.process_delete_confirmation()
-		if message.type == 'text':
-			self.GUI.messages_append(message)
+		if message.data_special_format:
+			if self.chat.not_repeated_button(self):
+				if function == '1':
+					self.process_top_menu()
+				elif function == '2':
+					self.process_container()
+				elif function == '3':
+					self.process_add_new_container()
+				elif function == '4':
+					self.process_add_new_container_capacity()
+				elif function == '5':
+					self.process_add_confirmation()
+				elif function == '6':
+					self.process_delete_confirmation()
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

@@ -81,3 +81,30 @@ class Chat:
             self.message.file1 = ''
             self.new_message(self.message_pause)
             self.message_pause = None
+
+    def next_level_id(self, chat):
+        message = chat.message
+        level = len(chat.address.split('/'))
+        if level == 1:
+            return message.file2
+        elif level == 2:
+            return message.file3
+        elif level == 3:
+            return message.file4
+        elif level == 4:
+            return message.file5
+        elif level == 5:
+            return message.file6
+
+    def add_if_text(self, chat):
+        message = chat.message
+        file = self.next_level_id(chat)
+        if message.type in ['text', 'document', 'photo'] and message.text != '/start' and not file:
+            chat.GUI.messages_append(message)
+
+    def not_repeated_button(self, chat):
+        data = chat.message.data
+        if not data or data != chat.last_data:
+            chat.last_data = data
+            return True
+        return False

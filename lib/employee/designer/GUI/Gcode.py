@@ -33,22 +33,20 @@ class Gcode_gui:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
 		function = message.function
-		if message.data_special_format and (data == '' or data != self.last_data):	# process user button presses and skip repeated button presses
-			self.last_data = data
-			if function == '1':
-				self.process_top_menu()
-			elif function == '2':
-				self.process_gcode_screenshot()
-			elif function == '3':
-				self.process_gcode_quantity()
-			elif function == '4':
-				self.process_gcode_hours()
-			elif function == '5':
-				self.process_gcode_minutes()
-		if message.type == 'text':
-			self.GUI.messages_append(message)
+		if message.data_special_format:
+			if self.chat.not_repeated_button(self):
+				if function == '1':
+					self.process_top_menu()
+				elif function == '2':
+					self.process_gcode_screenshot()
+				elif function == '3':
+					self.process_gcode_quantity()
+				elif function == '4':
+					self.process_gcode_hours()
+				elif function == '5':
+					self.process_gcode_minutes()
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

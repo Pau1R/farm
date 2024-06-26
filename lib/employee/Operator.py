@@ -25,15 +25,12 @@ class Operator:
 		self.GUI.clear_chat()
 		self.message = message
 
+		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (message.data == '' or message.data != self.last_data):
-				self.last_data = message.data
-				if message.function == '1':
+			if self.chat.not_repeated_button(self):
+				if function == '1':
 					self.process_top_menu()
-				# if message.function == '2':
-				# 	self.process_orders_design()
-			# elif message.file3 == '1':
-			# 	self.sub_something.new_message(message)
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

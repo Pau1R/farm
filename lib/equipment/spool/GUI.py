@@ -44,42 +44,40 @@ class SpoolGUI:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
 		function = message.function
-		if message.data_special_format and (data == '' or data != self.last_data):
-			self.last_data = data
-			if function == '1':
-				self.process_top_menu()
-			if function == '2':
-				self.process_ordered()
-			if function == '3':
-				self.process_spool()
-			if function == '4':
-				self.process_change_weight()
-			if function == '5':
-				self.process_weight_input()
-			if function == '6':
-				self.process_add_new_spool()
-			if function == '7':
-				self.process_add_new_spool_type()
-			if function == '8':
-				self.process_add_new_spool_color()
-			if function == '9':
-				self.process_add_new_spool_weight()
-			if function == '10':
-				self.process_add_new_spool_price()
-			if function == '11':
-				self.process_add_new_spool_dried()
-			if function == '12':
-				self.process_add_new_spool_brand()
-			if function == '13':
-				self.process_add_delivery_date()
-			if function == '14':
-				self.process_add_confirmation()
-			if function == '15':
-				self.process_delete_confirmation()
-		if message.type == 'text':
-			self.GUI.messages_append(message)
+		if message.data_special_format:
+			if self.chat.not_repeated_button(self):
+				if function == '1':
+					self.process_top_menu()
+				if function == '2':
+					self.process_ordered()
+				if function == '3':
+					self.process_spool()
+				if function == '4':
+					self.process_change_weight()
+				if function == '5':
+					self.process_weight_input()
+				if function == '6':
+					self.process_add_new_spool()
+				if function == '7':
+					self.process_add_new_spool_type()
+				if function == '8':
+					self.process_add_new_spool_color()
+				if function == '9':
+					self.process_add_new_spool_weight()
+				if function == '10':
+					self.process_add_new_spool_price()
+				if function == '11':
+					self.process_add_new_spool_dried()
+				if function == '12':
+					self.process_add_new_spool_brand()
+				if function == '13':
+					self.process_add_delivery_date()
+				if function == '14':
+					self.process_add_confirmation()
+				if function == '15':
+					self.process_delete_confirmation()
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

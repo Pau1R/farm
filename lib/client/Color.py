@@ -42,24 +42,24 @@ class Client_color:
 		self.set_order()
 		self.GUI.clear_order_chat(message.instance_id)
 
-		data = message.data
 		function = message.function
-		if message.data_special_format and (data == '' or data != self.last_data):	# process user button presses and skip repeated button presses
-			self.last_data = data
-			if function == '1':
-				self.process_colors()
-			elif function == '2':
-				self.process_colors_ordered()
-			elif function == '3':
-				self.process_order_colors()
-			elif function == '4':
-				self.process_order_colors_ordered()
-			elif function == '5':
-				self.process_color()
-			elif function == '6':
-				self.process_booked()
-		if message.type == 'text':
-			self.GUI.messages_append(message)
+		if message.data_special_format:
+			if file == '1':
+				self.general_parameters.new_message(message)
+			elif self.chat.not_repeated_button(self):
+				if function == '1':
+					self.process_colors()
+				elif function == '2':
+					self.process_colors_ordered()
+				elif function == '3':
+					self.process_order_colors()
+				elif function == '4':
+					self.process_order_colors_ordered()
+				elif function == '5':
+					self.process_color()
+				elif function == '6':
+					self.process_booked()
+		self.chat.add_if_text(self)
 
 	def set_order(self):
 		order_id = int(self.message.instance_id)

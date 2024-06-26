@@ -42,19 +42,19 @@ class Designer:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
+		file = self.chat.next_level_id(self)
 		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (data == '' or data != self.last_data):
-				self.last_data = data
+			if file == '1':
+				self.general.new_message(message)
+			if file == '2':
+				self.production.new_message(message)
+			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
 				if function == '2':
 					self.process_orders_design()
-			elif message.file3 == '1':
-				self.general.new_message(message)
-			elif message.file3 == '2':
-				self.production.new_message(message)
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

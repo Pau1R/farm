@@ -54,15 +54,27 @@ class Client:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
 		function = message.function
+		file = self.chat.next_level_id(self)
+
 		if message.text == '/start':
 			self.last_data = ''
 			self.reset_order()
 			self.show_top_menu()
 		elif message.data_special_format:
-			if message.file2 == '' and (data == '' or data != self.last_data):
-				self.last_data = data
+			if file == '1':
+				self.order_GUI.new_message(message)
+			elif file == '2':
+				self.info.new_message(message)
+			# elif file == '3':
+			# 	self.farm_model.new_message(message)
+			elif file == '4':
+				self.stl_link.new_message(message)
+			elif file == '5':
+				self.sketch_item.new_message(message)
+			elif file == '6':
+				self.production.new_message(message)
+			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
 				if function == '2':
@@ -73,20 +85,7 @@ class Client:
 					self.process_orders()
 				elif function == '6':
 					self.process_order()
-			elif message.file2 == '1':
-				self.order_GUI.new_message(message)
-			elif message.file2 == '2':
-				self.info.new_message(message)
-			# elif message.file2 == '3':
-			# 	self.farm_model.new_message(message)
-			elif message.file2 == '4':
-				self.stl_link.new_message(message)
-			elif message.file2 == '5':
-				self.sketch_item.new_message(message)
-			elif message.file2 == '6':
-				self.production.new_message(message)
-		if message.type == 'text' and message.file2 == '' and message.text != '/start':
-			self.GUI.messages_append(message)
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

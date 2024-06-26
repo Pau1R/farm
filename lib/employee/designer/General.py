@@ -49,11 +49,12 @@ class General:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
+		file = self.chat.next_level_id(self)
 		function = message.function
 		if message.data_special_format:
-			if message.file4 == '' and (data == '' or data != self.last_data):
-				self.last_data = data
+			if file == '1':
+				self.gcode_gui.new_message(message)
+			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
 				elif function == '2':
@@ -74,10 +75,7 @@ class General:
 					self.process_confirmation()
 				elif function == '10':
 					self.process_reject()
-			elif message.file4 == '1':
-				self.gcode_gui.new_message(message)
-		if message.type == 'text':
-			self.GUI.messages_append(message)
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

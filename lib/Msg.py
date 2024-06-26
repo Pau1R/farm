@@ -88,6 +88,10 @@ class Message:
 			self.file3 = address.split('/')[2]
 		if address.count('/') > 2:
 			self.file4 = address.split('/')[3]
+		if address.count('/') > 3:
+			self.file5 = address.split('/')[4]
+		if address.count('/') > 4:
+			self.file6 = address.split('/')[5]
 		if data.count('|') > 0:
 			self.function = data.split('|')[1]
 		if data.count('|') > 1:

@@ -30,7 +30,7 @@ class Owner:
 
 	def first_message(self, message):
 		self.context = 'first_message'
-		self.new_message(message)
+		self.show_top_menu()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
@@ -39,10 +39,8 @@ class Owner:
 		context = self.context
 
 		function = message.function
-		if context == 'first_message':
-			self.show_top_menu()
-		elif message.data_special_format:	# process user button presses
-			if message.data != self.last_data:  # skip repeated button presses
+		if message.data_special_format:
+			if self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
 				elif function == '2':
@@ -61,13 +59,7 @@ class Owner:
 					self.process_delete_employee_role()
 				elif function == '9':
 					self.process_employee_delete_confirmation()
-			self.last_data = message.data
-		else: # process user input
-			self.GUI.messages_append(message)
-			if context == 'accept_weight':
-				self.process_accept_weight()
-			elif context == 'reject':
-				self.process_reject()
+		self.chat.add_if_text(self)
 
 	def show_top_menu(self):
 		self.context = ''

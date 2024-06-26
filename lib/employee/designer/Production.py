@@ -29,18 +29,16 @@ class Production:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
 		function = message.function
-		if message.data_special_format and (data == '' or data != self.last_data):
-			self.last_data = data
-			if function == '1':
-				self.process_top_menu()
-			if function == '2':
-				self.process_order()
-			if function == '3':
-				self.process_reject()
-		if message.type == 'text':
-			self.GUI.messages_append(message)
+		if message.data_special_format:
+			if self.chat.not_repeated_button(self):
+				if function == '1':
+					self.process_top_menu()
+				if function == '2':
+					self.process_order()
+				if function == '3':
+					self.process_reject()
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

@@ -35,28 +35,26 @@ class Production:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
 		function = message.function
-		if message.data_special_format and (data == '' or data != self.last_data):
-			self.last_data = data
-			if function == '1':
-				self.process_top_menu()
-			elif function == '2':
-				self.process_weight()
-			elif function == '3':
-				self.process_quantity()
-			elif function == '4':
-				self.process_type()
-			elif function == '5':
-				self.process_color()
-			elif function == '6':
-				self.process_name()
-			elif function == '7':
-				self.process_comment()
-			elif function == '8':
-				self.process_confirmation()
-		if message.type in ['text','document']:
-			self.GUI.messages_append(message)
+		if message.data_special_format:
+			if self.chat.not_repeated_button(self):
+				if function == '1':
+					self.process_top_menu()
+				elif function == '2':
+					self.process_weight()
+				elif function == '3':
+					self.process_quantity()
+				elif function == '4':
+					self.process_type()
+				elif function == '5':
+					self.process_color()
+				elif function == '6':
+					self.process_name()
+				elif function == '7':
+					self.process_comment()
+				elif function == '8':
+					self.process_confirmation()
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

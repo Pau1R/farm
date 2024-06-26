@@ -51,18 +51,14 @@ class Employee:
 			else:
 				self.GUI.tell('Вам не назначена роль')
 
-		# elif message.data.split(",")[0] == 'assign_order':
-		# 	self.process_assign_order()
-
 		elif message.data_special_format:
 			if message.file2 == '' and (message.data == '' or message.data != self.last_data):
 				self.last_data = message.data
 				if message.function == '1':
 					self.send_first_message(message)
-			else: # pass message to child class
+			else:
 				self.send_new_message(message)
-		if message.type == 'text' and message.file2 == '' and message.text != '/start':
-			self.GUI.messages_append(message)
+		self.chat.add_if_text(self)
 
 	def send_first_message(self, message):
 		employee = None
@@ -93,18 +89,3 @@ class Employee:
 			self.designer.new_message(message)
 		elif message.file2 == '5':
 			self.delivery.new_message(message)
-
-	# def process_assign_order(self):
-	# 	id = int(self.message.data.split(",")[-1])
-	# 	print(id)
-	# 	# print('process_assign_order')
-	# 	for order in self.app.orders:
-	# 		print('order', order.id, type(order.id), id, type(id))
-	# 		if order.id == id:
-	# 			print(self.message.data.split(",")[1])
-	# 			if self.message.data.split(",")[1] == 'yes':
-	# 				if not order.assign_designer(self.chat.user_id):
-	# 					self.GUI.tell('Заказ назначен кому-то другому')
-	# 			else:
-	# 				# print('process_assign_order remove')
-	# 				order.remove_designer_query(self.chat.user_id)

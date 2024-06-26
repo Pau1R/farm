@@ -34,11 +34,9 @@ class Delivery:
 		self.message = message
 		self.GUI.clear_order_chat(message.instance_id)
 
-		data = message.data
 		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (data == '' or data != self.last_data):
-				self.last_data = data
+			if self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
 				if function == '2':
@@ -59,8 +57,7 @@ class Delivery:
 					self.process_prepay_confirmation()
 				if function == '10':
 					self.process_item_receive()
-			# elif message.file3 == '1':
-			# 	self.sub_something.new_message(message)
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

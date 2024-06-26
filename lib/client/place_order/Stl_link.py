@@ -31,15 +31,15 @@ class Stl_link:
 		self.GUI.clear_chat()
 		self.message = message
 
+		file = self.chat.next_level_id(self)
+		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (message.data == '' or message.data != self.last_data):
-				self.last_data = message.data
-				if message.function == '1':
-					self.process_top_menu()
-			elif message.file3 == '1':
+			if file == '1':
 				self.general_parameters.new_message(message)
-		if message.type in ['text', 'document', 'photo']:
-			self.GUI.messages_append(message)
+			elif self.chat.not_repeated_button(self):
+				if function == '1':
+					self.process_top_menu()
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 

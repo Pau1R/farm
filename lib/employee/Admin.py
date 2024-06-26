@@ -68,11 +68,34 @@ class Admin:
 		self.GUI.clear_chat()
 		self.message = message
 
-		data = message.data
+		file = self.chat.next_level_id(self)
 		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (data == '' or data != self.last_data):
-				self.last_data = data
+			if file == '1':
+				self.containerGUI.new_message(message)
+			elif file == '2':
+				self.dryerGUI.new_message(message)
+			elif file == '3':
+				self.extruderGUI.new_message(message)
+			elif file == '4':
+				self.locationGUI.new_message(message)
+			elif file == '5':
+				self.printer_typeGUI.new_message(message)
+			elif file == '6':
+				self.printerGUI.new_message(message)
+			elif file == '7':
+				self.spoolGUI.new_message(message)
+			elif file == '8':
+				self.colorGUI.new_message(message)
+			elif file == '9':
+				self.surfaceGUI.new_message(message)
+			elif file == '10':
+				self.settingsGUI.new_message(message)
+			elif file == '11':
+				self.order_GUI.new_message(message)
+			elif file == '12':
+				self.requestGUI.new_message(message)
+			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
 				elif function == '2':
@@ -81,34 +104,7 @@ class Admin:
 					self.process_equipment()
 				elif function == '4':
 					self.process_settings()
-			else:
-				self.last_data = ''
-			if message.file3 == '1':
-				self.containerGUI.new_message(message)
-			elif message.file3 == '2':
-				self.dryerGUI.new_message(message)
-			elif message.file3 == '3':
-				self.extruderGUI.new_message(message)
-			elif message.file3 == '4':
-				self.locationGUI.new_message(message)
-			elif message.file3 == '5':
-				self.printer_typeGUI.new_message(message)
-			elif message.file3 == '6':
-				self.printerGUI.new_message(message)
-			elif message.file3 == '7':
-				self.spoolGUI.new_message(message)
-			elif message.file3 == '8':
-				self.colorGUI.new_message(message)
-			elif message.file3 == '9':
-				self.surfaceGUI.new_message(message)
-			elif message.file3 == '10':
-				self.settingsGUI.new_message(message)
-			elif message.file3 == '11':
-				self.order_GUI.new_message(message)
-			elif message.file3 == '12':
-				self.requestGUI.new_message(message)
-		if message.type == 'text' and message.file3 == '':
-			self.GUI.messages_append(message)
+		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 
