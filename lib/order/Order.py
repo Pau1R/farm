@@ -75,11 +75,13 @@ class Order:
 		design_price = self.design_time / 60 * 1000														# cost for 3d design, 1000 rub
 		printer_cost = self.app.equipment.printer_cost(self.printer_type)  								# cost of one hour for printer
 		time_price = (self.get_printing_time() / 60) * printer_cost										# cost of all printer working time
-		supports_price = self.get_supports_price()
+		supports_price = self.get_supports_price()														# cost of removing supports
+		bring_to_delivery_price = 50																	# cost of walking to delivery
+		delivery_price = 50																				# cost of delivery worker time
 		if self.support_remover == 'Клиент':
 			supports_price = 0
-		rounded_price = math.ceil((plastic_price + design_price + time_price) / 10) * 10  # round to upper side
-		self.price = int(rounded_price + supports_price)
+		total_price = plastic_price + design_price + time_price + supports_price + bring_to_delivery_price + delivery_price
+		self.price = int(math.ceil((total_price) / 10) * 10)  # round to upper side by tens
 		self.app.db.update_order(self)
 
 	def get_printing_time(self):
@@ -112,7 +114,7 @@ class Order:
 	def get_supports_price(self):
 		setting = int(self.app.settings.get('support_remove_price'))
 		price = int(self.support_time * self.quantity * setting)
-		price = math.ceil(price / 10) * 10
+		price = int(math.ceil(price / 10) * 10)
 		return price
 
 	def set_pay_code(self):

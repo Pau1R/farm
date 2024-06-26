@@ -11,28 +11,31 @@ class Test:
 	def testing(self):
 		for chat in self.app.chats:
 			if chat.user_id == 7333126996:
-				validate = chat.user.designer.validate
+				general = chat.user.designer.general
 				for order in self.app.orders:
 					if order.id == 1:
-						validate.order = order
-						validate.gcode_gui.order = order
-						# stl.gcode_gui.
+						general.order = order
+						general.gcode_gui.order = order
 
-				validate.type = 'sketch'
-				validate.status = 'prevalidate'
-				validate.show_top_menu()
+				general.printer_type = 'Creality ender 3 s1 pro'
+				general.plastic_type = 'PETG'
+				general.weight = 4
+				general.support_time = 0
+
+				general.gcode_gui.gcode = Gcode(self.app, 0)
+				general.gcode_gui.show_top_menu()
 				
-				# validate.message = Message('')
-				# validate.message.btn_data = '2'
+				# general.message = Message('')
+				# general.message.btn_data = '2'
 				
-				# validate.process_supports()
+				# general.process_supports()
 				# gcode_ = Gcode(self.app, 0)
 				# gcode_.quantity = 1
 				# gcode_.duration = 200
 				# gcode_.file_id = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
 				# gcode_.screenshot = 'BQACAgIAAxkBAAISVWYpXGhOaUIDeaip_L6DOSXb74fHAAL6SwACJ6RJSWTOzdPWK5hrNAQ'
 				# stl.gcodes.append(gcode_)
-				# stl.order.logical_status = 'validate'
+				# stl.order.logical_status = 'general'
 				# self.app.db.update_order(stl.order)
 
 				# link = chat.user.designer.link
@@ -41,4 +44,4 @@ class Test:
 				# for order in self.app.orders:
 				#     if order.id == 12:
 				#         link.order = order
-				# link.process_validate()
+				# link.process_general()

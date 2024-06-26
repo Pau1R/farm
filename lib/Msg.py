@@ -17,6 +17,8 @@ class Message:
 	file2 = ''
 	file3 = ''
 	file4 = ''
+	file5 = ''
+	file6 = ''
 	function = ''
 	btn_user_id = ''
 	instance_id = ''
@@ -61,7 +63,8 @@ class Message:
 					self.file_name = str(message.json['document']['file_name'])
 				elif message.content_type == 'photo':
 					self.type = 'photo'
-					self.file_id = str(message.json['photo'][3]['file_id'])
+					biggest_photo = len(message.json['photo']) - 1
+					self.file_id = str(message.json['photo'][biggest_photo]['file_id'])
 				elif message.content_type == 'video':
 					self.type = 'video'
 					self.file_id = str(message.video.file_id)

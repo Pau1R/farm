@@ -117,7 +117,7 @@ class General_parameters:
 			self.chat.user.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
-					chat.user.designer.validate.show_new_order(self.order)
+					chat.user.designer.general.show_new_order(self.order)
 		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()
 

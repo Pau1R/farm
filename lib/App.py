@@ -144,7 +144,4 @@ class App:
 
 # TODO:
 # - refine order statuses movement
-# - refactor order GUI
 # - admin: view all orders, clients (their name) and client orders, tell info to client
-# - admin order edit: type, statuses, price, quantity, plastic_type, color, completion_date, remove/add files
-# - owner.py remove context usage

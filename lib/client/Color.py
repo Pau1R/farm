@@ -42,6 +42,7 @@ class Client_color:
 		self.set_order()
 		self.GUI.clear_order_chat(message.instance_id)
 
+		file = self.chat.next_level_id(self)
 		function = message.function
 		if message.data_special_format:
 			if file == '1':

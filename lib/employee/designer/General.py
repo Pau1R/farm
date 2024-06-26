@@ -2,6 +2,7 @@ import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
 from lib.order.Order import Order
+from lib.order.gcode.Gcode import Gcode
 from lib.employee.designer.GUI.Gcode import Gcode_gui
 
 class General:
@@ -169,6 +170,8 @@ class General:
 			text = 'Введите примерный вес (с хорошим запасом)'
 		if self.order.quantity > 1:
 			text += ' одного экземпляра в граммах'
+		else:
+			text += ' в граммах'
 		self.GUI.tell(text)
 
 	def show_supports(self):
@@ -233,7 +236,7 @@ class General:
 			self.show_top_menu()
 		elif data == 'take':
 			self.order.assinged_designer_id = self.chat.user_id
-			self.order.logical_status = 'design'
+			# self.order.logical_status = 'design'
 			self.app.db.update_order(self.order)
 			self.show_order()
 		elif data == 'accept':
@@ -306,6 +309,7 @@ class General:
 		self.show_confirmation()
 
 	def process_confirmation(self):
+		order = self.order
 		if self.message.btn_data == 'Отмена':
 			self.show_order()
 		else:
@@ -313,23 +317,22 @@ class General:
 				for i in range(1, temp_gcode.quantity + 1):
 					self.print_time = 0
 					gcode = Gcode(self.app, 0)
-					gcode.order_id = self.order.id
+					gcode.order_id = order.id
 					gcode.file_id = temp_gcode.file_id
 					gcode.screenshot = temp_gcode.screenshot
 					self.app.gcodes_append(gcode)
 					self.app.db.create_gcode(gcode)
-			self.order.design_time = self.design_time
-			self.order.print_time = self.print_time
-			self.order.weight = self.weight
-			self.order.support_time = self.support_minutes
-			self.order.plastic_type = self.material
-			self.order.printer_type = self.printer_type
-			# self.order.price = self.price
-			self.order.set_price()
-			user = self.get_user(self.order.user_id)
-			self.order.logical_status = 'validated'
-			user.order_GUI.show_confirmed_by_designer(self.order)
-			self.app.db.update_order(self.order)
+			order.design_time = self.design_time
+			order.print_time = self.print_time
+			order.weight = self.weight
+			order.support_time = self.support_minutes
+			order.plastic_type = self.material
+			order.printer_type = self.printer_type
+			order.set_price()
+			user = self.get_user(order.user_id)
+			order.logical_status = 'validated'
+			user.order_GUI.show_confirmed_by_designer(order)
+			self.app.db.update_order(order)
 			self.show_top_menu()
 
 	def process_reject(self):

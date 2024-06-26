@@ -52,8 +52,6 @@ class Designer:
 			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
-				if function == '2':
-					self.process_orders_design()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------

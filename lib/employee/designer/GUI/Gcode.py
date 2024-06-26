@@ -54,6 +54,7 @@ class Gcode_gui:
 		self.chat.set_context(self.address, 1)
 		text = 'Загрузите файл gcode'
 		if self.gcodes:
+			text += f'\n\nфайлов загружено: {len(self.gcodes)}'
 			buttons = [['Загрузку закончил', 'uploaded']]
 			self.GUI.tell_buttons(text, buttons, [], 1, self.order.id)
 		else:
@@ -61,12 +62,15 @@ class Gcode_gui:
 
 	def show_gcode_screenshot(self):
 		self.chat.set_context(self.address, 2)
-		text = 'Сделайте скриншот в слайсере gcode файла и загрузите его'
+		text = 'Сделайте скриншот в слайсере загруженного файла'
 		self.GUI.tell(text)
 
 	def show_gcode_quantity(self):
+		if self.order.quantity == 1:
+			self.show_gcode_hours()
+			return
 		self.chat.set_context(self.address, 3)
-		text = 'Выберите либо введите кол-во экземпляров загруженного файла'
+		text = 'Выберите либо введите сколько раз печатать загруженный файл'
 		buttons = ['1','2','3','4','5','6','7','8','9','10']
 		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
 

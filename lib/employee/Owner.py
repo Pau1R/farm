@@ -5,8 +5,6 @@ from lib.Msg import Message
 from lib.Gui import Gui
 from lib.Texts import Texts
 
-# Владелец добавляет/удаляет сотрудников и получает отчеты
-
 class Owner:
 	address = ''
 
@@ -14,7 +12,6 @@ class Owner:
 	chat = None
 	GUI = None
 	message = None
-	context = ''
 	last_data = ''
 	employees = []
 	employee = None
@@ -29,14 +26,12 @@ class Owner:
 		self.texts = Texts(chat, self.address)
 
 	def first_message(self, message):
-		self.context = 'first_message'
 		self.show_top_menu()
 
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.GUI.messages_append(message)
 		self.message = message
-		context = self.context
 
 		function = message.function
 		if message.data_special_format:
@@ -62,7 +57,6 @@ class Owner:
 		self.chat.add_if_text(self)
 
 	def show_top_menu(self):
-		self.context = ''
 		text = 'Здравствуйте, владелец ' + self.chat.user_name
 		buttons = ['Сотрудники', 'Статистика']
 		for chat in self.app.chats:
@@ -173,7 +167,6 @@ class Owner:
 		elif data == 'Удалить роль':
 			self.show_employee_roles(False)
 		elif data == 'Назад':
-			self.context = ''
 			self.employee = None
 			self.show_employees()
 
@@ -214,7 +207,6 @@ class Owner:
 			self.employee.user.roles.append(self.message.btn_data)
 			self.app.db.update_chat(self.employee)
 			self.GUI.tell_id(self.employee.user_id, 'Вам добавлена роль: ' + self.message.btn_data)
-		self.context = ''
 		self.show_employee()
 
 	def process_delete_employee_role(self):
@@ -222,7 +214,6 @@ class Owner:
 			self.employee.user.roles = [i for i in self.employee.user.roles if i not in self.message.btn_data]
 			self.app.db.update_chat(self.employee)
 			self.GUI.tell_id(self.employee.user_id, 'Ваша роль ' + self.message.btn_data + ' удалена')
-		self.context = ''
 		self.show_employee()
 
 	def process_employee_delete_confirmation(self):
@@ -236,7 +227,6 @@ class Owner:
 			self.employee = None
 			self.show_employees()
 		else:
-			self.context = ''
 			self.show_employee()
 
 #---------------------------- OTHER ----------------------------

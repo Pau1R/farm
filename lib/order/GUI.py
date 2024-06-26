@@ -84,8 +84,24 @@ class Order_GUI:
 		
 		buttons = []
 		if self.is_admin():
-			x = ''
-			# TODO: put buttons for admin
+			buttons.append(['Сменить тип заказа','type'])
+			buttons.append(['Сменить статуc','status'])
+			if order.price:
+				buttons.append(['Изменить цену','price'])
+			if order.quantity:
+				buttons.append(['Изменить количество','quantity'])
+			if order.plastic_type:
+				buttons.append(['Изменить тип пластика','plastic_type'])
+			if order.color_id:
+				buttons.append(['Изменить цвет','color'])
+			if order.completion_date:
+				buttons.append(['Изменить дату готовности','completion_date'])
+			if order.link:
+				buttons.append(['Изменить ссылку','files'])
+			text = 'Добавить файлы'
+			if order.sketches:
+				text = 'Редактировать файлы'
+			buttons.append([text,'files'])
 		else:
 			if not order.type == 'production':
 				# Уборка поддержек и выбор цвета
@@ -94,7 +110,7 @@ class Order_GUI:
 					if (order.support_time and 
 						not order.support_remover):
 						buttons.append(['Выбрать кто уберет поддержки', 'supports'])
-					elif not order.color:
+					elif not order.color_id:
 							buttons.append(['Выбрать цвет', 'color'])
 				# Предоплата
 				elif logical == 'parameters_set':
@@ -108,6 +124,7 @@ class Order_GUI:
 		buttons.append('Назад')
 
 		# show order and buttons
+		type_ = order.type
 		if type_ == 'stl':
 			self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 		elif type_ == 'link':
@@ -192,6 +209,14 @@ class Order_GUI:
 
 	def process_order(self):
 		data = self.message.btn_data
+
+		if self.is_admin():
+			if data == 'Назад':
+				self.chat.user.admin.last_data = ''
+				self.chat.user.admin.show_orders()
+			# TODO: transfer to admin functions
+			return
+
 		if data == 'color':
 			self.client_color.last_data = ''
 			self.client_color.first_message(self.message)
@@ -209,12 +234,8 @@ class Order_GUI:
 			else:
 				self.show_cancel_confirmation()
 		elif data == 'Назад':
-			if self.is_admin():
-				self.chat.user.admin.last_data = ''
-				self.chat.user.admin.show_orders()
-			else:
-				self.chat.user.last_data = ''
-				self.chat.user.show_orders()
+			self.chat.user.last_data = ''
+			self.chat.user.show_orders()
 
 	def process_supports(self):
 		self.order.support_remover = self.message.btn_data
@@ -241,7 +262,7 @@ class Order_GUI:
 						chat.user.order_GUI.show_rejected_by_admin(order, self.reject_reason)
 						self.reject_reason = ''
 			if order.logical_status == 'validated':
-				chat = self.app.get_chat(order.user_id) # if admin is looking at order
+				chat = self.app.get_chat(order.user_id)
 				chat.user.penalty()
 			order.remove_reserve()
 			self.app.orders.remove(order)
@@ -283,7 +304,7 @@ class Order_GUI:
 		delivery_text = ''
 		logical = order.logical_status
 		physical = order.physical_status
-		if logical in ['prevalidate','validate'] or order.assinged_designer_id:
+		if logical in ['prevalidate','validate']:
 			status = 'Ожидание дизайнера'
 		elif logical == 'validated':
 			status = 'Ожидание действий клиента'
@@ -315,7 +336,7 @@ class Order_GUI:
 		text += f'Дата создания: {self.app.functions.russian_date(order.date)}\n'
 		if order.price:
 			text += f'Стоимость: {order.price} рублей\n'
-		if order.quantity:
+		if order.quantity > 1:
 			text += f'Кол-во экземпляров: {order.quantity}\n'
 		if order.weight:
 			text0 = 'Общий вес' if order.quantity else 'Вес'
