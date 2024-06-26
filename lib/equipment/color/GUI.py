@@ -37,23 +37,25 @@ class ColorGUI:
 		self.GUI.clear_chat()
 		self.message = message
 
-		if message.data_special_format and (message.data == '' or message.data != self.last_data):
-			self.last_data = message.data
-			if message.function == '1':
+		data = message.data
+		function = message.function
+		if message.data_special_format and (data == '' or data != self.last_data):
+			self.last_data = data
+			if function == '1':
 				self.process_top_menu()
-			elif message.function == '2':
+			elif function == '2':
 				self.process_color()
-			elif message.function == '3':
+			elif function == '3':
 				self.process_add_new_color()
-			elif message.function == '4':
+			elif function == '4':
 				self.process_sub_colors()
-			elif message.function == '5':
+			elif function == '5':
 				self.process_add_photo()
-			elif message.function == '6':
+			elif function == '6':
 				self.process_edit_photo()
-			elif message.function == '7':
+			elif function == '7':
 				self.process_add_confirmation()
-			elif message.function == '8':
+			elif function == '8':
 				self.process_delete_confirmation()
 		if message.type == 'text' or message.type == 'photo':
 			self.GUI.messages_append(message)

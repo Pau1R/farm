@@ -28,19 +28,21 @@ class LocationGUI:
 		self.GUI.clear_chat()
 		self.message = message
 
-		if message.data_special_format and (message.data == '' or message.data != self.last_data):
-			self.last_data = message.data
-			if message.function == '1':
+		data = message.data
+		function = message.function
+		if message.data_special_format and (data == '' or data != self.last_data):
+			self.last_data = data
+			if function == '1':
 				self.process_top_menu()
-			elif message.function == '2':
+			elif function == '2':
 				self.process_location()
-			elif message.function == '3':
+			elif function == '3':
 				self.process_add_new_location()
-			elif message.function == '4':
+			elif function == '4':
 				self.process_add_new_location_type()
-			elif message.function == '5':
+			elif function == '5':
 				self.process_add_confirmation()
-			elif message.function == '6':
+			elif function == '6':
 				self.process_delete_confirmation()
 		if message.type == 'text':
 			self.GUI.messages_append(message)

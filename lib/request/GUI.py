@@ -27,15 +27,17 @@ class RequestGUI:
 		self.GUI.clear_chat()
 		self.message = message
 
-		if message.data_special_format and (message.data == '' or message.data != self.last_data):
-			self.last_data = message.data
-			if message.function == '1':
+		data = message.data
+		function = message.function
+		if message.data_special_format and (data == '' or data != self.last_data):
+			self.last_data = data
+			if function == '1':
 				self.process_top_menu()
-			elif message.function == '2':
+			elif function == '2':
 				self.process_new_request()
-			elif message.function == '3':
+			elif function == '3':
 				self.process_request()
-			elif message.function == '4':
+			elif function == '4':
 				self.process_reply()
 		if message.type == 'text':
 			self.GUI.messages_append(message)

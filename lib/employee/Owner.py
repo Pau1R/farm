@@ -38,27 +38,28 @@ class Owner:
 		self.message = message
 		context = self.context
 
+		function = message.function
 		if context == 'first_message':
 			self.show_top_menu()
 		elif message.data_special_format:	# process user button presses
 			if message.data != self.last_data:  # skip repeated button presses
-				if message.function == '1':
+				if function == '1':
 					self.process_top_menu()
-				elif message.function == '2':
+				elif function == '2':
 					self.process_add_employee()
-				elif message.function == '3':
+				elif function == '3':
 					self.process_employee_ownership_confirmation()
-				elif message.function == '4':
+				elif function == '4':
 					self.process_add_employee_confirmation()
-				elif message.function == '5':
+				elif function == '5':
 					self.process_employees()
-				elif message.function == '6':
+				elif function == '6':
 					self.process_employee()
-				elif message.function == '7':
+				elif function == '7':
 					self.process_add_employee_role()
-				elif message.function == '8':
+				elif function == '8':
 					self.process_delete_employee_role()
-				elif message.function == '9':
+				elif function == '9':
 					self.process_employee_delete_confirmation()
 			self.last_data = message.data
 		else: # process user input

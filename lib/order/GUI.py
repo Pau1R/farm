@@ -133,14 +133,17 @@ class Order_GUI:
 		else:
 			price = order.get_prepayment_price()
 
+		setting = self.app.settings.get
+		tell = self.GUI.tell
+
 		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру телефона, карточки или счета, указанных ниже. В комментарии обязательно укажите код заказа: '
 		text += str(order.pay_code)
-		self.GUI.tell(text)
-		self.GUI.tell('Сумма перевода: ' + str(int(price)))
-		self.GUI.tell('Получатель перевода: ' + self.app.settings.get('transfer_receiver'))
-		self.GUI.tell(self.app.settings.get('phone_number'))
-		self.GUI.tell(self.app.settings.get('card_number'))
-		self.GUI.tell(self.app.settings.get('account_number'))
+		tell(text)
+		tell('Сумма перевода: ' + str(int(price)))
+		tell('Получатель перевода: ' + setting('transfer_receiver'))
+		tell(setting('phone_number'))
+		tell(setting('card_number'))
+		tell(setting('account_number'))
 		text = 'Для зачисления средств может понадобиться несколько минут.'
 		text += ' После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
 		text += ' В случае если ваш перевод не привязался к заказу напишите в поддержку.'
@@ -232,19 +235,20 @@ class Order_GUI:
 		self.show_cancel_confirmation()
 
 	def process_cancel_confirmation(self):
+		order = self.order
 		if self.message.btn_data == 'confirm':
 			if self.is_admin():
 				for chat in self.app.chats:
-					if chat.user_id == self.order.user_id:
-						chat.user.order_GUI.show_rejected_by_admin(self.order, self.reject_reason)
+					if chat.user_id == order.user_id:
+						chat.user.order_GUI.show_rejected_by_admin(order, self.reject_reason)
 						self.reject_reason = ''
-			if self.order.logical_status == 'validated':
-				chat = self.app.get_chat(self.order.user_id) # if admin is looking at order
+			if order.logical_status == 'validated':
+				chat = self.app.get_chat(order.user_id) # if admin is looking at order
 				chat.user.penalty()
-			self.order.remove_reserve()
-			self.app.orders.remove(self.order)
-			self.app.db.remove_order(self.order)
-			self.order = None
+			order.remove_reserve()
+			self.app.orders.remove(order)
+			self.app.db.remove_order(order)
+			order = None
 			self.chat.user.last_data = ''
 			if self.is_admin():
 				self.chat.user.admin.last_data = ''

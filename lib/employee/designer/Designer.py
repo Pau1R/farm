@@ -42,12 +42,14 @@ class Designer:
 		self.GUI.clear_chat()
 		self.message = message
 
+		data = message.data
+		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (message.data == '' or message.data != self.last_data):
-				self.last_data = message.data
-				if message.function == '1':
+			if message.file3 == '' and (data == '' or data != self.last_data):
+				self.last_data = data
+				if function == '1':
 					self.process_top_menu()
-				if message.function == '2':
+				if function == '2':
 					self.process_orders_design()
 			elif message.file3 == '1':
 				self.general.new_message(message)

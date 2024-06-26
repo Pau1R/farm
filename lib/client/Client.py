@@ -54,22 +54,24 @@ class Client:
 		self.GUI.clear_chat()
 		self.message = message
 
+		data = message.data
+		function = message.function
 		if message.text == '/start':
 			self.last_data = ''
 			self.reset_order()
 			self.show_top_menu()
 		elif message.data_special_format:
-			if message.file2 == '' and (message.data == '' or message.data != self.last_data):
-				self.last_data = message.data
-				if message.function == '1':
+			if message.file2 == '' and (data == '' or data != self.last_data):
+				self.last_data = data
+				if function == '1':
 					self.process_top_menu()
-				if message.function == '2':
+				if function == '2':
 					self.process_order_menu()
-				elif message.function == '4':
+				elif function == '4':
 					self.process_price()
-				elif message.function == '5':
+				elif function == '5':
 					self.process_orders()
-				elif message.function == '6':
+				elif function == '6':
 					self.process_order()
 			elif message.file2 == '1':
 				self.order_GUI.new_message(message)

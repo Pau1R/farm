@@ -68,16 +68,18 @@ class Admin:
 		self.GUI.clear_chat()
 		self.message = message
 
+		data = message.data
+		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (message.data == '' or message.data != self.last_data):
-				self.last_data = message.data
-				if message.function == '1':
+			if message.file3 == '' and (data == '' or data != self.last_data):
+				self.last_data = data
+				if function == '1':
 					self.process_top_menu()
-				elif message.function == '2':
+				elif function == '2':
 					self.process_orders()
-				elif message.function == '3':
+				elif function == '3':
 					self.process_equipment()
-				elif message.function == '4':
+				elif function == '4':
 					self.process_settings()
 			else:
 				self.last_data = ''

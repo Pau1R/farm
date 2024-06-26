@@ -34,28 +34,30 @@ class Delivery:
 		self.message = message
 		self.GUI.clear_order_chat(message.instance_id)
 
+		data = message.data
+		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (message.data == '' or message.data != self.last_data):
-				self.last_data = message.data
-				if message.function == '1':
+			if message.file3 == '' and (data == '' or data != self.last_data):
+				self.last_data = data
+				if function == '1':
 					self.process_top_menu()
-				if message.function == '2':
+				if function == '2':
 					self.process_order_query()
-				if message.function == '3':
+				if function == '3':
 					self.process_issue_order()
-				if message.function == '4':
+				if function == '4':
 					self.process_pay_for_order()
-				if message.function == '5':
+				if function == '5':
 					self.process_item_id_query()
-				if message.function == '6':
+				if function == '6':
 					self.process_photos_confirm()
-				if message.function == '7':
+				if function == '7':
 					self.process_item_prepay()
-				if message.function == '8':
+				if function == '8':
 					self.process_item_prepay_amount()
-				if message.function == '9':
+				if function == '9':
 					self.process_prepay_confirmation()
-				if message.function == '10':
+				if function == '10':
 					self.process_item_receive()
 			# elif message.file3 == '1':
 			# 	self.sub_something.new_message(message)

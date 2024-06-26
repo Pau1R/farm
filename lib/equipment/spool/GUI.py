@@ -44,37 +44,39 @@ class SpoolGUI:
 		self.GUI.clear_chat()
 		self.message = message
 
-		if message.data_special_format and (message.data == '' or message.data != self.last_data):
-			self.last_data = message.data
-			if message.function == '1':
+		data = message.data
+		function = message.function
+		if message.data_special_format and (data == '' or data != self.last_data):
+			self.last_data = data
+			if function == '1':
 				self.process_top_menu()
-			if message.function == '2':
+			if function == '2':
 				self.process_ordered()
-			if message.function == '3':
+			if function == '3':
 				self.process_spool()
-			if message.function == '4':
+			if function == '4':
 				self.process_change_weight()
-			if message.function == '5':
+			if function == '5':
 				self.process_weight_input()
-			if message.function == '6':
+			if function == '6':
 				self.process_add_new_spool()
-			if message.function == '7':
+			if function == '7':
 				self.process_add_new_spool_type()
-			if message.function == '8':
+			if function == '8':
 				self.process_add_new_spool_color()
-			if message.function == '9':
+			if function == '9':
 				self.process_add_new_spool_weight()
-			if message.function == '10':
+			if function == '10':
 				self.process_add_new_spool_price()
-			if message.function == '11':
+			if function == '11':
 				self.process_add_new_spool_dried()
-			if message.function == '12':
+			if function == '12':
 				self.process_add_new_spool_brand()
-			if message.function == '13':
+			if function == '13':
 				self.process_add_delivery_date()
-			if message.function == '14':
+			if function == '14':
 				self.process_add_confirmation()
-			if message.function == '15':
+			if function == '15':
 				self.process_delete_confirmation()
 		if message.type == 'text':
 			self.GUI.messages_append(message)
