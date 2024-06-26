@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
-from lib.client.place_order.GUI.Values import Values
+from lib.client.place_order.GUI.General import General_parameters
 
 class Sketch_item:
 	address = ''
@@ -13,14 +13,14 @@ class Sketch_item:
 
 	last_data = ''
 
-	values = None
+	general_parameters = None
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, address)
-		self.values = Values(app, chat, address + '/1')
+		self.general_parameters = General_parameters(app, chat, address + '/1')
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
@@ -37,7 +37,7 @@ class Sketch_item:
 				if message.function == '1':
 					self.process_top_menu()
 			elif message.file3 == '1':
-				self.values.new_message(message)
+				self.general_parameters.new_message(message)
 		if message.type in ['text', 'document', 'photo']:
 			self.GUI.messages_append(message)
 
@@ -69,7 +69,7 @@ class Sketch_item:
 		file_id = self.message.file_id
 		type_ = self.message.type
 		if self.message.btn_data == 'uploaded':
-			self.values.first_message(self.message)
+			self.general_parameters.first_message(self.message)
 			return
 		elif type_ == 'photo' or (self.order.type == 'sketch' and type_ == 'document'):
 			if file_id:

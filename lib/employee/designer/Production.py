@@ -68,7 +68,7 @@ class Production:
 		text += f'\nДополнительная информация: {self.order.quality}'
 		buttons = []
 		if self.order.assinged_designer_id:
-			buttons.append(['Перейти в личный чат', 'chat'])
+			buttons.append(['Перевести в чат', 'chat'])
 			buttons.append(['Отказать','reject'])
 		else:
 			buttons.append(['Взять в работу', 'take'])

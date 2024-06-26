@@ -141,7 +141,7 @@ class Client:
 		self.show_top_menu()
 
 	def show_wait_for_designer(self):
-		self.GUI.tell_permanent(f'Заказ {self.order.name} передан дизайнеру для оценки, ожидайте.')
+		self.GUI.tell_permanent(f'Заказ "{self.order.name}" передан дизайнеру для оценки, ожидайте.')
 		if self.order.type in ['sketch','item']:
 			text = 'После оценки будет известна предварительная стоимость заказа.'
 			text += ' Итоговая стоимость станет известна после создания модели'

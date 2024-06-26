@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
@@ -64,7 +65,7 @@ class Production:
 
 	def show_weight(self):
 		self.chat.set_context(self.address, 2)
-		self.GUI.tell('Напишите приблизительно вес единицы изделия в килограммах')
+		self.GUI.tell('Напишите приблизительно вес единицы изделия в граммах')
 
 	def show_quantity(self):
 		self.chat.set_context(self.address, 3)
@@ -106,7 +107,7 @@ class Production:
 	def process_weight(self):
 		self.chat.context = ''
 		try:
-			self.weight = int(float(self.message.text) * 1000)
+			self.weight = int(self.message.text)
 			self.show_quantity()
 		except:
 			self.show_weight()
@@ -127,7 +128,7 @@ class Production:
 
 	def process_color(self):
 		self.color = self.message.text
-		self.show_confirmation()
+		self.show_name()
 
 	def process_name(self):
 		self.chat.context = ''
@@ -159,6 +160,6 @@ class Production:
 			self.chat.user.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
-					chat.user.designer.process.show_new_order(self.order)
+					chat.user.designer.validate.show_new_order(self.order)
 		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()

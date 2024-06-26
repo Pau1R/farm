@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
-from lib.client.place_order.GUI.Values import Values
+from lib.client.place_order.GUI.General import General_parameters
 
 class Stl_link:
 	address = ''
@@ -11,7 +11,7 @@ class Stl_link:
 	order = None
 	GUI = None
 
-	values = None
+	general_parameters = None
 
 	supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
@@ -20,7 +20,7 @@ class Stl_link:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.values = Values(app, chat, address + '/1')
+		self.general_parameters = General_parameters(app, chat, address + '/1')
 
 	def first_message(self, message):
 		self.order = self.chat.user.order
@@ -37,7 +37,7 @@ class Stl_link:
 				if message.function == '1':
 					self.process_top_menu()
 			elif message.file3 == '1':
-				self.values.new_message(message)
+				self.general_parameters.new_message(message)
 		if message.type in ['text', 'document', 'photo']:
 			self.GUI.messages_append(message)
 
@@ -62,9 +62,9 @@ class Stl_link:
 		if self.order.type == 'stl':
 			if self.message.type == 'document' and self.message.file_name.split(".")[-1] in self.supported_files:
 				self.order.model_file = self.message.file_id
-				self.values.first_message(self.message)
+				self.general_parameters.first_message(self.message)
 			else:
 				self.show_extention_error()
 		elif self.order.type == 'link' and self.message.type == 'text':
 			self.order.link = self.message.text
-			self.values.first_message(self.message)
+			self.general_parameters.first_message(self.message)

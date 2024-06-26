@@ -4,7 +4,7 @@ from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.employee.designer.GUI.Gcode import Gcode_gui
 
-class Process:
+class General:
 	address = ''
 	
 	type = ''
