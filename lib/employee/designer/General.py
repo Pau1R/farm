@@ -94,10 +94,11 @@ class General:
 			self.chat.user.designer.first_message(self.message)
 
 	def show_order(self):
-		text = f'Заказ № {self.order.id} "{self.order.name}" \nДата добавления: {self.app.functions.russian_date(self.order.date)}'
-		if self.order.quantity > 1:
-			text += f'\nКоличество экземпляров: {self.order.quantity}'
-		quality = self.order.quality
+		order = self.order
+		text = f'Заказ № {order.id} "{order.name}" \nДата добавления: {self.app.functions.russian_date(order.date)}'
+		if order.quantity > 1:
+			text += f'\nКоличество экземпляров: {order.quantity}'
+		quality = order.quality
 		if quality:
 			if quality == 'cheap':
 				quality = 'максимально дешевое'
@@ -108,23 +109,25 @@ class General:
 			elif quality == 'durability':
 				quality = 'максимальная прочность'
 			text += f'\nКачество печати: {quality}' 
-		if self.order.comment:
-			text += f'\nКомментарий клиента: {self.order.comment}'
+		if order.comment:
+			text += f'\nКомментарий клиента: {order.comment}'
 		buttons = []
-		if self.order.assinged_designer_id:
+		if order.assinged_designer_id:
 			buttons.append(['Принять модель', 'accept'])
 			buttons.append(['Отказать','reject'])
+			if order.type == 'sketch':
+				buttons.append(['Перевести в чат','chat'])
 		else:
 			buttons.append(['Взять в работу', 'take'])
 		buttons.append('Назад')
-		if self.order.type == 'stl':
-			self.GUI.tell_document_buttons(self.order.model_file, text, buttons, ['Назад'], 2, self.order.id)
-		elif self.order.type == 'link':
-			self.GUI.tell_link_buttons(self.order.link, text, buttons, buttons, 2, self.order.id)
-		elif self.order.type in ['sketch', 'item']:
-			for file in self.order.sketches:
+		if order.type == 'stl':
+			self.GUI.tell_document_buttons(order.model_file, text, buttons, ['Назад'], 2, order.id)
+		elif order.type == 'link':
+			self.GUI.tell_link_buttons(order.link, text, buttons, buttons, 2, order.id)
+		elif order.type in ['sketch', 'item']:
+			for file in order.sketches:
 				self.GUI.tell_file(file[0], file[1], '')
-			self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.id)
+			self.GUI.tell_buttons(text, buttons, buttons, 2, order.id)
 
 	def show_design_time(self):
 		text = 'Сколько часов ушло на разработку модели и слайсинг?'
@@ -224,20 +227,27 @@ class General:
 					self.show_order()
 
 	def process_order(self):
-		if self.message.btn_data == 'Назад':
+		data = self.message.btn_data
+		if data == 'Назад':
 			self.order = None
 			self.show_top_menu()
-		elif self.message.btn_data == 'take':
+		elif data == 'take':
 			self.order.assinged_designer_id = self.chat.user_id
+			self.order.logical_status = 'design'
 			self.app.db.update_order(self.order)
 			self.show_order()
-		elif self.message.btn_data == 'accept':
+		elif data == 'accept':
 			if self.order.type in ['sketch','item']:
 				self.show_design_time()
 			else:
 				self.show_printer_type()
-		elif self.message.btn_data == 'reject':
+		elif data == 'reject':
 			self.show_reject()
+		elif data == 'chat':
+			chat = self.app.get_chat(self.order.user_id)
+			chat.user.show_redirect_to_chat(self.order)
+			self.order.quality += '\nЗаказ переведен в чат'
+			self.show_order()
 
 	def process_design_time(self):
 		try:

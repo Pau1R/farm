@@ -68,13 +68,15 @@ class Order:
 		self.spool_logic = self.app.equipment.spool_logic
 
 	def set_price(self):
+		if not self.prepayment_percent:
+			self.prepayment_percent = int(self.app.settings.get('prepayment_percent'))
 		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic
 		plastic_price = self.weight * self.quantity * gram_price  										# total plastic price for order
 		design_price = self.design_time / 60 * 1000														# cost for 3d design, 1000 rub
 		printer_cost = self.app.equipment.printer_cost(self.printer_type)  								# cost of one hour for printer
 		time_price = (self.get_printing_time() / 60) * printer_cost										# cost of all printer working time
 		supports_price = self.get_supports_price()
-		if self.support_remover == 'Компания':
+		if self.support_remover == 'Клиент':
 			supports_price = 0
 		rounded_price = math.ceil((plastic_price + design_price + time_price) / 10) * 10  # round to upper side
 		self.price = int(rounded_price + supports_price)
@@ -128,12 +130,12 @@ class Order:
 			self.app.db.update_order(self)
 
 	def is_free_start(self):
-		money_payed = 0
-		for chat in self.app.chats:
-			if chat.user_id == self.user_id:
-				money_payed = chat.user.money_payed
-		if self.price < int(self.app.settings.get('prepayment_free_max')) and self.price < (money_payed / 4):
-			return True
+		# money_payed = 0
+		# for chat in self.app.chats:
+		# 	if chat.user_id == self.user_id:
+		# 		money_payed = chat.user.money_payed
+		# if self.price < int(self.app.settings.get('prepayment_free_max')) and self.price < (money_payed / 4):
+		# 	return True
 		return False
 
 	def reserve_plastic(self, statuses, color_id):

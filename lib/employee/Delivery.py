@@ -99,7 +99,7 @@ class Delivery:
 
 	def show_item_id_query(self):
 		self.chat.set_context(self.address, 5)
-		self.GUI.tell('Введите код предмета который сообщит вам клиент')
+		self.GUI.tell('Попросите клиента назвать вам код передачи и введите его.')
 
 	def show_photos_confirm(self):
 		for photo in self.order.sketches:

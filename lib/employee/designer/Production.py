@@ -101,7 +101,7 @@ class Production:
 			self.show_order()
 		elif self.message.btn_data == 'chat':
 			chat = self.app.get_chat(self.order.user_id)
-			chat.user.info.show_redirect_to_chat(self.order)
+			chat.user.show_redirect_to_chat(self.order)
 			self.order.quality += '\nЗаказ переведен в чат'
 			self.show_order()
 		elif self.message.btn_data == 'reject':

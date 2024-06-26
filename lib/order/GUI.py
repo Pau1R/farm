@@ -41,20 +41,22 @@ class Order_GUI:
 		self.set_order()
 		self.GUI.clear_order_chat(self.order.id)
 
+		data = message.data
+		function = message.function
 		if message.data_special_format:
-			if message.file3 == '' and (message.data == '' or message.data != self.last_data):	# process user button presses and skip repeated button presses
-				self.last_data = message.data
-				if message.function == '1':
+			if message.file3 == '' and (data == '' or data != self.last_data):	# process user button presses and skip repeated button presses
+				self.last_data = data
+				if function == '1':
 					self.process_order()
-				elif message.function == '2':
+				elif function == '2':
 					self.process_supports()
-				elif message.function == '3':
+				elif function == '3':
 					self.process_pay()
-				elif message.function == '4':
+				elif function == '4':
 					self.process_cancel_confirmation()
-				elif message.function == '5':
+				elif function == '5':
 					self.process_confirmed_by_designer()
-				elif message.function == '6':
+				elif function == '6':
 					self.process_reject_reason()
 			elif message.file3 == '1':
 				self.client_color.new_message(message)
@@ -76,114 +78,38 @@ class Order_GUI:
 #---------------------------- SHOW ----------------------------
 
 	def show_order(self):
+		text = self.get_text()
 		order = self.order
 
-		# set parameters
-		settings_set = False
-		if order.color_id != 0 and (order.support_remover != '' or order.support_time == 0):
-			if order.prepayment_percent == 0:
-				order.prepayment_percent = int(self.app.settings.get('prepayment_percent'))
-				self.app.db.update_order(self.order)
-			settings_set = True
-		free_start = order.is_free_start()
-		prepayed = order.is_prepayed()
-		color = self.app.equipment.color_logic.get_color_name(order.color_id)
-
-		plastic_type = order.plastic_type
-		if plastic_type:
-			if plastic_type == 'basic':
-				plastic_type = 'любой базовый'
-			plastic_type.lower()
-
-		status = ''
-		if order.logical_status == 'validate':
-			status = 'Ожидание дизайнера'
-		elif order.logical_status == 'validated':
-			status = 'Ожидание действий клиента'
-		elif order.logical_status == 'waiting_for_item':
-			status = 'Ожидание доставки предмета клиентом'
-			# TODO: delivery item receive, order.logical_status rethink for client item order
-		elif order.logical_status == 'prepayed':
-			status = 'Выполняется'
-		elif order.logical_status == 'no_spools':
-			status = 'Приостановлен (отсутствует пластик)'
-		elif order.logical_status == 'in_pick-up':
-			status = 'Ожидает в пункте выдачи'
-		elif order.logical_status == 'issued':
-			status = 'Выдан клиенту'
-
-		# set text
-		text = order.name + '\n\n'
-		text += f'Статус: {status.upper()}\n'
-		if order.delivery_code > 0:
-			if order.logical_status == 'in_pick-up':
-				text += f'Код получения'
-			elif order.logical_status == 'waiting_for_item':
-				text += f'Код предмета'
-			text += f': {order.delivery_code}\n\n'
-		text += f'Дата создания: {self.app.functions.russian_date(order.date)}\n'
-		if order.price > 0:
-			if settings_set:
-				text += 'С'
-			else:
-				text += 'Предварительная с'
-			text += f'тоимость: {order.price} рублей\n'
-		if order.quantity > 1:
-			text += f'Кол-во экземпляров: {order.quantity}\n'
-		if order.weight > 0:
-			if order.quantity > 1:
-				text0 = 'Общий вес'
-			else:
-				text0 = 'Вес'
-			text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
-		if plastic_type:
-			text += f'Тип материала: {plastic_type}\n'
-		if order.color_id != 0:
-			text += f'Цвет изделия: {color.lower()}\n'
-		# if order.time > 0:
-		# 	text += f'Длительность печати'
-		# 	if order.time > 119: # if 2 hours or more show only hours amount
-		# 		text += f' (часов): {int(order.time/60)}\n'
-		# 	else:
-		# 		text += f': {int(order.time)} минут\n'
-		if order.completion_date:
-			date = self.app.functions.russian_date(order.completion_date)
-			text += f'Дата готовности (примерно): {date}'
-		if order.support_remover != '':
-			text += f'Удаление поддержек: {order.support_remover.lower()}\n'
-		if order.payed > 0:
-			if not free_start and not prepayed:
-				text += f'Предоплачено: {int(order.payed)}/{int(prepay_price)} рублей'
-			else:
-				text += f'Предоплачено: {int(order.payed)} рублей'
-
-		# set buttons
+		logical = order.logical_status
+		physical = order.physical_status
+		
 		buttons = []
-		if not self.is_admin():
-			type_ = order.type
-			if type_ == 'stl' or type_ == 'link':
-				if order.support_remover == '' and order.support_time > 0:
-					buttons.append(['Выбрать кто уберет поддержки', 'supports'])
-				elif order.color_id == 0:
-					buttons.append(['Выбрать цвет', 'color'])
-				elif not free_start and not prepayed:
+		if self.is_admin():
+			x = ''
+			# TODO: put buttons for admin
+		else:
+			if not order.type == 'production':
+				# Уборка поддержек и выбор цвета
+				if logical == 'validated':
+					# TODO: if type == 'sketch' ask client to confirm photos, else: create dialog with client for clarification.
+					if (order.support_time and 
+						not order.support_remover):
+						buttons.append(['Выбрать кто уберет поддержки', 'supports'])
+					elif not order.color:
+							buttons.append(['Выбрать цвет', 'color'])
+				# Предоплата
+				elif logical == 'parameters_set':
 					buttons.append(['Внести предоплату', 'pay'])
-				elif free_start and order.logical_status == 'validated':
-					buttons.append(['Подтвердить и передать на выполнение', 'continue'])
-				elif prepayed and not order.is_payed():
+				elif physical in ['in_line','printing','finished','in_pick-up'] and not order.is_payed():
 					buttons.append(['Оплатить полностью', 'pay'])
-			elif type_ == 'sketch' or type_ == 'item':
-				if order.color_id == 0:
-					buttons.append(['Выбрать цвет', 'color'])
-				elif free_start and order.logical_status == 'validated':
-					buttons.append(['Подтвердить заказ', 'continue'])
-				elif prepayed and not order.is_payed():
-					buttons.append(['Оплатить полностью', 'pay'])
-				elif not free_start and not prepayed:
-					buttons.append(['Внести предоплату', 'pay'])
-
-		buttons.append('Отменить заказ')
+				# Отмена заказа
+				if (    (order.type in ['stl','link']    and physical in ['prepare','in_line']) or 
+					not (order.type in ['sketch','item'] and order.assinged_designer_id)):
+					buttons.append('Отменить заказ')
 		buttons.append('Назад')
+
+		# show order and buttons
 		if type_ == 'stl':
 			self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 		elif type_ == 'link':
@@ -192,26 +118,6 @@ class Order_GUI:
 			for file in order.sketches:
 				self.GUI.tell_file(file[0], file[1], '')
 			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
-
-		# buttons for stl, link: 
-		# - supports, color
-		#   - pay, continue
-		# - cancel, back
-
-		# buttons for sketch:
-		# - color
-		#   - pay, continue
-		#     - confirm, redo
-		#       - supports
-		# - cancel, back
-
-		# buttons for item:
-		# - color
-		#   - pay, continue
-		# - cancel, back
-
-		# buttons for production: TODO: think over
-
 
 	def show_supports(self):
 		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + str(self.order.get_supports_price()) + ' рублей'
@@ -254,7 +160,7 @@ class Order_GUI:
 		message.general_clear = False
 
 	def show_rejected_by_designer(self, order, reason):
-		text = f'Заказ {order.name} не прошел оценку.'
+		text = f'Заказ "{order.name}" не прошел оценку.'
 		if reason != '':
 			text +=  f'\nПричина: {reason}'
 		self.GUI.tell(text)
@@ -268,11 +174,11 @@ class Order_GUI:
 		text = ''
 		if reason != '':
 			text = f' по причине: {reason}'
-		text = f'Заказ {order.name} отменен администратором' + text
+		text = f'Заказ "{order.name}" отменен администратором' + text
 		self.GUI.tell(text)
 
 	def show_material_unavailable(self, order):
-		text = f'Заказ {order.name}\n\n'
+		text = f'Заказ "{order.name}"\n\n'
 		text += 'К сожалению в настоящее время на складе отсутствует нужный вам тип пластика. '
 		text += 'Мы вам сообщим когда он будет в наличии.'
 		self.GUI.tell(text)
@@ -357,3 +263,73 @@ class Order_GUI:
 
 	def is_admin(self):
 		return self.chat.is_employee and 'Администратор' in self.chat.user.roles
+
+	def get_text(self):
+		order = self.order
+
+		# set parameters
+		free_start = order.is_free_start()
+		prepayed = order.is_prepayed()
+		color = self.app.equipment.color_logic.get_color_name(order.color_id)
+		plastic_type = order.plastic_type
+		if plastic_type == 'basic':
+			plastic_type = 'любой базовый'
+		plastic_type.lower()
+
+		# convert order status to readable format
+		status = ''
+		delivery_text = ''
+		logical = order.logical_status
+		physical = order.physical_status
+		if logical in ['prevalidate','validate'] or order.assinged_designer_id:
+			status = 'Ожидание дизайнера'
+		elif logical == 'validated':
+			status = 'Ожидание действий клиента'
+		elif logical == 'parameters_set':
+			status = 'Ожидание оплаты'
+		# statuses for item order
+		elif logical == 'waiting_for_item':
+			status = 'Принесите предмет в пункт выдачи'
+			delivery_text = 'Код передачи'
+		elif logical in ['sample_aquired','waiting_for_design']:
+			status = 'Ожидание дизайнера'
+		# physical statuses
+		elif physical == 'in_line':
+			status = 'В очереди на печать'
+		elif physical == 'printing':
+			status = 'Печатается'
+		elif physical == 'finished':
+			status = 'Печать завершена'
+		elif physical == 'in_pick-up':
+			status = 'В пункте выдачи'
+			delivery_text = 'Код получения'
+
+		# set text
+		text = order.name + '\n\n'
+		if status:
+			text += f'Статус: {status.upper()}\n'
+		if order.delivery_code and delivery_text:
+			text += f'{delivery_text}: {order.delivery_code}\n\n'
+		text += f'Дата создания: {self.app.functions.russian_date(order.date)}\n'
+		if order.price:
+			text += f'Стоимость: {order.price} рублей\n'
+		if order.quantity:
+			text += f'Кол-во экземпляров: {order.quantity}\n'
+		if order.weight:
+			text0 = 'Общий вес' if order.quantity else 'Вес'
+			text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
+		if plastic_type:
+			text += f'Тип материала: {plastic_type}\n'
+		if order.color_id:
+			text += f'Цвет изделия: {color.lower()}\n'
+		if order.completion_date:
+			date = self.app.functions.russian_date(order.completion_date)
+			text += f'Дата готовности (примерно): {date}'
+		if order.support_time:
+			text += f"Удаление поддержек: {'клиент' if order.support_remover == 'Клиент' else 'студия'}\n"
+		if order.payed:
+			if not free_start and not prepayed:
+				text += f'Предоплачено: {int(order.payed)}/{int(prepay_price)} рублей'
+			else:
+				text += f'Предоплачено: {int(order.payed)} рублей'
+		return text
