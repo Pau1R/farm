@@ -3,6 +3,7 @@ from datetime import date
 from datetime import datetime
 import os
 from lib.Chat import Chat
+from lib.Database_meta import Meta
 from lib.order.Order import Order
 from lib.order.gcode.Gcode import Gcode
 from lib.equipment.container.Container import Container
@@ -18,10 +19,15 @@ from lib.equipment.color.Logic import Color_logic
 from lib.equipment.surface.Surface import Surface
 from lib.request.Request import Request
 
+import inspect
 import time
 import ast
 
 class Database:
+	app = None
+	meta = None
+
+	db = None
 	cursor = None
 
 	appRoot = os.getcwd()
@@ -30,8 +36,10 @@ class Database:
 
 	def __init__(self, app):
 		self.app = app
+		self.meta = Meta()
 
 		self.connect()
+		self.edit_database()
 
 	def connect(self):
 		if not os.path.exists(self.appRoot):
@@ -39,144 +47,48 @@ class Database:
 		self.db = sqlite3.connect(self.dbPath, check_same_thread=False)
 		self.cursor = self.db.cursor()
 
-		chat = """
-			user_id INTEGER PRIMARY KEY,
-			created DATETIME,
-			name TEXT,
-			isEmployee LOGICAL,
-			roles TEXT,
-			payId TEXT,
-			money_payed DECIMAL,
-			last_access_date DATETIME,
-			orders_canceled INTEGER,
-			limit_date DATETIME
-			"""
-		container = """
-			id INTEGER PRIMARY KEY,
-			created DATETIME,
-			type TEXT,
-			capacity INTEGER"""
-		dryer = """
-			id INTEGER PRIMARY KEY,
-			created DATETIME,
-			name TEXT,
-			capacity INTEGER,
-			minTemp INTEGER,
-			maxTemp INTEGER,
-			maxTime INTEGER"""
-		extruder = """
-			id INTEGER PRIMARY KEY,
-			created DATETIME,
-			name TEXT,
-			maxTemp INTEGER,
-			nozzleDiameter INTEGER"""
-		location = """
-			id INTEGER PRIMARY KEY,
-			created DATETIME,
-			name TEXT,
-			type TEXT"""
-		printer_type = """
-			id INTEGER PRIMARY KEY,  
-			name TEXT,
-			hour_cost INTEGER"""
-		printer = """
-			id INTEGER PRIMARY KEY, 
-			created DATETIME, 
-			name TEXT,
-			type TEXT"""
-		spool = """
-			id INTEGER PRIMARY KEY,
-			created DATETIME,
-			type TEXT,
-			diameter DECIMAL,
-			weight TEXT,
-			density DECIMAL,
-			color_id TEXT,
-			dried TEXT,
-			brand TEXT,
-			booked INTEGER,
-			used TEXT,
-			price INTEGER,
-			status TEXT,
-			delivery_date_estimate DATETIME"""
-		color = """
-			id INTEGER PRIMARY KEY,
-			created DATETIME,
-			name TEXT,
-			parent_id INTEGER,
-			samplePhoto TEXT"""
-		surface = """
-			id INTEGER PRIMARY KEY,
-			created DATETIME,
-			type TEXT"""
-		order = """
-			id INTEGER PRIMARY KEY,
-			name TEXT,
-			created DATETIME,
-			user_id INTEGER,
-			type TEXT,
-			physical_status TEXT,
-			logical_status TEXT,
-			assinged_designer_id TEXT,
-			priority INTEGER,
-			quantity INTEGER,
-			quality TEXT,
-			comment TEXT,
-			color_id INTEGER,
-			support_remover TEXT,
-			sketches TEXT,
-			model_file TEXT,
-			link TEXT,
-			design_time INTEGER,
-			print_time INTEGER,
-			plastic_type TEXT,
-			printer_type TEXT,
-			weight DECIMAL,
-			completion_date DATE,
-			start_datetime DATETIME,
-			support_time DECIMAL,
-			layer_hight DECIMAL,
-			price DECIMAL,
-			pay_code INTEGER,
-			payed DECIMAL,
-			prepayment_percent DECIMAL,
-			booked TEXT,
-			booked_time INTEGER,
-			delivery_code INTEGER,
-			delivery_user_id INTEGER """  # time DECIMAL,
-		gcode = """
-			id INTEGER PRIMARY KEY,
-			order_id INTEGER,
-			file_id TEXT,
-			screenshot TEXT,
-			status TEXT,
-			duration INTEGER"""  # in_line, printing, printed
-		setting = """
-			id INTEGER,
-			name TEXT PRIMARY KEY,
-			value TEXT"""
-		request = """
-			id INTEGER,
-			user_id INTEGER PRIMARY KEY,
-			date DATETIME
-			text TEXT"""
+#---------------------------- METADATA EDIT ----------------------------
 
-		create = 'CREATE TABLE IF NOT EXISTS '
-		
-		self.cursor.execute(create + 'chat (' + chat + ')')
-		self.cursor.execute(create + 'container (' + container + ')')
-		self.cursor.execute(create + 'dryer (' + dryer + ')')
-		self.cursor.execute(create + 'extruder (' + extruder + ')')
-		self.cursor.execute(create + 'location (' + location + ')')
-		self.cursor.execute(create + 'printer_type (' + printer_type + ')')
-		self.cursor.execute(create + 'printer (' + printer + ')')
-		self.cursor.execute(create + 'spool (' + spool + ')')
-		self.cursor.execute(create + 'color (' + color + ')')
-		self.cursor.execute(create + 'surface (' + surface + ')')
-		self.cursor.execute(create + 'order_ (' + order + ')')
-		self.cursor.execute(create + 'gcode (' + gcode + ')')
-		self.cursor.execute(create + 'setting (' + setting + ')')
-		self.cursor.execute(create + 'request (' + request + ')')
+	def edit_database(self):
+		tables = [attr for attr in vars(Meta) if not attr.startswith('__')]
+
+		# create tables
+		for table in tables:
+			self.create_table(table, getattr(self.meta, table))
+
+		# delete tables
+		self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+		existing_tables = [row[0] for row in self.cursor.fetchall()]
+		for table in existing_tables:
+			if table not in tables:
+				self.cursor.execute(f'DROP TABLE IF EXISTS "{table}";')
+
+	def create_table(self, table_name, table_fields):
+		# create table and columns
+		columns = ",\n    ".join([f"{col_name} {col_type}" for col_name, col_type in table_fields.items()])
+		create_table_sql = f'CREATE TABLE IF NOT EXISTS "{table_name}" (\n    {columns}\n);'
+		self.cursor.execute(create_table_sql)
+
+		# get columns
+		self.cursor.execute(f'PRAGMA table_info("{table_name}")')
+		existing_columns = {row[1]: row[2] for row in self.cursor.fetchall()}  # Column name to type mapping
+
+		# add columns
+		for col_name, col_type in table_fields.items():
+			if col_name not in existing_columns:
+				alter_table_sql = f'ALTER TABLE "{table_name}" ADD COLUMN {col_name} {col_type};'
+				self.cursor.execute(alter_table_sql)
+				# set default values for new column
+				if col_type in ['TEXT','DATETIME','']:
+					self.cursor.execute(f'UPDATE "{table_name}" SET {col_name} = ""')
+				elif col_type in ['INTEGER','REAL','LOGICAL','DECIMAL']:
+					self.cursor.execute(f'UPDATE "{table_name}" SET {col_name} = 0')
+
+		# delete columns
+		for col_name in existing_columns:
+			if col_name not in table_fields:
+				drop_column_sql = f"ALTER TABLE {table_name} DROP COLUMN {col_name};"
+				self.cursor.execute(drop_column_sql)
 		self.db.commit()
 
 #---------------------------- LOGIC ----------------------------
@@ -193,26 +105,73 @@ class Database:
 		else:
 			return None
 
+#---------------------------- GET DATA ----------------------------
+
+	def get_meta(self, table):
+		self.cursor.execute(f'SELECT * FROM "{table}"')
+		return [col[0] for col in self.cursor.description]
+
+	def get_data(self, table, columns, row):
+		data = {}
+		for field, field_type in getattr(Meta, table).items():
+			if field in columns:
+				index = columns.index(field)
+				value = row[index]
+				if value is not None:
+					if field_type == "LOGICAL":
+						value = bool(value)
+					elif field_type == "DECIMAL":
+						value = float(value)
+					elif field_type == "INTEGER":
+						value = int(value)
+					elif field_type == "DATETIME":
+						value = self.string_to_date(value)
+					data[field] = value
+		return data
+
+	def get_objects(self, table):
+		class_name = table[:1].upper() + table[1:]
+		Class = globals()[class_name]
+		objects = []
+		full_data = []
+		columns = self.get_meta(table)
+		for row in self.cursor.fetchall():
+			data = self.get_data(table, columns, row)
+			params = list(inspect.signature(Class.__init__).parameters.keys())[1:]  # get constructer parameters to clear up data
+			data_trimmed = {key: data[key] for key in params if key in data}
+			obj = Class(self.app, **data_trimmed)
+			objects.append(obj)
+			full_data.append(data)
+		return objects, full_data
+
+#---------------------------- SET DATA ----------------------------
+
+	def update_table(self, name, contents):
+		fields = vars(contents)
+		data_fields = getattr(Meta, name)
+		formatted_fields = {key: str(value) for key, value in fields.items() if key in data_fields}
+		values = ', '.join([f"{key} = ?" for key in formatted_fields.keys()])
+		sql_query = f'UPDATE "{name}" SET {values} WHERE id = ?'
+		self.cursor.execute(sql_query, list(formatted_fields.values()) + [contents.id])
+		self.db.commit()
+
 #---------------------------- CHAT ----------------------------
 
 	def get_chats(self):
-		self.cursor.execute('SELECT * FROM chat')
-		for row in self.cursor.fetchall():
-			chat = Chat(self.app, int(row[0]), row[2], bool(row[3]), row[1])
-			if row[3]: # employee
-				chat.user.roles = row[4].split(',')
-				while ('' in chat.user.roles):
-   					chat.user.roles.remove("")
+		chats, full_data = self.get_objects('chat')
+		for chat, data in zip(chats, full_data):
+			if data['isEmployee']:
+				chat.user.roles = [role for role in data['roles'].split(',') if role.strip()]
 			else:
-				chat.user.payId = row[5]
-				chat.user.money_payed = float(row[6])
-				chat.user.orders_canceled = int(row[8])
-				chat.user.limit_date = self.string_to_date(row[9])
-				chat.last_access_date = self.string_to_date(row[7])
+				chat.user.payId = data['payId']
+				chat.user.money_payed = data['money_payed']
+				chat.user.orders_canceled = data['orders_canceled']
+				chat.user.limit_date = self.string_to_date(data['limit_date'])
+			chat.last_access_date = self.string_to_date(data['last_access_date'])
 			self.app.chats.append(chat)
 
 	def create_chat(self, chat):
-		self.cursor.execute('INSERT OR IGNORE INTO chat VALUES (?,?,"",0,"","",0,"",0,"")', (str(chat.user_id), date.today()))
+		self.cursor.execute('INSERT OR IGNORE INTO chat (user_id, created) VALUES (?, ?)', (str(chat.user_id), date.today()))
 		self.db.commit()
 		self.update_chat(chat)
 
@@ -222,7 +181,7 @@ class Database:
 		if chat.is_employee:
 			chat.user.roles.append('')
 			while ("" in chat.user.roles):
-   				chat.user.roles.remove("")
+				chat.user.roles.remove("")
 			values += 'roles = "' + ','.join(chat.user.roles) + '" '
 		else:
 			values += 'payId = "' + chat.user.payId + '", '
@@ -239,91 +198,72 @@ class Database:
 
 #---------------------------- ORDER ----------------------------
 
+
+	def get_chats(self):
+		chats, full_data = self.get_objects('chat')
+		for chat, data in zip(chats, full_data):
+			if data['isEmployee']:
+				chat.user.roles = [role for role in data['roles'].split(',') if role.strip()]
+			else:
+				chat.user.payId = data['payId']
+				chat.user.money_payed = data['money_payed']
+				chat.user.orders_canceled = data['orders_canceled']
+				chat.user.limit_date = self.string_to_date(data['limit_date'])
+			chat.last_access_date = self.string_to_date(data['last_access_date'])
+			self.app.chats.append(chat)
+
+
 	def get_orders(self):
-		self.cursor.execute('SELECT * FROM order_')
-		sql = self.cursor.fetchall()
-		orders = []
-		for line in sql:
-			order = Order(self.app, line[0])
-			order.name = line[1]
-			order.date = self.string_to_datetime(line[2])
-			order.user_id = int(line[3])
-			order.type = line[4]
-			order.physical_status = line[5]
-			order.logical_status = line[6]
-			order.assinged_designer_id = int(line[7])
-			order.priority = int(line[8])
-			order.quantity = int(line[9])
-			order.quality = line[10]
-			order.comment = line[11]
-			order.color_id = int(line[12])
-			order.support_remover = line[13]
-			order.sketches = ast.literal_eval(line[14])
-			order.model_file = line[15]
-			order.link = line[16]
-			order.design_time = line[17]
-			order.print_time = line[18]
-			order.plastic_type = line[19]
-			order.printer_type = line[20]
-			order.weight = int(line[21])
-			order.completion_date = self.string_to_date(line[22])
-			order.start_datetime = self.string_to_datetime(line[23])
-			order.support_time = int(line[24])
-			order.layer_hight = line[25]
-			order.price = int(line[26])
-			order.pay_code = 0 if line[27] == '' else int(line[27])
-			order.payed = line[28]
-			order.prepayment_percent = int(line[29])
-			order.booked = ast.literal_eval(line[30])
-			order.booked_time = int(line[31])
-			order.delivery_code = int(line[32])
-			order.delivery_user_id = int(line [33])
+		orders, full_data = self.get_objects('order')
+		for order, data in zip(orders, full_data):
+			order.name = data['name']
+			order.date = self.string_to_datetime(data['created'])
+			order.user_id = data['user_id']
+			order.type = data['type']
+			order.physical_status = data['physical_status']
+			order.logical_status = data['logical_status']
+			order.assigned_designer_id = data['assigned_designer_id']
+			order.priority = data['priority']
+			order.quantity = data['quantity']
+			order.quality = data['quality']
+			order.comment = data['comment']
+			order.color_id = data['color_id']
+			order.support_remover = data['support_remover']
+			order.sketches = ast.literal_eval(data['sketches'])
+			order.model_file = data['model_file']
+			order.link = data['link']
+			order.design_time = data['design_time']
+			order.print_time = data['print_time']
+			order.plastic_type = data['plastic_type']
+			order.printer_type = data['printer_type']
+			order.weight = data['weight']
+			order.completion_date = self.string_to_date(data['completion_date'])
+			order.start_datetime = self.string_to_datetime(data['start_datetime'])
+			order.support_time = data['support_time']
+			order.layer_height = data['layer_height']
+			order.price = data['price']
+			order.pay_code = data['pay_code']
+			order.payed = data['payed']
+			order.prepayment_percent = data['prepayment_percent']
+			order.booked = ast.literal_eval(data['booked'])
+			order.booked_time = data['booked_time']
+			order.delivery_code = data['delivery_code']
+			order.delivery_user_id = data['delivery_user_id']
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.cursor.execute('INSERT INTO order_ VALUES (?,"",?,0,"","","",0,0,0,"","",0,"","","","",0,0,"","",0,"","",0,0,0,0,0,0,"[]",0,0,0)', (order.id, order.date))
-		self.db.commit()
-		self.update_order(order)
+	    self.cursor.execute('INSERT INTO order (id, created) VALUES (?, ?)', (order.id, order.date))
+	    self.db.commit()
+	    self.update_order(order)
 
 	def update_order(self, order):
-		values = 'name = "' + order.name + '", '
-		values += 'user_id = "' + str(order.user_id) + '", '
-		values += 'type = "' + order.type + '", '
-		values += 'physical_status = "' + order.physical_status + '", '
-		values += 'logical_status = "' + order.logical_status + '", '
-		values += 'assinged_designer_id = "' + str(order.assinged_designer_id) + '", '
-		values += 'priority = "' + str(order.priority) + '", '
-		values += 'quantity = "' + str(order.quantity) + '", '
-		values += 'quality = "' + order.quality + '", '
-		values += 'comment = "' + order.comment + '", '
-		values += 'color_id = "' + str(order.color_id) + '", '
-		values += 'support_remover = "' + str(order.support_remover) + '", '
-		values += 'sketches = "' + str(order.sketches) + '", '
-		values += 'model_file = "' + order.model_file + '", '
-		values += 'link = "' + order.link + '", '
-		values += 'design_time = "' + str(order.design_time) + '", '
-		values += 'print_time = "' + str(order.print_time) + '", '
-		values += 'plastic_type = "' + order.plastic_type + '", '
-		values += 'printer_type = "' + order.printer_type + '", '
-		values += 'weight = "' + str(order.weight) + '", '
-		values += 'completion_date = "' + str(order.completion_date) + '", '
-		values += 'start_datetime = "' + str(order.start_datetime) + '", '
-		values += 'support_time = "' + str(order.support_time) + '", '
-		values += 'layer_hight = "' + str(order.layer_hight) + '", '
-		values += 'price = "' + str(order.price) + '", '
-		values += 'pay_code = "' + str(order.pay_code) + '", '
-		values += 'payed = "' + str(order.payed) + '", '
-		values += 'prepayment_percent = "' + str(order.prepayment_percent) + '", '
-		values += 'booked = "' + str(order.booked) + '", '
-		values += 'booked_time = "' + str(order.booked_time) + '", '
-		values += 'delivery_code = "' + str(order.delivery_code) + '", '
-		values += 'delivery_user_id = "' + str(order.delivery_user_id) + '" '
-		self.cursor.execute('UPDATE order_ SET ' + values + ' WHERE id = ' + str(order.id))
-		self.db.commit()
+		self.update_table('order', order)
 
 	def remove_order(self, order):
-		self.cursor.execute('DELETE FROM order_ WHERE id=?', (order.id,))
+		self.cursor.execute('DELETE FROM order WHERE id=?', (order.id,))
 		self.db.commit()
+
+
 
 	def get_gcodes(self):
 		self.cursor.execute('SELECT * FROM gcode')
