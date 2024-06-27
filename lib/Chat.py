@@ -4,11 +4,11 @@ from lib.Gui import Gui
 from datetime import date
 
 class Chat:
-    def __init__(self, app, user_id, user_name, is_employee, created):
+    def __init__(self, app, user_id, name, isEmployee, created):
         self.app = app
         self.user_id = user_id
-        self.user_name = user_name
-        self.is_employee = is_employee
+        self.user_name = name
+        self.is_employee = isEmployee
         self.created = created
         self.GUI = Gui(app, self, '-1')
         self.message = None

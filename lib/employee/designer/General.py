@@ -113,7 +113,7 @@ class General:
 		if order.comment:
 			text += f'\nКомментарий клиента: {order.comment}'
 		buttons = []
-		if order.assinged_designer_id:
+		if order.assigned_designer_id:
 			buttons.append(['Принять модель', 'accept'])
 			buttons.append(['Отказать','reject'])
 			if order.type == 'sketch':
@@ -235,7 +235,7 @@ class General:
 			self.order = None
 			self.show_top_menu()
 		elif data == 'take':
-			self.order.assinged_designer_id = self.chat.user_id
+			self.order.assigned_designer_id = self.chat.user_id
 			# self.order.logical_status = 'design'
 			self.app.db.update_order(self.order)
 			self.show_order()

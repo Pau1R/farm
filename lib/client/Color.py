@@ -112,12 +112,8 @@ class Client_color:
 		self.GUI.tell_photo_buttons(text, color.samplePhoto, buttons, buttons, 5, order_id)
 
 	def show_booked(self):
-		if self.order.is_free_start():
-			text = 'Заказ принят и помещен в очередь на печать'
-			self.order.physical_status = 'in_line'
-		else:
-			text = 'Цвет забронирован. Если в течении 30 минут не будет внесена предоплата, бронь отменится'
-		buttons = [['Хорошо','ok']]
+		text = 'Цвет забронирован. Если в течении 30 минут не будет внесена предоплата, бронь отменится'
+		buttons = [['Согласен','ok']]
 		self.GUI.tell_buttons(text, buttons, buttons, 6, 0)
 
 #---------------------------- PROCESS ----------------------------
@@ -179,6 +175,7 @@ class Client_color:
 					self.show_order_colors_ordered()
 					return
 			self.order.color_id = color_id
+			self.order.logical_status = 'parameters_set'
 			self.order.set_price()
 			self.app.db.update_order(self.order)
 			self.show_booked()

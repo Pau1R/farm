@@ -14,9 +14,7 @@ class Order_logic:
 		for order in self.orders:
 			if not order.is_prepayed() and order.booked:
 				if now > order.booked_time + 1800: # 30 minutes to prepay
-					order.remove_reserve()
-					chat = self.app.get_chat(order.user_id)
-					chat.user.order_GUI.show_booking_canceled(self)
+					order.booking_canceled()
 
 	def get_order_by_id(self, order_id):
 		for order in self.orders:
@@ -35,7 +33,7 @@ class Order_logic:
 			type_ = [type_]
 		orders_ = []
 		for order in orders:
-			designer = order.assinged_designer_id
+			designer = order.assigned_designer_id
 			if order.type in type_:
 				orders_.append(order)
 		return orders_
@@ -45,7 +43,7 @@ class Order_logic:
 			status = [status]
 		orders_ = []
 		for order in orders:
-			designer = order.assinged_designer_id
+			designer = order.assigned_designer_id
 			if order.logical_status in status:
 				orders_.append(order)
 		return orders_
@@ -53,7 +51,7 @@ class Order_logic:
 	def get_orders_by_user_id(self, orders, user_id):
 		orders_ = []
 		for order in orders:
-			designer = order.assinged_designer_id
+			designer = order.assigned_designer_id
 			if not user_id or not designer or designer == user_id:
 				orders_.append(order)
 		return orders_

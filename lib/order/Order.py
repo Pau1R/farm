@@ -1,4 +1,5 @@
-from datetime import timedelta, datetime, date, time
+from datetime import timedelta, datetime, date
+import time
 from lib.Gui import Gui
 import math
 import random
@@ -24,7 +25,7 @@ class Order:
 	#   - validate
 	# - bot:
 	#   - validated: prepayed
-	assinged_designer_id = 0 # not used yet
+	assigned_designer_id = 0 # not used yet
 	priority = 0
 
 	# user settings
@@ -48,7 +49,7 @@ class Order:
 	completion_date = None
 	start_datetime = None # date and time when order started printing
 	support_time = 0
-	layer_hight = 0.0
+	layer_height = 0.0
 
 	# payment, booking and delivery info
 	price = 0.0
@@ -152,10 +153,17 @@ class Order:
 			spool = self.spool_logic.get_spool(book[0])
 			if spool.booked >= book[1]:
 				spool.booked -= book[1]
+		self.booked = []
 		self.booked_time = 0
 		self.color_id = 0
 		self.completion_date = None
 		self.app.db.update_order(self)
+
+	def booking_canceled(self):
+		self.logical_status = 'validated'
+		self.remove_reserve()
+		chat = self.app.get_chat(self.user_id)
+		chat.user.order_GUI.show_booking_canceled(self)
 
 	def min_weight(self): # minimum weight of one spool
 		if self.weight < 300:
@@ -176,14 +184,35 @@ class Order:
 		return element.date
 
 	def set_completion_date(self):
-		self.completion_date = self.app.order_logic.get_completion_date(50, self.printer_type) # TODO
-		# self.completion_date = self.app.order_logic.get_completion_date(self.time, self.printer_type)
+		print_time = self.get_gcodes_duration()
+		if not print_time:
+			print_time = self.print_time
+		self.completion_date = self.app.order_logic.get_completion_date(print_time, self.printer_type)
 		self.app.db.update_order(self)
+
+	def get_gcodes(self):
+		gcodes = []
+		for gcode in self.app.gcodes:
+			if gcode.order_id == self.id:
+				gcodes.append(gcode)
+		return gcodes
+
+	def get_gcodes_duration(self):
+		time = 0
+		for gcode in self.get_gcodes():
+			time += gcode.duration
+		return time
 
 	def order_payed(self, amount):
 		self.payed += amount
 		if self.is_prepayed():
-			self.physical_status = 'in_line'
+			if self.type == 'sketch':
+				self.logical_status = 'waiting_for_design'
+			elif self.type == 'item':
+				self.logical_status = 'waiting_for_item'
+			else:
+				self.logical_status = ''
+				self.physical_status = 'in_line'
 			chat = self.app.get_chat(self.user_id)
 			chat.user.orders_canceled = 0
 			if self.status == 'in_pick-up' and self.delivery_user_id != 0:

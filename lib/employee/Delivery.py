@@ -64,9 +64,9 @@ class Delivery:
 	def show_top_menu(self):
 		text = f'Здравствуйте, {self.chat.user_name}. Выберите действие'
 		buttons = []
-		if self.app.order_logic.get_orders_by_status('in_pick-up', ''):
+		if self.app.order_logic.get_orders_by_status(self.app.orders, 'in_pick-up'):
 			buttons.append('Выдать заказ')
-		if self.app.order_logic.get_orders_by_status('waiting_for_item', ''):
+		if self.app.order_logic.get_orders_by_status(self.app.orders, 'waiting_for_item'):
 			buttons.append('Принять предмет')
 		if not buttons:
 			buttons.append('Обновить')

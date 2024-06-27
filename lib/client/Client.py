@@ -92,17 +92,21 @@ class Client:
 	def show_top_menu(self):
 		self.chat.context = 'secret_message~' + self.address + '|1||'
 		buttons = [['Сделать заказ', 'order'], ['Информация о студии', 'info']]
-		if len(self.get_orders(['validate', 'validated', 'prepayed'])) > 0:
+		if len(self.app.order_logic.get_client_orders(self.chat.user_id)):
 			buttons.insert(1, ['Мои заказы', 'orders'])
 		self.GUI.tell_buttons('Выберите действие', buttons, buttons, 1, 0)
 
 	def show_order_menu(self):
 		if self.is_limited():
+			self.last_data = ''
 			self.show_limited()
 			self.show_top_menu()
+			return
 		elif self.is_unprepaided_orders_limit_reached():
+			self.last_data = ''
 			self.show_unprepaided_orders_limit_reached()
 			self.show_top_menu()
+			return
 		buttons = []
 		# buttons.append(['Ввести артикул из каталога str3d.ru', 'farm model'])
 		buttons.append(['stl файл', 'stl'])
@@ -116,8 +120,8 @@ class Client:
 	def show_orders(self):
 		text = 'Мои заказы'
 		buttons = []
-		x = 1
-		orders = self.get_orders(['validate', 'validated', 'prepayed'])
+		# orders = self.get_orders(['prevalidate', 'validate', 'validated', 'prepayed', 'parameters_set', 'waiting_for_item', 'sample_aquired', 'waiting_for_design'])
+		orders = self.app.order_logic.get_client_orders(self.chat.user_id)
 		orders.sort(key=self.get_object_date)
 		for order in orders:
 			buttons.append([order.name, order.id])
@@ -134,12 +138,10 @@ class Client:
 		text = ' Оценка производится вручную, а дизайнер ценит свое время.'
 		self.GUI.tell(text)
 		time.sleep(5)
-		self.show_top_menu()
 
 	def show_unprepaided_orders_limit_reached(self):
 		self.GUI.tell('У вас 3 непредоплаченных заказа, больше нельзя =)')
 		time.sleep(5)
-		self.show_top_menu()
 
 	def show_wait_for_designer(self):
 		self.GUI.tell_permanent(f'Заказ "{self.order.name}" передан дизайнеру для оценки, ожидайте.')

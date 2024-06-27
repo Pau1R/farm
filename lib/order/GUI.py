@@ -88,6 +88,8 @@ class Order_GUI:
 			buttons.append(['Сменить статуc','status'])
 			if order.price:
 				buttons.append(['Изменить цену','price'])
+				buttons.append(['Изменить внесенную сумму', 'payed'])
+				buttons.append(['Изменить количество','quantity'])
 			if order.quantity:
 				buttons.append(['Изменить количество','quantity'])
 			if order.plastic_type:
@@ -114,19 +116,24 @@ class Order_GUI:
 							buttons.append(['Выбрать цвет', 'color'])
 				# Предоплата
 				elif logical == 'parameters_set':
-					buttons.append(['Внести предоплату', 'pay'])
-				elif physical in ['in_line','printing','finished','in_pick-up'] and not order.is_payed():
-					buttons.append(['Оплатить полностью', 'pay'])
+					if order.price == order.get_prepayment_price():
+						buttons.append(['Оплатить заказ', 'pay'])
+					else:
+						buttons.append(['Внести предоплату', 'pay'])
+				elif physical in ['in_line','printing','finished','in_pick-up'] and not order.is_payed() and order.is_prepayed():
+					buttons.append(['Оплатить оставшуюся часть', 'pay'])
 				# Отмена заказа
 				if (    (order.type in ['stl','link']    and physical in ['prepare','in_line']) or 
-					not (order.type in ['sketch','item'] and order.assinged_designer_id)):
+					not (order.type in ['sketch','item'] and order.assigned_designer_id)):
 					buttons.append('Отменить заказ')
 		buttons.append('Назад')
 
 		# show order and buttons
 		type_ = order.type
 		if type_ == 'stl':
-			self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
+			self.GUI.tell_document(order.model_file, '')
+			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
+			# self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 		elif type_ == 'link':
 			self.GUI.tell_link_buttons(order.link, text, buttons, buttons, 1, order.id)
 		elif type_ == 'sketch' or type_ == 'item':
@@ -151,17 +158,16 @@ class Order_GUI:
 		setting = self.app.settings.get
 		tell = self.GUI.tell
 
-		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру телефона, карточки или счета, указанных ниже. В комментарии обязательно укажите код заказа: '
-		text += str(order.pay_code)
+		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру карточки. Обязательно укажите код перевода в комментарии.\n\n'
+		text += f'Комментарий: {order.pay_code}\n'
+		text += f'Сумма перевода: {int(price)}\n'
+		text += f'Получатель перевода: {setting("transfer_receiver")}\n'
+		text += 'Номер карточки: ↓'
 		tell(text)
-		tell('Сумма перевода: ' + str(int(price)))
-		tell('Получатель перевода: ' + setting('transfer_receiver'))
-		tell(setting('phone_number'))
 		tell(setting('card_number'))
-		tell(setting('account_number'))
-		text = 'Для зачисления средств может понадобиться несколько минут.'
-		text += ' После зачисления средств вам прийдет уведомление о принятии заказа в работу.'
-		text += ' В случае если ваш перевод не привязался к заказу напишите в поддержку.'
+
+		text = 'После поступления средств вам прийдет уведомление.'
+		text += ' В случае если уведомление не пришло напишите в поддержку указав название заказа и сумму перевода.'
 		buttons = [['Предоплату сделал', 'prepayed']]
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 3, order.id)
@@ -347,12 +353,12 @@ class Order_GUI:
 			text += f'Цвет изделия: {color.lower()}\n'
 		if order.completion_date:
 			date = self.app.functions.russian_date(order.completion_date)
-			text += f'Дата готовности (примерно): {date}'
+			text += f'Дата готовности (примерно): {date}\n'
 		if order.support_time:
 			text += f"Удаление поддержек: {'клиент' if order.support_remover == 'Клиент' else 'студия'}\n"
 		if order.payed:
 			if not free_start and not prepayed:
-				text += f'Предоплачено: {int(order.payed)}/{int(prepay_price)} рублей'
+				text += f'Предоплачено: {int(order.payed)}/{int(order.get_prepayment_price())} рублей'
 			else:
 				text += f'Предоплачено: {int(order.payed)} рублей'
 		return text

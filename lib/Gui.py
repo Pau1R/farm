@@ -170,7 +170,7 @@ class Gui:
 				# count button text length
 				button_length = len(str(button_text))
 
-				# if at least one button is greater than the limit for each coloumn size then lower coloumn amount
+				# if at least one button is greater than the limit for each column size then lower column amount
 				if max_row_buttons == 6 and button_length > 4:
 					max_row_buttons -= 1
 				if max_row_buttons == 5 and button_length > 6:

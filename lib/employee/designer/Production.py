@@ -67,7 +67,7 @@ class Production:
 			text += f'\nКомментарий клиента: {self.order.comment}'
 		text += f'\nДополнительная информация: {self.order.quality}'
 		buttons = []
-		if self.order.assinged_designer_id:
+		if self.order.assigned_designer_id:
 			buttons.append(['Перевести в чат', 'chat'])
 			buttons.append(['Отказать','reject'])
 		else:
@@ -96,7 +96,7 @@ class Production:
 			self.order = None
 			self.show_top_menu()
 		elif self.message.btn_data == 'take':
-			self.order.assinged_designer_id = self.chat.user_id
+			self.order.assigned_designer_id = self.chat.user_id
 			self.app.db.update_order(self.order)
 			self.show_order()
 		elif self.message.btn_data == 'chat':
