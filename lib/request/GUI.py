@@ -1,16 +1,9 @@
 import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
+from lib.request.Logic import Request_logic
 
 class RequestGUI:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	request = None
-	# request_logic = None
-	
 	last_data = ''
 
 	def __init__(self, app, chat, address):
@@ -18,7 +11,8 @@ class RequestGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		# self.request_logic = app.request_logic
+		self.request = None
+		self.request_logic = Request_logic(app)
 
 	def first_message(self, message):
 		self.show_top_menu()

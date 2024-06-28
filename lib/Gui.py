@@ -3,12 +3,9 @@ from telebot import types as tbot
 from lib.Msg import Message
 
 class Gui:
-	messages = []
-	app = None
-	chat = None
-	address = ''
 
 	def __init__(self, app, chat, address):
+		self.messages = []
 		self.app = app
 		self.chat = chat
 		self.address = address

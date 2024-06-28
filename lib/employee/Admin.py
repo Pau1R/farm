@@ -2,7 +2,6 @@ import sys
 sys.path.append('../lib')
 # from lib.Msg import Message
 from lib.Gui import Gui
-from lib.Texts import Texts
 from lib.equipment.Equipment import Equipment
 from lib.equipment.container.GUI import ContainerGUI
 from lib.equipment.dryer.GUI import DryerGUI
@@ -18,34 +17,14 @@ from lib.order.GUI import Order_GUI
 from lib.request.GUI import RequestGUI
 
 class Admin:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	message = None
 	last_data = ''
-	texts = None
-
-	containerGUI = None
-	dryerGUI = None
-	extruderGUI = None
-	locationGUI = None
-	printer_typeGUI = None
-	printerGUI = None
-	spoolGUI = None
-	colorGUI = None
-	surfaceGUI = None
-	settingsGUI = None
-
-	requestGUI = None
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.message = None
 		self.address = address
 		self.GUI = Gui(app, chat, address)
-		self.texts = Texts(chat, address)
 
 		self.containerGUI = ContainerGUI(app, chat, address + '/1')
 		self.dryerGUI = DryerGUI(app, chat, address + '/2')
@@ -128,7 +107,7 @@ class Admin:
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
 
 	def show_equipment(self):
-		buttons = self.texts.admin_equipment.copy()
+		buttons = ['Локации', 'Типы принтеров', 'Принтеры', 'Экструдеры', 'Поверхности', 'Сушилки', 'Катушки', 'Цвета', 'Ящики']
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите оборудование', buttons, ['Назад'], 3, 0)
 

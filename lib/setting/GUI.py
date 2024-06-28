@@ -3,17 +3,7 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 
 class SettingsGUI:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-
 	last_data = ''
-
-	name = ''
-	value = ''
-
 	context = ''
 
 	def __init__(self, app, chat, address):
@@ -21,6 +11,8 @@ class SettingsGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
+		self.name = ''
+		self.value = ''
 
 	def first_message(self, message):
 		self.show_top_menu()

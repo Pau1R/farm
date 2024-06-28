@@ -10,27 +10,14 @@ from telebot import types as tbot
 class Employee:
 	address = '1'
 
-	app = None
-	chat = None
-	GUI = None
-
-	messages = []
-	message = None
-	roles = []
-	date = None
-	active = True
-	
 	last_data = ''
-
-	owner = None
-	admin = None
-	operator = None
-	designer = None
-	delivery = None
 
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
+		self.messages = []
+		self.message = None
+		self.roles = []
 		self.GUI = Gui(app, chat, self.address)
 		self.owner = Owner(app, chat, self.address + '/1')
 		self.admin = Admin(app, chat, self.address + '/2')

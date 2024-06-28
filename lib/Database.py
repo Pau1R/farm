@@ -24,27 +24,23 @@ import time
 import ast
 
 class Database:
-	app = None
-	meta = None
-
-	db = None
-	cursor = None
-
-	appRoot = os.getcwd()
-	# appRoot = '/farm'
-	dbPath = appRoot + '/farm.db'
 
 	def __init__(self, app):
 		self.app = app
 		self.meta = Meta()
+		self.db = None
+		self.cursor = None
 
 		self.connect()
 		self.edit_database()
 
 	def connect(self):
-		if not os.path.exists(self.appRoot):
+		appRoot = os.getcwd()
+		# appRoot = '/farm'
+		dbPath = appRoot + '/farm.db'
+		if not os.path.exists(appRoot):
 			os.mkdir(self.appRoot)
-		self.db = sqlite3.connect(self.dbPath, check_same_thread=False)
+		self.db = sqlite3.connect(dbPath, check_same_thread=False)
 		self.cursor = self.db.cursor()
 
 #---------------------------- METADATA EDIT ----------------------------

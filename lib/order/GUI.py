@@ -7,21 +7,7 @@ import time
 import random
 
 class Order_GUI:
-	address = ''
-	
-	app = None
-	chat = None
-	message = None
-	order = None
-	order_waiting = None
-	GUI = None
-	context = ''
-	color = None
 	last_data = ''
-
-	order = None
-
-	client_color = None
 
 	def __init__(self, app, chat, address):
 		self.app = app
@@ -29,6 +15,10 @@ class Order_GUI:
 		self.address = address
 		self.GUI = Gui(app, chat, address)
 		self.client_color = Client_color(app, chat, address + '/1')
+		self.message = None
+		self.order = None
+		self.order_waiting = None
+		self.color = None
 
 	def first_message(self, message):
 		self.message = message

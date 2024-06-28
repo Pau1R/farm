@@ -4,20 +4,12 @@ from lib.Gui import Gui
 from lib.client.place_order.GUI.General import General_parameters
 
 class Stl_link:
-	address = ''
-
-	app = None
-	chat = None
-	order = None
-	GUI = None
-
-	general_parameters = None
-
 	supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.order = None
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.general_parameters = General_parameters(app, chat, address + '/1')

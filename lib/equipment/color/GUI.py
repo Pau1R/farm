@@ -2,20 +2,10 @@ import numpy
 import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
-from lib.Texts import Texts
 from datetime import date
 import time
 
 class ColorGUI:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	texts = None
-	colors = None
-	color = None
-
 	last_data = ''
 
 	name = ''
@@ -27,8 +17,8 @@ class ColorGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(chat, self.address) 
 		self.colors = app.equipment.colors
+		self.color = None
 
 	def first_message(self, message):
 		self.show_top_menu()

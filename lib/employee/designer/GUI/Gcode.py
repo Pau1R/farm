@@ -4,25 +4,18 @@ from lib.Gui import Gui
 from lib.order.gcode.Gcode import Gcode
 
 class Gcode_gui:
-	address = ''
-
-	app = None
-	chat = None
-	parent = None
-	GUI = None
-	message = None
 	last_data = ''
-	order = None
-
-	gcode = None
-	gcodes = []
 
 	def __init__(self, app, chat, address, parent):
 		self.app = app
 		self.chat = chat
+		self.order = None
+		self.message = None
 		self.address = address
 		self.parent = parent
 		self.GUI = Gui(app, chat, address)
+		self.gcode = None
+		self.gcodes = []
 
 	def first_message(self, message):
 		self.gcodes = []

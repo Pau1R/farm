@@ -4,20 +4,12 @@ from lib.Gui import Gui
 from lib.client.place_order.GUI.General import General_parameters
 
 class Sketch_item:
-	address = ''
-
-	app = None
-	chat = None
-	order = None
-	GUI = None
-
 	last_data = ''
-
-	general_parameters = None
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.order = None
 		self.address = address
 		self.GUI = Gui(app, chat, address)
 		self.general_parameters = General_parameters(app, chat, address + '/1')

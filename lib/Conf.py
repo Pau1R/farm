@@ -2,16 +2,17 @@ import configparser
 import os
 
 class Conf:
-	bot_token = ''
-	roles = {
-		'owner': 'Владелец',
-		'admin': 'Администратор',
-		'operator': 'Оператор',
-		'designer': 'Дизайнер',
-		'issue': 'Выдача'
-	}
 
 	def __init__(self):
+		bot_token = ''
+		roles = {
+			'owner': 'Владелец',
+			'admin': 'Администратор',
+			'operator': 'Оператор',
+			'designer': 'Дизайнер',
+			'issue': 'Выдача'
+		}
+		
 		config = configparser.ConfigParser()
 		config.read("config.ini")
 

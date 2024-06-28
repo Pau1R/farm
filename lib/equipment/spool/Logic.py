@@ -1,9 +1,6 @@
 from datetime import date
 
 class Spool_logic:
-	app = None
-	spools = []
-	color_logic = None
 
 	def __init__(self, app):
 		self.app = app
@@ -48,7 +45,7 @@ class Spool_logic:
 		return weight
 
 	def filament_available(self, statuses, type_, color_id, all_weight, one_copy_weight):
-		spools = sorted(self.spools.copy(), key=lambda item: item.date)
+		spools = sorted(self.spools.copy(), key=lambda item: item.created)
 		selected_spools = []
 		small_spools = {}
 		weight = 0

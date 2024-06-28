@@ -4,19 +4,13 @@ from lib.Gui import Gui
 from datetime import datetime
 
 class General_parameters:
-	address = ''
-
-	app = None
-	chat = None
-	order = None
-	GUI = None
-
 	last_data = ''
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
 		self.address = address
+		self.order = None
 		self.GUI = Gui(app, chat, address)
 
 	def first_message(self, message):

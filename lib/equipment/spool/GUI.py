@@ -7,14 +7,6 @@ from datetime import date
 from datetime import timedelta
 
 class SpoolGUI:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	spool = None
-	texts = None
-
 	last_data = ''
 
 	quantity = 1
@@ -36,6 +28,7 @@ class SpoolGUI:
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.texts = Texts(chat, self.address)
+		self.spool = None
 
 	def first_message(self, message):
 		self.show_top_menu()

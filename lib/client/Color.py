@@ -5,24 +5,16 @@ from lib.Gui import Gui
 import time
 
 class Client_color:
-	address = ''
-	
-	app = None
-	chat = None
-	message = None
-	order = None
-	GUI = None
 	colors = {}
 
 	last_data = ''
 	pending = False
 
-	spool_logic = None
-	color_logic = None
-
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.message = None
+		self.order = None
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 		self.spool_logic = app.equipment.spool_logic

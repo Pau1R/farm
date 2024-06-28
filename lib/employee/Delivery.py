@@ -3,17 +3,9 @@ import time
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.Texts import Texts
 
 class Delivery:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	message = None
 	last_data = ''
-	texts = None
 
 	order = ''
 	price = 0
@@ -22,9 +14,9 @@ class Delivery:
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.message = None
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(chat, self.address)
 
 	def first_message(self, message):
 		self.show_top_menu()

@@ -18,30 +18,13 @@ from lib.Functions import Functions
 from lib.Test import Test
 
 class App:
-	bot = None
-	conf = None
-	db = None
-	equipment = None
-	setting = None
-	functions = Functions()
-	clicker = None
-
 	chats = []
-	chat = None
-	count = 0
-	last_check_date = None
-
-	orders = []
-	order_logic = None
-	gcodes = []
-	gcode_logic = None
-	
-	printer_logic = None
-
-	requests = []
-	request_logic = None
 
 	def __init__(self, bot, conf):
+		self.orders = []
+		self.gcodes = []
+		self.requests = []
+		
 		self.bot = bot
 		self.conf = conf
 		self.equipment = Equipment()
@@ -56,6 +39,7 @@ class App:
 		self.clicker = Clicker(self)
 		self.printer_logic = Printer_logic(self)
 		self.request_logic = Request_logic(self)
+		self.functions = Functions()
 		
 		# test = Test(self)
 
@@ -146,3 +130,4 @@ class App:
 # - refine order statuses movement
 # - admin: view all orders, clients (their name) and client orders, tell info to client
 # - rewrite classe to include all fields in init function
+# - remove old context usage from setting.gui

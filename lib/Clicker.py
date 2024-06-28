@@ -2,18 +2,18 @@ import time
 from datetime import date
 
 class Clicker:
-	app = None
-	now = int(time.time())
-	sec2 = 0
-	sec15 = 0
-	sec30 = 0
-	min1 = 0
-	min5 = 0
-	hour1 = 0
-	day1 = 0
 	
 	def __init__(self, app):
 		self.app = app
+		self.now = int(time.time())
+		self.sec2 = 0
+		self.sec15 = 0
+		self.sec30 = 0
+		self.min1 = 0
+		self.min5 = 0
+		self.hour1 = 0
+		self.day1 = 0
+
 
 	def click(self):
 		now = int(time.time())

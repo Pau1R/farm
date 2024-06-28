@@ -1,18 +1,16 @@
 class Setting:
-	app = None
-
-	settings = {}
-	names = ['support_remove_price',
-		'prepayment_percent',
-		'prepayment_free_max',
-		'phone_number',
-		'card_number', 
-		'account_number',
-		'transfer_receiver',
-		'plastic_types',
-		'basic_plastic_types']
 
 	def __init__(self, app):
+		self.names = ['support_remove_price',
+			'prepayment_percent',
+			'prepayment_free_max',
+			'phone_number',
+			'card_number', 
+			'account_number',
+			'transfer_receiver',
+			'plastic_types',
+			'basic_plastic_types']
+		
 		self.app = app
 		settings = self.app.db.get_settings()
 		for name in self.names:

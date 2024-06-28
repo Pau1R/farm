@@ -1,8 +1,5 @@
 
 class Gcode_logic:
-	app = None
-	orders = None
-	gcodes = None
 
 	def __init__(self, app):
 		self.app = app

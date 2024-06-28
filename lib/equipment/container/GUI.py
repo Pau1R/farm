@@ -3,13 +3,6 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 
 class ContainerGUI:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	container = None
-
 	last_data = ''
 
 	types = ['Сухой', 'Обычный']
@@ -21,6 +14,7 @@ class ContainerGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
+		self.container = None
 
 	def first_message(self, message):
 		self.show_top_menu()

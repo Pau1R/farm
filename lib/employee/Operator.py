@@ -4,17 +4,12 @@ from lib.Msg import Message
 from lib.Gui import Gui
 
 class Operator:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	message = None
 	last_data = ''
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.message = None
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 

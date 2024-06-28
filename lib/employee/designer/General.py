@@ -6,18 +6,11 @@ from lib.order.gcode.Gcode import Gcode
 from lib.employee.designer.GUI.Gcode import Gcode_gui
 
 class General:
-	address = ''
-	
 	type = ''
 	status = ''
 	
-	app = None
-	chat = None
-	GUI = None
-	message = None
 	last_data = ''
 
-	order = None
 	order_timer = ''
 
 	weight = 1
@@ -36,6 +29,8 @@ class General:
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.order = None
+		self.message = None
 		self.address = address
 		self.GUI = Gui(app, chat, address)
 		self.gcode_gui = Gcode_gui(app, chat, address + '/1', self)

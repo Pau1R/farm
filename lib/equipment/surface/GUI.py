@@ -2,17 +2,8 @@ import numpy
 import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
-from lib.Texts import Texts
 
 class SurfaceGUI:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	surface = None
-	texts = None
-	
 	context = ''
 	last_data = ''
 
@@ -23,7 +14,7 @@ class SurfaceGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(chat, '1/2/1')
+		self.surface = None
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -67,7 +58,8 @@ class SurfaceGUI:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
 	def show_add_new_surface(self):
-		self.GUI.tell_buttons('Выберите тип поверхности', self.texts.surface_types.copy(), [], 3, 0)
+		buttons = ['PEI', 'Стекло']
+		self.GUI.tell_buttons('Выберите тип поверхности', buttons, [], 3, 0)
 
 	def show_add_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить добавление']

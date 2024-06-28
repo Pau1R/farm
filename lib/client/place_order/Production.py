@@ -5,13 +5,6 @@ from lib.Msg import Message
 from lib.Gui import Gui
 
 class Production:
-	address = ''
-
-	app = None
-	chat = None
-	order = None
-	GUI = None
-
 	need_design = False
 	weight = 0
 	plastic_type = ''
@@ -22,6 +15,7 @@ class Production:
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.order = None
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
 

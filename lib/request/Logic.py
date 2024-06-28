@@ -1,9 +1,7 @@
 from lib.request.Request import Request
 
 class Request_logic:
-	app = None
-	requests = []
-	
+
 	def __init__(self, app):
 		self.app = app
 		self.requests = app.requests
@@ -29,5 +27,5 @@ class Request_logic:
 		self.app.db.remove_request(request)
 
 	def get_object_date(self, element):
-		return element.date
+		return element.created
 		

@@ -3,13 +3,6 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 
 class DryerGUI:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	dryer = None
-
 	last_data = ''
 
 	name = ''
@@ -23,6 +16,7 @@ class DryerGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
+		self.dryer = None
 
 	def first_message(self, message):
 		self.show_top_menu()

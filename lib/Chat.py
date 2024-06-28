@@ -4,6 +4,7 @@ from lib.Gui import Gui
 from datetime import date
 
 class Chat:
+    
     def __init__(self, app, user_id, name, isEmployee, created):
         self.app = app
         self.user_id = user_id

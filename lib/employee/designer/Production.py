@@ -6,19 +6,13 @@ from lib.order.Order import Order
 from lib.Texts import Texts
 
 class Production:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	message = None
 	last_data = ''
 
-	order = None
-	
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.order = None
+		self.message = None
 		self.address = address
 		self.GUI = Gui(app, chat, address)
 

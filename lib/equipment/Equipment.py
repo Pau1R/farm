@@ -12,33 +12,32 @@ from lib.equipment.surface.Surface import Surface
 from datetime import date
 
 class Equipment:
-	app = None
-	db = None
-
-	containers = []
-	dryers = []
-	extruders = []
-	locations = []
-	printer_types = []
-	printers = []
-	spools = []
-	spool_logic = None
-	color_logic = None
-	colors = []
-	surfaces = []
-
-	container = None
-	dryer = None
-	extruder = None
-	location = None
-	printer = None
-	spool = None
-	color = None
-	surface = None
 
 	def init(self, app, db):
 		self.app = app
 		self.db = db
+		
+		self.containers = []
+		self.dryers = []
+		self.extruders = []
+		self.locations = []
+		self.printer_types = []
+		self.printers = []
+		self.spools = []
+		self.spool_logic = None
+		self.color_logic = None
+		self.colors = []
+		self.surfaces = []
+
+		self.container = None
+		self.dryer = None
+		self.extruder = None
+		self.location = None
+		self.printer = None
+		self.spool = None
+		self.color = None
+		self.surface = None
+
 		self.db.get_containers()
 		self.db.get_dryers()
 		self.db.get_extruders()

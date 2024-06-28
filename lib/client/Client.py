@@ -17,20 +17,8 @@ from lib.client.place_order.Production import Production
 class Client:
 	address = '1'
 
-	app = None
-	chat = None
-	order = None
-	name = ''
-
-	GUI = None
-	message = None
-
 	last_data = ''
 	
-	menu = None
-	stl_link = None
-	order_GUI = None
-
 	payId = ''
 	money_payed = 0.0
 	orders_canceled = 0
@@ -39,6 +27,8 @@ class Client:
 	def __init__(self, app, chat):
 		self.app = app
 		self.chat = chat
+		self.message = None
+		self.order = None
 		self.GUI = Gui(app, chat, self.address)
 		self.reset_order()
 
@@ -220,7 +210,7 @@ class Client:
 		return orders
 
 	def get_object_date(self, object):
-		return object.date
+		return object.created
 
 	def penalty(self):
 		self.orders_canceled += 1

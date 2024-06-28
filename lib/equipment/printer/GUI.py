@@ -4,12 +4,6 @@ sys.path.append('../lib')
 from lib.Gui import Gui
 
 class PrinterGUI:
-	address = ''
-	app = None
-	chat = None
-	GUI = None
-	printer = None
-
 	context = ''
 	last_data = ''
 
@@ -21,6 +15,7 @@ class PrinterGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
+		self.printer = None
 
 	def first_message(self, message):
 		self.show_top_menu()

@@ -3,7 +3,6 @@ from datetime import time as date_time
 import time
 
 class Order_logic:
-	app = None
 
 	def __init__(self, app):
 		self.app = app

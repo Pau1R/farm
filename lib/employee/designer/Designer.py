@@ -3,34 +3,20 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
-from lib.Texts import Texts
 from lib.employee.designer.General import General
 from lib.employee.designer.Production import Production
 import ast
 
 class Designer:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	texts = None
-	message = None
-
-	orders = []
-	
 	last_data = ''
-
-	general = None
-	production = None
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.message = None
 		self.address = address
 		self.orders = app.orders
 		self.GUI = Gui(app, chat, address)
-		self.texts = Texts(chat, address)
 
 		self.general = General(app, chat, address + '/1')
 		self.production = Production(app, chat, address + '/2')

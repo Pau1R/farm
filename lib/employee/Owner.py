@@ -3,27 +3,19 @@ import sys
 sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
-from lib.Texts import Texts
 
 class Owner:
-	address = ''
-
-	app = None
-	chat = None
-	GUI = None
-	message = None
 	last_data = ''
 	employees = []
 	employee = None
 	new_employee_id = ''
-	texts = None
 
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
+		self.message = None
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.texts = Texts(chat, self.address)
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -80,13 +72,18 @@ class Owner:
 #---------------------------- SHOW EMPLOYEES ----------------------------
 
 	def show_employees(self):
+		text = """
+Сотрудники
+
+(Для добавления сотрудника ему нужно отправить в бот сообщение: я_хочу_стать_сотрудником.
+После этого нужно принять запрос и назначить ему необходимые роли.)"""
 		buttons = []
 		for chat in self.app.chats:
 			if chat.is_employee:
 				self.employees.append(chat)
 				buttons.append([chat.user_name, chat.user_id])
 		buttons.append('Назад')
-		self.GUI.tell_buttons(self.texts.owner_employee_menu, buttons, ['Назад'], 5, 0)
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 5, 0)
 
 	def show_employee(self):
 		if self.employee == None:

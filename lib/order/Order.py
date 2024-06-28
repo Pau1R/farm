@@ -1,72 +1,64 @@
 from datetime import timedelta, datetime, date
 import time
-from lib.Gui import Gui
 import math
 import random
 
 class Order:
-	app = None
-	GUI = None
-	spool_logic = None
 
-	# order attributes:
-	id = 1
-	name = ''
-	created = None
-	user_id = 1
-	type = ''
-	physical_status = '' # preparing, in_line, printing, printed
-	logical_status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
-	# who can change order status to another:
-	# - client:
-	#   - creating: validate
-	#   - validated
-	# - designer:
-	#   - validate
-	# - bot:
-	#   - validated: prepayed
-	assigned_designer_id = 0 # not used yet
-	priority = 0
-
-	# user settings
-	quantity = 1
-	quality = ''
-	comment = ''
-	color_id = 0
-	support_remover = ''
-
-	# files
-	sketches = []
-	model_file = ''
-	link = ''
-
-	# evaluation data and process
-	design_time = 0
-	print_time = 0
-	plastic_type = ''
-	printer_type = ''
-	weight = 0
-	completion_date = None
-	start_datetime = None # date and time when order started printing
-	support_time = 0
-	layer_height = 0.0
-
-	# payment, booking and delivery info
-	price = 0.0
-	pay_code = 0
-	payed = 0.0
-	prepayment_percent = 0
-	booked = []
-	booked_time = 0
-	delivery_code = 0
-	delivery_user_id = 0
-	
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
 		self.created = datetime.today()
 		self.spools = self.app.equipment.spools
 		self.spool_logic = self.app.equipment.spool_logic
+		self.name = ''
+		self.user_id = 1
+		self.type = ''
+		self.physical_status = '' # preparing, in_line, printing, printed
+		self.logical_status = 'creating' # client: creating, validate, validated, rejected, prepayed, printed, at_delivery, no_spools, in_pick-up, issued, client_refused
+		# who can change order status to another:
+		# - client:
+		#   - creating: validate
+		#   - validated
+		# - designer:
+		#   - validate
+		# - bot:
+		#   - validated: prepayed
+		self.assigned_designer_id = 0 # not used yet
+		self.priority = 0
+
+		# user settings
+		self.quantity = 1
+		self.quality = ''
+		self.comment = ''
+		self.color_id = 0
+		self.support_remover = ''
+
+		# files
+		self.sketches = []
+		self.model_file = ''
+		self.link = ''
+
+		# evaluation data and process
+		self.design_time = 0
+		self.print_time = 0
+		self.plastic_type = ''
+		self.printer_type = ''
+		self.weight = 0
+		self.completion_date = None
+		self.start_datetime = None # date and time when order started printing
+		self.support_time = 0
+		self.layer_height = 0.0
+
+		# payment, booking and delivery info
+		self.price = 0.0
+		self.pay_code = 0
+		self.payed = 0.0
+		self.prepayment_percent = 0
+		self.booked = []
+		self.booked_time = 0
+		self.delivery_code = 0
+		self.delivery_user_id = 0
 
 	def set_price(self):
 		if not self.prepayment_percent:

@@ -1,7 +1,5 @@
 class Color_logic:
-	app = None
-	colors = []
-
+	
 	def __init__(self, app):
 		self.app = app
 		self.colors = app.equipment.colors
