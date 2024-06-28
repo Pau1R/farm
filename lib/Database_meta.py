@@ -44,7 +44,7 @@ class Meta:
         "id": "INTEGER PRIMARY KEY", 
         "created": "DATETIME DEFAULT ''",
         "name": "TEXT DEFAULT ''",
-        "type": "TEXT DEFAULT ''"}
+        "type_": "TEXT DEFAULT ''"}
     spool = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
@@ -119,5 +119,5 @@ class Meta:
     request = {
         "id": "INTEGER PRIMARY KEY",
         "user_id": "INTEGER DEFAULT 0",
-        "date": "DATETIME DEFAULT ''",
+        "created": "DATETIME DEFAULT ''",
         "text": "TEXT DEFAULT ''"}

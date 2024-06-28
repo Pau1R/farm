@@ -64,7 +64,7 @@ class ExtruderGUI:
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_extruder(self):
-		text = f'номер экструдера: {self.extruder.id}\nдата добавления: {self.extruder.date}\nназвание: {self.extruder.name}\n'
+		text = f'номер экструдера: {self.extruder.id}\nдата добавления: {self.extruder.created}\nназвание: {self.extruder.name}\n'
 		text += f'максимальная температура: {self.extruder.maxTemp}\n'
 		text += f'диаметр сопла: {self.extruder.nozzleDiameter}'
 		buttons = ['Удалить', 'Назад']
@@ -92,7 +92,7 @@ class ExtruderGUI:
 
 	def show_delete_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить удаление']
-		self.GUI.tell_buttons('Подтвердите удаление ящика', buttons, buttons, 7, 0)
+		self.GUI.tell_buttons('Подтвердите удаление экструдера', buttons, buttons, 7, 0)
 
 #---------------------------- PROCESS ----------------------------
 

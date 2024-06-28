@@ -120,7 +120,7 @@ class SpoolGUI:
 		if not self.spool.status == 'ordered':
 			text += f'Сухая: {self.spool.dried}\n'
 		text += f'Магазин/бренд: {self.spool.brand}\n'
-		text += f'Дата добавления: {self.app.functions.russian_date(self.spool.date)}\n'
+		text += f'Дата добавления: {self.app.functions.russian_date(self.spool.created)}\n'
 		if self.spool.status == 'ordered':
 			date = self.app.functions.russian_date(self.spool.delivery_date_estimate)
 			text += f'Дата поставки: {date}\n'
@@ -313,7 +313,6 @@ class SpoolGUI:
 		self.diameter = 0.0
 		self.weight = 0
 		self.density = 0.0
-		self.date = date.today()
 		self.delivery_date_estimate = None
 		self.status = ''
 

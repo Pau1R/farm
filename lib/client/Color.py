@@ -74,7 +74,7 @@ class Client_color:
 
 	def show_colors(self):
 		buttons = self.spool_logic.get_all_buttons('stock')
-		types = self.app.settings.get('plastic_types').split(',')
+		types = self.app.setting.get('plastic_types').split(',')
 		if self.spool_logic.is_ordered(types, 1, 1):
 			buttons.append(['Ожидающие поставки', 'ordered'])
 		buttons.append('Назад')

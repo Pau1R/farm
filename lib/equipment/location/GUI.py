@@ -59,7 +59,7 @@ class LocationGUI:
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_location(self):
-		text = f'номер локации: {self.location.id}\nдата добавления: {self.location.date}\n'
+		text = f'номер локации: {self.location.id}\nдата добавления: {self.location.created}\n'
 		text += f'название: {self.location.name}\nтип: {self.location.type}\n'
 		buttons = ['Удалить', 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)

@@ -13,7 +13,7 @@ from lib.equipment.printer.GUI import PrinterGUI
 from lib.equipment.spool.GUI import SpoolGUI
 from lib.equipment.color.GUI import ColorGUI
 from lib.equipment.surface.GUI import SurfaceGUI
-from lib.settings.GUI import SettingsGUI
+from lib.setting.GUI import SettingsGUI
 from lib.order.GUI import Order_GUI
 from lib.request.GUI import RequestGUI
 

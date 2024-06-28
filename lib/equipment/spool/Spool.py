@@ -4,7 +4,7 @@ class Spool:
 	app = None
 
 	id = 1
-	date: date
+	created: date
 	type = ''
 	diameter = 0.0
 	weight = 0
@@ -21,7 +21,8 @@ class Spool:
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
-		self.date = date.today()
+		self.created = date.today()
+		self.booked = 0
 
 	def available_weight(self):
 		return self.weight - self.used

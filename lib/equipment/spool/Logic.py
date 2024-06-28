@@ -192,7 +192,7 @@ class Spool_logic:
 			val = [val]
 		if 'basic' in val:
 			val.remove('basic')
-			val.extend(self.app.settings.get('basic_plastic_types').split(','))
+			val.extend(self.app.setting.get('basic_plastic_types').split(','))
 		return list(set(val)) # remove duplicates
 
 	def get_colors(self, types):

@@ -4,10 +4,10 @@ class Surface:
 	app = None
 
 	id = 1
-	date: date
+	created: date
 	type = ''
 
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
-		self.date = date.today()
+		self.created = date.today()

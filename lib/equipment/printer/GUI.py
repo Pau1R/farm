@@ -60,7 +60,7 @@ class PrinterGUI:
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_printer(self):
-		text = f'номер принтера: {self.printer.id}\nдата добавления: {self.printer.date}\n'
+		text = f'номер принтера: {self.printer.id}\nдата добавления: {self.printer.created}\n'
 		text += f'название: {self.printer.name}\nтип: {self.printer.type_}'
 		buttons = ['Удалить', 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
@@ -89,6 +89,7 @@ class PrinterGUI:
 		if self.message.btn_data == 'Добавить':
 			self.show_add_type()
 		elif self.message.btn_data == 'Назад':
+			self.app.chat.user.admin.last_data = ''
 			self.app.chat.user.admin.show_equipment()
 		else:
 			for printer in self.app.equipment.printers:

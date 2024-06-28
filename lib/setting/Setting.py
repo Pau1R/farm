@@ -1,4 +1,4 @@
-class Settings:
+class Setting:
 	app = None
 
 	settings = {}

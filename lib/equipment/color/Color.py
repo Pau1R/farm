@@ -4,7 +4,7 @@ class Color:
 	app = None
 
 	id = 0
-	date: date
+	created: date
 	name = ''
 	parent_id = 0
 	samplePhoto = ''
@@ -12,7 +12,7 @@ class Color:
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
-		self.date = date.today()
+		self.created = date.today()
 
 	def get_name(self):
 		if self.parent_id == 0:

@@ -4,11 +4,11 @@ class Container:
 	app = None
 	
 	id = 1
-	date: date
+	created: date
 	type = ''
 	capacity = 0
 
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
-		self.date = date.today()
+		self.created = date.today()

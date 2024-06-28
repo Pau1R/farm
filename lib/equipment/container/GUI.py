@@ -62,7 +62,7 @@ class ContainerGUI:
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_container(self):
-		text = f'Ящик номер {self.container.id}\nдата добавления: {self.container.date}\nтип: {self.container.type}\nемкость: {self.container.capacity} катушек'
+		text = f'Ящик номер {self.container.id}\nдата добавления: {self.container.created}\nтип: {self.container.type}\nемкость: {self.container.capacity} катушек'
 		buttons = ['Удалить', 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.container.id)
 

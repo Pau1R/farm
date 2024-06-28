@@ -12,7 +12,7 @@ class Order:
 	# order attributes:
 	id = 1
 	name = ''
-	date = None
+	created = None
 	user_id = 1
 	type = ''
 	physical_status = '' # preparing, in_line, printing, printed
@@ -64,13 +64,13 @@ class Order:
 	def __init__(self, app, id):
 		self.app = app
 		self.id = id
-		self.date = datetime.today()
+		self.created = datetime.today()
 		self.spools = self.app.equipment.spools
 		self.spool_logic = self.app.equipment.spool_logic
 
 	def set_price(self):
 		if not self.prepayment_percent:
-			self.prepayment_percent = int(self.app.settings.get('prepayment_percent'))
+			self.prepayment_percent = int(self.app.setting.get('prepayment_percent'))
 		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic
 		plastic_price = self.weight * self.quantity * gram_price  										# total plastic price for order
 		design_price = self.design_time / 60 * 1000														# cost for 3d design, 1000 rub
@@ -113,7 +113,7 @@ class Order:
 		return False
 
 	def get_supports_price(self):
-		setting = int(self.app.settings.get('support_remove_price'))
+		setting = int(self.app.setting.get('support_remove_price'))
 		price = int(self.support_time * self.quantity * setting)
 		price = int(math.ceil(price / 10) * 10)
 		return price
@@ -137,7 +137,7 @@ class Order:
 		# for chat in self.app.chats:
 		# 	if chat.user_id == self.user_id:
 		# 		money_payed = chat.user.money_payed
-		# if self.price < int(self.app.settings.get('prepayment_free_max')) and self.price < (money_payed / 4):
+		# if self.price < int(self.app.setting.get('prepayment_free_max')) and self.price < (money_payed / 4):
 		# 	return True
 		return False
 
@@ -177,11 +177,11 @@ class Order:
 
 	def plastic_types(self):
 		if self.type == 'basic':
-			return self.app.settings.get('basic_plastic_types').split(',')
+			return self.app.setting.get('basic_plastic_types').split(',')
 		return [self.type]
 
 	def get_object_date(self, element):
-		return element.date
+		return element.created
 
 	def set_completion_date(self):
 		print_time = self.get_gcodes_duration()

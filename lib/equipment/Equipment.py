@@ -78,7 +78,7 @@ class Equipment:
 	def remove_container(self, id):
 		for container in self.containers:
 			if container.id == id:
-				self.db.remove_container(container.id)
+				self.db.remove_container(container)
 				self.containers.remove(container)
 				break
 
@@ -101,7 +101,7 @@ class Equipment:
 	def remove_dryer(self, id):
 		for dryer in self.dryers:
 			if dryer.id == id:
-				self.db.remove_dryer(id)
+				self.db.remove_dryer(dryer)
 				self.dryers.remove(dryer)
 				break
 
@@ -113,7 +113,7 @@ class Equipment:
 		extruder = Extruder(self.db, id)
 		extruder.name = name
 		extruder.maxTemp = maxTemp
-		extruder.nozzle = nozzle
+		extruder.nozzleDiameter = nozzle
 		self.db.add_extruder(extruder)
 		self.extruders.append(extruder)
 		return extruder
@@ -121,7 +121,7 @@ class Equipment:
 	def remove_extruder(self, id):
 		for extruder in self.extruders:
 			if extruder.id == id:
-				self.db.remove_extruder(id)
+				self.db.remove_extruder(extruder)
 				self.extruders.remove(extruder)
 				break
 
@@ -140,7 +140,7 @@ class Equipment:
 	def remove_location(self, id):
 		for location in self.locations:
 			if location.id == id:
-				self.db.remove_location(id)
+				self.db.remove_location(location)
 				self.locations.remove(location)
 				break
 
@@ -159,7 +159,7 @@ class Equipment:
 	def remove_printer_type(self, id):
 		for printer_type in self.printer_types:
 			if printer_type.id == id:
-				self.db.remove_printer_type(id)
+				self.db.remove_printer_type(printer_type)
 				self.printer_types.remove(printer_type)
 				break
 
@@ -178,7 +178,7 @@ class Equipment:
 	def remove_printer(self, id):
 		for printer in self.printers:
 			if printer.id == id:
-				self.db.remove_printer(id)
+				self.db.remove_printer(printer)
 				self.printers.remove(printer)
 				break
 
@@ -202,7 +202,6 @@ class Equipment:
 		spool.color_id = color_id
 		spool.dried = dried
 		spool.brand = brand
-		spool.booked = booked
 		spool.used = used
 		spool.price = price
 		spool.status = status
@@ -215,7 +214,7 @@ class Equipment:
 	def remove_spool(self, id):
 		for spool in self.spools:
 			if spool.id == int(id):
-				self.db.remove_spool(int(id))
+				self.db.remove_spool(spool)
 				self.spools.remove(spool)
 				break
 
@@ -246,7 +245,7 @@ class Equipment:
 	def remove_surface(self, id):
 		for surface in self.surfaces:
 			if surface.id == id:
-				self.db.remove_surface(id)
+				self.db.remove_surface(surface)
 				self.surfaces.remove(surface)
 				break
 

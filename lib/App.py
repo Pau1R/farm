@@ -9,7 +9,7 @@ from lib.order.gcode.Gcode import Gcode
 from lib.order.gcode.Logic import Gcode_logic
 from lib.equipment.printer.Logic import Printer_logic
 from lib.request.Logic import Request_logic
-from lib.settings.Settings import Settings
+from lib.setting.Setting import Setting
 from lib.Clicker import Clicker
 import jsonpickle
 from datetime import date
@@ -22,7 +22,7 @@ class App:
 	conf = None
 	db = None
 	equipment = None
-	settings = None
+	setting = None
 	functions = Functions()
 	clicker = None
 
@@ -50,7 +50,7 @@ class App:
 		self.db.get_chats()
 		self.db.get_orders()
 		self.db.get_gcodes()
-		self.settings = Settings(self)
+		self.setting = Setting(self)
 		self.order_logic = Order_logic(self)
 		self.gcode_logic = Gcode_logic(self)
 		self.clicker = Clicker(self)
@@ -135,7 +135,7 @@ class App:
 #     6 spool
 #     7 color
 #     8 surface
-#	  9 settings
+#	  9 setting
 #     10 requests
 #	3 Operator
 #	4 Designer
@@ -145,3 +145,4 @@ class App:
 # TODO:
 # - refine order statuses movement
 # - admin: view all orders, clients (their name) and client orders, tell info to client
+# - rewrite classe to include all fields in init function

@@ -155,7 +155,7 @@ class Order_GUI:
 		else:
 			price = order.get_prepayment_price()
 
-		setting = self.app.settings.get
+		setting = self.app.setting.get
 		tell = self.GUI.tell
 
 		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру карточки. Обязательно укажите код перевода в комментарии.\n\n'
@@ -339,7 +339,7 @@ class Order_GUI:
 			text += f'Статус: {status.upper()}\n'
 		if order.delivery_code and delivery_text:
 			text += f'{delivery_text}: {order.delivery_code}\n\n'
-		text += f'Дата создания: {self.app.functions.russian_date(order.date)}\n'
+		text += f'Дата создания: {self.app.functions.russian_date(order.created)}\n'
 		if order.price:
 			text += f'Стоимость: {order.price} рублей\n'
 		if order.quantity > 1:

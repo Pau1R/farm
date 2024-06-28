@@ -77,7 +77,7 @@ class ColorGUI:
 			text = 'Цвет'
 		else:
 			text = f'Оттенок'
-		text += f': {self.color.name}\nДата добавления: {self.color.date}'
+		text += f': {self.color.name}\nДата добавления: {self.color.created}'
 		buttons = ['Поменять картинку']
 		if self.color.parent_id == 0:
 			no_shades = True

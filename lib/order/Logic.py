@@ -109,4 +109,4 @@ class Order_logic:
 		return date.today() + timedelta(days=days)
 
 	def get_object_date(self, object):
-		return object.date
+		return object.created

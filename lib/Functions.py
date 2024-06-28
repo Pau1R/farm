@@ -17,19 +17,23 @@ class Functions:
 		11:'ноября',
 		12:'декабря'}
 
-	def russian_date(self, date):
-		if date == None:
+	def russian_date(self, date_):
+		if date_ == None:
 			return ''
-		if isinstance(date, datetime):
-			date = date.date()
-		if date == date.today():
+		if isinstance(date_, datetime):
+			date_ = date_.date()
+		if date_ == date.today():
 			return 'сегодня'
-		elif date == date.today() + timedelta(days=1):
+		elif date_ == date.today() + timedelta(days=1):
 			return 'завтра'
-		elif date == date.today() + timedelta(days=2):
+		elif date_ == date.today() + timedelta(days=2):
 			return 'послезавтра'
+		elif date_ == date.today() - timedelta(days=1):
+			return 'вчера'
+		elif date_ == date.today() - timedelta(days=2):
+			return 'позавчера'
 		else:
-			return str(date.day) + ' ' + self.months[date.month]
+			return str(date_.day) + ' ' + self.months[date_.month]
 
 	def russian_date_2(self, date_):
 		if date_ < date.today():

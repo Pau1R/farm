@@ -52,25 +52,25 @@ class SettingsGUI:
 		self.context = 'settings_money'
 		buttons = []
 		param = 'support_remove_price'
-		text = 'Стоимость одной минуты удаления поддержек: ' + self.app.settings.get(param) + ' рублей'
+		text = 'Стоимость одной минуты удаления поддержек: ' + self.app.setting.get(param) + ' рублей'
 		buttons.append([text, param])
 		param = 'prepayment_percent'
-		text = 'Процент предоплаты: ' + self.app.settings.get(param) + '%'
+		text = 'Процент предоплаты: ' + self.app.setting.get(param) + '%'
 		buttons.append([text, param])
 		param = 'prepayment_free_max'
-		text = 'Максимальная сумма без предоплаты: ' + self.app.settings.get(param) + ' рублей'
+		text = 'Максимальная сумма без предоплаты: ' + self.app.setting.get(param) + ' рублей'
 		buttons.append([text, param])
 		param = 'phone_number'
-		text = 'Телефон для переводов: ' + self.app.settings.get(param)
+		text = 'Телефон для переводов: ' + self.app.setting.get(param)
 		buttons.append([text, param])
 		param = 'card_number'
-		text = 'Карточка для переводов: ' + self.app.settings.get(param)
+		text = 'Карточка для переводов: ' + self.app.setting.get(param)
 		buttons.append([text, param])
 		param = 'account_number'
-		text = 'Счет для переводов: ' + self.app.settings.get(param)
+		text = 'Счет для переводов: ' + self.app.setting.get(param)
 		buttons.append([text, param])
 		param = 'transfer_receiver'
-		text = 'Получатель перевода: ' + self.app.settings.get(param)
+		text = 'Получатель перевода: ' + self.app.setting.get(param)
 		buttons.append([text, param])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите настройку', buttons, buttons, 2, 0)
@@ -79,10 +79,10 @@ class SettingsGUI:
 		self.context = 'settings_other'
 		buttons = []
 		param = 'plastic_types'
-		text = 'Используемые типы материалов: ' + self.app.settings.get(param)
+		text = 'Используемые типы материалов: ' + self.app.setting.get(param)
 		buttons.append([text, param])
 		param = 'basic_plastic_types'
-		text = 'Базовые типы материалов (последовательность указывает очередность назначения): ' + self.app.settings.get(param)
+		text = 'Базовые типы материалов (последовательность указывает очередность назначения): ' + self.app.setting.get(param)
 		buttons.append([text, param])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите настройку', buttons, buttons, 2, 0)
@@ -90,7 +90,7 @@ class SettingsGUI:
 	def show_setting(self, name):
 		self.chat.set_context(self.address, 3)
 		self.name = name
-		text = f'Текущее значение: {self.app.settings.get(name)}\nВведите новое значение'
+		text = f'Текущее значение: {self.app.setting.get(name)}\nВведите новое значение'
 		self.GUI.tell(text)
 
 	def show_confirmation(self):
@@ -119,7 +119,7 @@ class SettingsGUI:
 
 	def process_confirmation(self):
 		if self.message.btn_data == 'confirm':
-			self.app.settings.set(self.name, self.value)
+			self.app.setting.set(self.name, self.value)
 			self.name = ''
 			self.value = ''
 		if self.context == 'settings_money':

@@ -61,7 +61,7 @@ class SurfaceGUI:
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_surface(self):
-		text = f'номер поверхности: {self.surface.id}\nдата добавления: {self.surface.date}\n'
+		text = f'номер поверхности: {self.surface.id}\nдата добавления: {self.surface.created}\n'
 		text += f'тип: {self.surface.type}'
 		buttons = ['Удалить', 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)

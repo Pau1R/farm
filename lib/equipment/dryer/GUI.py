@@ -69,7 +69,7 @@ class DryerGUI:
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
 	def show_dryer(self):
-		text = f'Номер сушилки: {self.dryer.id}\nдата добавления: {self.dryer.date}\nназвание: {self.dryer.name}\nемкость: {self.dryer.capacity} катушек\n'
+		text = f'Номер сушилки: {self.dryer.id}\nдата добавления: {self.dryer.created}\nназвание: {self.dryer.name}\nемкость: {self.dryer.capacity} катушек\n'
 		text += f'минимальная температура: {self.dryer.minTemp}\nмаксимальная температура: {self.dryer.maxTemp}\n'
 		text += f'максимальное время сушки: {self.dryer.maxTime}'
 		buttons = ['Удалить', 'Назад']
