@@ -70,21 +70,11 @@ class Order_logic:
 			if order.delivery_code == delivery_code:
 				return order
 
-	def count_all_time(self, printer_type):
+	def count_all_time(self, printer_type): # Count the amount of time scheduled for printer type
 		scheduled_time = 0
 		for order in self.orders:
 			if order.physical_status in ['in_line', 'printing'] and (order.printer_type == printer_type or printer_type == '*'):
-				then = order.start_datetime
-				now = datetime.today()
-				used_time = 0
-				if now.day == then.day:
-					used_time = (then.hour * 60) + then.minute - (then.hour * 60) + then.minute
-				else:
-					used_time = (9 + 10) * 60 - (then.hour * 60) + then.minute # Count first day.  starts at 9 am for a 10 hour shift
-					used_time += ((now - then).days - 1) * 10 * 60 # count days in between
-					used_time += (now.hour * 60 + now.minute) - 9 * 60 # Count last day.
-				# scheduled_time += order.time - used_time
-				scheduled_time += 50 - used_time # TODO: redo time calculation using gcode table
+				scheduled_time += order.get_gcodes_future_time()
 		return scheduled_time
 
 	def get_completion_date(self, order_time, printer_type):

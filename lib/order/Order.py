@@ -179,7 +179,7 @@ class Order:
 		return element.created
 
 	def set_completion_date(self):
-		print_time = self.get_gcodes_duration()
+		print_time = self.get_gcodes_all_time()
 		if not print_time:
 			print_time = self.print_time
 		self.completion_date = self.app.order_logic.get_completion_date(print_time, self.printer_type)
@@ -192,11 +192,21 @@ class Order:
 				gcodes.append(gcode)
 		return gcodes
 
-	def get_gcodes_duration(self):
-		time = 0
-		for gcode in self.get_gcodes():
-			time += gcode.duration
-		return time
+	def get_gcodes_all_time(self):
+	    return sum(gcode.duration for gcode in self.get_gcodes())
+
+	def get_gcodes_future_time(self):
+	    total_duration = 0
+	    for gcode in self.get_gcodes():
+	        if gcode.start_datetime:
+	            time_passed = (datetime.today() - gcode.start_datetime).total_seconds() / 60  # Convert to minutes
+	            if time_passed < gcode.duration:  # Only consider remaining time
+	                remaining_duration = gcode.duration - time_passed
+	                total_duration += max(0, remaining_duration)  # Ensure no negative duration
+	    return total_duration
+
+	def get_gcodes_past_time(self):
+	    return self.get_gcodes_all_time() - self.get_gcodes_future_time()
 
 	def order_payed(self, amount):
 		self.payed += amount

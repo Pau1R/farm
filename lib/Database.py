@@ -274,6 +274,7 @@ class Database:
 			gcode.screenshot = data['screenshot']
 			gcode.status = data['status']
 			gcode.duration = data['duration']
+			gcode.start_datetime = data['start_datetime']
 			self.app.gcodes.append(gcode)
 
 	def create_gcode(self, gcode):

@@ -9,5 +9,6 @@ class Gcode:
 		self.screenshot = ''
 		self.status = ''
 		self.duration = 0
+		self.start_datetime = None
 		
 		self.quantity = 1 # temporary value for created gcodes

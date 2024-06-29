@@ -256,10 +256,15 @@ class General:
 			self.show_design_time()
 
 	def process_printer_type(self):
-		for type_ in self.app.equipment.printer_types:
-			if type_.id == int(self.message.btn_data):
-				self.printer_type = type_.name
-				self.show_plastic_type()
+		data = self.message.btn_data
+		if data == '*':
+			self.printer_type = '*'
+		else:
+			data = int(data)
+			for type_ in self.app.equipment.printer_types:
+				if type_.id == data:
+					self.printer_type = type_.name
+		self.show_plastic_type()
 
 	def process_plastic_type(self):
 		if self.message.btn_data == 'unavailable':

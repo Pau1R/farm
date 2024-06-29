@@ -111,7 +111,8 @@ class Meta:
         "file_id": "TEXT DEFAULT ''",
         "screenshot": "TEXT DEFAULT ''",
         "status": "TEXT DEFAULT ''",
-        "duration": "INTEGER DEFAULT 0"}
+        "duration": "INTEGER DEFAULT 0",
+        "start_datetime": "DATETIME DEFAULT ''"}
     setting = {
         "id": "INTEGER DEFAULT 0",
         "name": "TEXT PRIMARY KEY",
