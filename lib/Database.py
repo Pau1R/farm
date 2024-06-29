@@ -256,14 +256,14 @@ class Database:
 			self.app.orders.append(order)
 
 	def create_order(self, order):
-		self.create_table_row('order (id, created)', (order.id, order.created))
+		self.create_table_row('"order" (id, created)', (order.id, order.created))
 		self.update_order(order)
 
 	def update_order(self, order):
 		self.update_table('order', order)
 
 	def remove_order(self, order):
-		self.cursor.execute('DELETE FROM order WHERE id=?', (order.id,))
+		self.cursor.execute('DELETE FROM "order" WHERE id=?', (order.id,))
 		self.db.commit()
 
 	def get_gcodes(self):

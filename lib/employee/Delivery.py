@@ -34,9 +34,9 @@ class Delivery:
 				if function == '2':
 					self.process_order_query()
 				if function == '3':
-					self.process_issue_order()
+					self.process_client()
 				if function == '4':
-					self.process_pay_for_order()
+					self.process_order_payed()
 				if function == '5':
 					self.process_item_id_query()
 				if function == '6':
@@ -48,7 +48,7 @@ class Delivery:
 				if function == '9':
 					self.process_prepay_confirmation()
 				if function == '10':
-					self.process_item_receive()
+					self.process_item_received()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -77,16 +77,12 @@ class Delivery:
 		else:
 			text = f'Предоставьте заказ № {self.order.id} клиенту для ознакомления.\n'
 			text += f'Заказ оплачен не полностью. Сумма доплаты: {self.order.remaining_payment()} рублей\n\n'
-			text += 'Клиент может оплатить наличными либо переводом через чат-бот на странице заказа.'
+			text += 'Клиент может оплатить наличными либо переводом по инструкции на странице заказа.'
 			buttons = [['Клиент оплатил наличными', 'payed']]
 			buttons.append(['Клиент отказался от заказа', 'refused'])
+			buttons.append(['Обновить данные', 'reload'])
+			buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.id)
-
-	def show_order_payed(self, order):
-		text = f'Заказ № {self.order.id} оплачен полностью'
-		buttons = [['Клиент забрал заказ', 'issued']]
-		message = self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
-		message.general_clear = False
 
 	def show_item_id_query(self):
 		self.chat.set_context(self.address, 5)
@@ -100,13 +96,13 @@ class Delivery:
 		self.GUI.tell_buttons(text, buttons, buttons, 6, self.order.id)
 
 	def show_item_prepay(self):
-		text = f'Предоплата заказа не выполнена. Клиент может выполнить оплату переводом через чат-бот либо наличными.'
+		text = f'Предоплата заказа не выполнена. Клиент может выполнить оплату переводом по инструкции на странице заказа либо наличными.'
 		buttons = [['Клиент желает оплатить наличными', 'cash'], ['Обновить данные']]
 		self.GUI.tell_buttons(text, buttons, buttons, 7, self.order.id)
 
 	def show_item_prepay_amount(self):
 		self.chat.set_context(self.address, 8)
-		text = f'Минимальная сумма предоплаты: {self.order.get_prepayment_price()} рублей. Введите внесенную сумму:'
+		text = f'Минимальная сумма предоплаты: {self.order.get_remaining_prepayment()} рублей. Введите внесенную сумму:'
 		buttons = ['Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 8, self.order.id)
 
@@ -115,8 +111,12 @@ class Delivery:
 		buttons = [['Подтверждаю', 'confirm'], 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 9, self.order.id)
 
-	def show_item_receive(self):
-		text = f'Оплата выполнена. Возьмите предмет клиента, наклейте на него этикетку с номером {self.order.delivery_code} и положите его в место приема.'
+	def show_item_received(self):
+		if self.order.is_payed():
+			text = 'Оплата выполнена.'
+		if self.order.is_prepayed():
+			text = 'Преоплата выполнена.'
+		text = f' Возьмите предмет клиента, наклейте на него этикетку с номером {self.order.delivery_code} и положите его в место приема.'
 		buttons = ['Задача выполнена']
 		self.GUI.tell_buttons(text, buttons, buttons, 10, self.order.id)
 
@@ -136,18 +136,38 @@ class Delivery:
 			self.show_top_menu()
 
 	def process_order_query(self):
-		code = self.message.text
+		try:
+			code = int(self.message.text)
+		except:
+			self.GUI.tell('Неверный код')
+			self.show_order_query()
+			return
 		order = self.app.order_logic.get_order_by_delivery_code(code)
+		if not order:
+			self.GUI.tell('Неверный код')
+			self.show_order_query()
+			return
 		self.order = order
 		order.delivery_user_id = self.chat.user_id
 		self.show_client()
 
 	def process_client(self):
 		data = self.message.btn_data
-		if data == 'issued' or data == 'payed':
-			self.order_issued(self.order)
+		if data == 'issued':
+			# self.order_issued(self.order)
+			self.order.logical_status = 'issued'
+			self.order.remove()
+			self.show_top_menu()
+		elif data == 'payed':
+			self.order.payed += self.order.remaining_payment()
+			self.show_client()
 		elif data == 'refused':
 			self.order.logical_status = 'client_refused' # client doesn't get refund for prepayment
+			self.show_top_menu()
+		elif data == 'reload':
+			self.last_data = ''
+			self.show_client()
+		elif data == 'Назад':
 			self.show_top_menu()
 
 	def process_order_payed(self):
@@ -160,7 +180,7 @@ class Delivery:
 			code = int(self.message.text)
 		except:
 			self.GUI.tell('Код введен не верно')
-			time.sleep(3)
+			time.sleep(1)
 			self.show_top_menu()
 			return
 		order = self.app.order_logic.get_order_by_delivery_code(code)
@@ -169,7 +189,7 @@ class Delivery:
 			self.show_photos_confirm()
 		else:
 			self.GUI.tell('Код введен не верно')
-			time.sleep(3)
+			time.sleep(1)
 			self.show_top_menu()
 
 	def process_photos_confirm(self):
@@ -205,20 +225,21 @@ class Delivery:
 			self.accepted_money = 0
 			self.update_pay_status()
 
-	def process_item_receive(self):
+	def process_item_received(self):
 		if self.message.btn_data == 'Задача выполнена':
-			self.order.logical_status = 'item_received' # TODO: think of status. Save to db
+			self.order.logical_status = 'item_received' # TODO: admin or operator take the item: write code to process that
+			self.app.db.update_order(self.order)
 			self.show_top_menu()
 
 #---------------------------- LOGIC ----------------------------
 
-	def order_issued(self, order):
+	def order_issued(self):
 		self.order.logical_status = 'issued'
 		time.sleep(5)
 		self.show_top_menu()
 
 	def update_pay_status(self):
 		if self.order.is_prepayed():
-			self.show_item_receive()
+			self.show_item_received()
 		else:
 			self.show_item_prepay()

@@ -91,6 +91,9 @@ class Order:
 			prepay_price = math.ceil(prepay_price / 10) * 10
 		return prepay_price
 
+	def get_remaining_prepayment(self):
+		return int(self.get_prepayment_price() - self.payed)
+
 	def is_prepayed(self):
 		if self.is_free_start():
 			return True
@@ -207,7 +210,7 @@ class Order:
 				self.physical_status = 'in_line'
 			chat = self.app.get_chat(self.user_id)
 			chat.user.orders_canceled = 0
-			if self.status == 'in_pick-up' and self.delivery_user_id != 0:
+			if self.physical_status == 'in_pick-up' and self.delivery_user_id != 0:
 				chat = self.app.get_chat(self.delivery_user_id)
 				chat.user.delivery.show_order_payed(self)
 
@@ -225,4 +228,9 @@ class Order:
 		self.app.db.update_order(self)
 
 	def remaining_payment(self):
-		return self.price - self.payed
+		return int(self.price - self.payed)
+
+	def remove(self):
+		self.remove_reserve()
+		self.app.orders.remove(self)
+		self.app.db.remove_order(self)

@@ -32,7 +32,6 @@ class Order_logic:
 			type_ = [type_]
 		orders_ = []
 		for order in orders:
-			designer = order.assigned_designer_id
 			if order.type in type_:
 				orders_.append(order)
 		return orders_
@@ -42,8 +41,7 @@ class Order_logic:
 			status = [status]
 		orders_ = []
 		for order in orders:
-			designer = order.assigned_designer_id
-			if order.logical_status in status:
+			if order.logical_status in status or order.physical_status in status:
 				orders_.append(order)
 		return orders_
 

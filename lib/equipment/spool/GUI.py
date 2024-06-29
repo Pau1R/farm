@@ -13,7 +13,7 @@ class SpoolGUI:
 	type = ''
 	weight = 0
 	color_id = ''
-	dried = ''
+	dried = False
 	brand = ''
 	used = 0
 	price = 0
@@ -168,7 +168,8 @@ class SpoolGUI:
 			self.dried = 'Нет'
 			self.show_add_new_spool_brand()
 			return
-		self.GUI.tell_buttons('Катушка высушена?', ['Да', 'Нет'], ['Да', 'Нет'], 11, 0)
+		buttons = [['Да', '1'], ['Нет', '0']]
+		self.GUI.tell_buttons('Катушка высушена?', buttons, buttons, 11, 0)
 
 	def show_add_new_spool_brand(self):
 		self.chat.set_context(self.address, 12)
@@ -270,7 +271,7 @@ class SpoolGUI:
 			self.show_add_new_spool_price()
 
 	def process_add_new_spool_dried(self):
-		self.dried = self.message.btn_data
+		self.dried = bool(self.message.btn_data)
 		self.show_add_new_spool_brand()
 
 	def process_add_new_spool_brand(self):

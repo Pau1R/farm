@@ -30,7 +30,7 @@ class Meta:
         "created": "DATETIME DEFAULT ''",
         "name": "TEXT DEFAULT ''",
         "maxTemp": "INTEGER DEFAULT 0",
-        "nozzleDiameter": "INTEGER DEFAULT 0"}
+        "nozzleDiameter": "DECIMAL DEFAULT 0"}
     location = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
@@ -50,13 +50,13 @@ class Meta:
         "created": "DATETIME DEFAULT ''",
         "type": "TEXT DEFAULT ''",
         "diameter": "DECIMAL DEFAULT 0",
-        "weight": "TEXT DEFAULT ''",
+        "weight": "INTEGER DEFAULT ''",
         "density": "DECIMAL DEFAULT 0",
-        "color_id": "TEXT DEFAULT ''",
-        "dried": "TEXT DEFAULT ''",
+        "color_id": "INTEGER DEFAULT ''",
+        "dried": "LOGICAL DEFAULT ''",
         "brand": "TEXT DEFAULT ''",
         "booked": "INTEGER DEFAULT 0",
-        "used": "TEXT DEFAULT ''",
+        "used": "INTEGER DEFAULT ''",
         "price": "INTEGER DEFAULT 0",
         "status": "TEXT DEFAULT ''",
         "delivery_date_estimate": "DATETIME DEFAULT ''"}
@@ -78,7 +78,7 @@ class Meta:
         "type": "TEXT DEFAULT ''",
         "physical_status": "TEXT DEFAULT ''",
         "logical_status": "TEXT DEFAULT ''",
-        "assigned_designer_id": "TEXT DEFAULT ''",
+        "assigned_designer_id": "INTEGER DEFAULT ''",
         "priority": "INTEGER DEFAULT 0",
         "quantity": "INTEGER DEFAULT 0",
         "quality": "TEXT DEFAULT ''",

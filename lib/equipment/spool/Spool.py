@@ -11,7 +11,7 @@ class Spool:
 		self.weight = 0
 		self.density = 0.0 # gramms per cm cube
 		self.color_id = 0
-		self.dried = ''
+		self.dried = False
 		self.brand = ''
 		self.booked = 0
 		self.used = 0

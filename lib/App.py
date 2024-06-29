@@ -127,7 +127,4 @@ class App:
 #	5 Delivery
 
 # TODO:
-# - refine order statuses movement
 # - admin: view all orders, clients (their name) and client orders, tell info to client
-# - rewrite classe to include all fields in init function
-# - remove old context usage from setting.gui

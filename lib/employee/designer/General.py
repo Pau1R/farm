@@ -91,7 +91,7 @@ class General:
 
 	def show_order(self):
 		order = self.order
-		text = f'Заказ № {order.id} "{order.name}" \nДата добавления: {self.app.functions.russian_date(order.date)}'
+		text = f'Заказ № {order.id} "{order.name}" \nДата добавления: {self.app.functions.russian_date(order.created)}'
 		if order.quantity > 1:
 			text += f'\nКоличество экземпляров: {order.quantity}'
 		quality = order.quality
@@ -145,6 +145,7 @@ class General:
 		buttons = []
 		for type_ in self.app.equipment.printer_types:
 			buttons.append([type_.name, type_.id])
+		buttons.append('Любой')
 		self.GUI.tell_buttons('Выберите тип принтера', buttons, buttons, 5, self.order.id)
 
 	def show_plastic_type(self):
@@ -175,7 +176,7 @@ class General:
 			text = 'Примерно сколько нужно минут на удаление поддержек'
 		if self.order.quantity > 1:
 			text += ' с одного экземпляра'
-		buttons = ['0.5','1','2','3','5','10','15','20']
+		buttons = ['1','2','3','5','10','15','20']
 		buttons.append(['Поддержки не нужны', 'no_supports'])
 		self.GUI.tell_buttons(text + '?', buttons, [['Поддержки не нужны', 'no_supports']], 8, self.order.id)
 

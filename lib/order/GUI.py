@@ -113,9 +113,9 @@ class Order_GUI:
 				elif physical in ['in_line','printing','finished','in_pick-up'] and not order.is_payed() and order.is_prepayed():
 					buttons.append(['Оплатить оставшуюся часть', 'pay'])
 				# Отмена заказа
-				if (    (order.type in ['stl','link']    and physical in ['prepare','in_line']) or 
-					not (order.type in ['sketch','item'] and order.assigned_designer_id)):
-					buttons.append('Отменить заказ')
+				if ((order.type in ['stl', 'link'] and physical in ['prepare', 'in_line']) or 
+				    (order.type in ['sketch', 'item'] and not order.assigned_designer_id)):
+				    buttons.append('Отменить заказ')
 		buttons.append('Назад')
 
 		# show order and buttons
@@ -260,9 +260,7 @@ class Order_GUI:
 			if order.logical_status == 'validated':
 				chat = self.app.get_chat(order.user_id)
 				chat.user.penalty()
-			order.remove_reserve()
-			self.app.orders.remove(order)
-			self.app.db.remove_order(order)
+			order.remove()
 			order = None
 			self.chat.user.last_data = ''
 			if self.is_admin():
