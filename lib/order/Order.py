@@ -210,6 +210,10 @@ class Order:
 
 	def order_payed(self, amount):
 		self.payed += amount
+		text = f'К заказу {self.name} поступил платеж в размере {amount} рублей'
+		chat = self.app.get_chat(self.user_id)
+		chat.user.GUI.tell(text)
+
 		if self.is_prepayed():
 			if self.type == 'sketch':
 				self.logical_status = 'waiting_for_design'

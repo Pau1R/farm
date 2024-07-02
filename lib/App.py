@@ -2,6 +2,7 @@ from lib.Database import Database
 from lib.equipment.Equipment import Equipment
 from lib.Chat import Chat
 from datetime import date
+import re
 from lib.Msg import Message
 from lib.order.Order import Order
 from lib.order.Logic import Order_logic
@@ -101,6 +102,30 @@ class App:
 			else:
 				break
 		return id
+
+	def telethon_new_message(self, event):
+		print('app.py telethon_new_message')
+		text = event.message.message
+		chat_id = int(event.message.peer_id.user_id)
+		# chat_id = 240044026  # TODO: remove for production!
+		if not ('Перевод' in text and chat_id == 240044026):
+			return
+
+		sender = re.search(r'от ([А-Яа-яЁё]+\s[А-Яа-яЁё]+\.)', text)
+		sender = sender.group(1) if sender else ''
+		
+		amount = re.search(r'Перевод (\d[\d ]*)р', text)
+		amount = int(amount.group(1).replace(' ', '') if amount else '0')
+
+		pay_code = re.search(r'«.*?(\d+).*?»', text)
+		pay_code = int(pay_code.group(1) if pay_code else '0')
+
+		order = self.order_logic.get_order_by_pay_code(pay_code)
+		if order:
+			order.order_payed(amount)
+		else:
+			for admin in self.get_chats('Администратор'):
+				admin.user.admin.show_unmatched_payment(sender, amount, pay_code)
 
 # app structure for buttons:
 # 1 client 

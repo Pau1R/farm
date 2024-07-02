@@ -91,7 +91,7 @@ class Owner:
 				if str(chat.user_id) == self.message.btn_data:
 					self.employee = chat
 		self.employees = []
-		text = 'Имя: ' + self.employee.user_name + '\nРоли: ' + str(self.employee.user.roles.copy()) + '\nДата создания: ' + self.employee.created  # add additional info in future
+		text = 'Имя: ' + self.employee.user_name + '\nРоли: ' + str(self.employee.user.roles.copy()) + '\nДата создания: ' + self.employee.created.strftime('%Y-%m-%d')  # add additional info in future
 		buttons = ['Статистика', 'Удалить', ['Сделать владельцем вместо себя', 'tranfer_ownership'], 'Добавить роль', 'Удалить роль', 'Назад']
 		if 'Владелец' in self.employee.user.roles:
 			buttons.remove('Удалить')

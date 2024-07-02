@@ -40,7 +40,9 @@ class Message:
 			self.chat_id = int(message.json['message']['chat']['id'])
 		self.user_id = int(message.json['from']['id'])
 
-		self.user_name = str(message.from_user.first_name) + ' ' + str(message.from_user.last_name)
+		self.user_name = str(message.from_user.first_name)
+		if message.from_user.last_name:
+			self.user_name +=  ' ' + str(message.from_user.last_name)
 		if len(self.user_name) < 2:
 			self.user_name = message.from_user.user_name
 		if self.user_name == '':

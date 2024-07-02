@@ -111,6 +111,13 @@ class Admin:
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите оборудование', buttons, ['Назад'], 3, 0)
 
+	def show_unmatched_payment(self, sender, amount, pay_code):
+		text = 'Поступил некорректный платеж.\n\n'
+		text += f'Отправитель: {sender}\n'
+		text += f'Сумма: {amount}\n'
+		text += f'Код платежа: {pay_code}'
+		self.GUI.tell_permanent(text)
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
