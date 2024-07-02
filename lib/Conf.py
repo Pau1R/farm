@@ -4,7 +4,6 @@ import os
 class Conf:
 
 	def __init__(self):
-		bot_token = ''
 		roles = {
 			'owner': 'Владелец',
 			'admin': 'Администратор',
@@ -20,3 +19,6 @@ class Conf:
 		    self.bot_token = config['Bot']['bot_dev_token'] # dev
 		else:
 		    self.bot_token = config['Bot']['bot_prod_token'] # prod
+		
+		self.api_id = config['Client']['api_id']
+		self.api_hash = config['Client']['api_hash']
