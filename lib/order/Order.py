@@ -208,13 +208,11 @@ class Order:
 	def get_gcodes_past_time(self):
 	    return self.get_gcodes_all_time() - self.get_gcodes_future_time()
 
-	def order_payed(self, amount):
+	def payed(self, amount):
+		previous = self.is_prepayed()
 		self.payed += amount
-		text = f'К заказу {self.name} поступил платеж в размере {amount} рублей'
-		chat = self.app.get_chat(self.user_id)
-		chat.user.GUI.tell(text)
-
-		if self.is_prepayed():
+		current = self.is_prepayed()
+		if current and not previous: # order gets fully prepayed
 			if self.type == 'sketch':
 				self.logical_status = 'waiting_for_design'
 			elif self.type == 'item':
@@ -222,11 +220,14 @@ class Order:
 			else:
 				self.logical_status = ''
 				self.physical_status = 'in_line'
-			chat = self.app.get_chat(self.user_id)
-			chat.user.orders_canceled = 0
-			if self.physical_status == 'in_pick-up' and self.delivery_user_id != 0:
-				chat = self.app.get_chat(self.delivery_user_id)
-				chat.user.delivery.show_order_payed(self)
+
+		chat = self.app.get_chat(self.user_id)
+		chat.user.orders_canceled = 0
+		self.app.db.update_chat(chat)
+		chat.user.show_order_payed(self, amount)
+
+		self.app.chat_payed(self.user_id, amount)
+		self.app.db.update_order(self)
 
 	def set_delivery_code(self):
 		used_codes = [0]

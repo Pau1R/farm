@@ -16,6 +16,7 @@ class Order_logic:
 					order.booking_canceled()
 
 	def get_order_by_id(self, order_id):
+		order_id = int(order_id)
 		for order in self.orders:
 			if order.id == order_id:
 				return order

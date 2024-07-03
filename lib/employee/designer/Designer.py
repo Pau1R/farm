@@ -51,7 +51,7 @@ class Designer:
 		orders_of_status = logic.get_orders_by_status
 
 		orders = orders_of_type(self.app.orders, ['stl','link','sketch','item'])
-		orders = orders_of_status(orders, ['validate', 'prevalidate'])
+		orders = orders_of_status(orders, ['validate', 'prevalidate', 'waiting_for_design'])
 		orders = logic.get_orders_by_user_id(orders, self.chat.user_id)
 		amount = len(orders)
 		if amount > 0:
@@ -60,6 +60,8 @@ class Designer:
 			text += 'Задачи отсутствуют'
 
 		buttons = []
+
+		# validate
 		validate = orders_of_status(self.orders, 'validate')
 		validate = logic.get_orders_by_user_id(validate, self.chat.user_id)
 			# buttons.append(['Настройка параметрических моделей','parametric'])
@@ -70,17 +72,21 @@ class Designer:
 
 		# prevalidate
 		prevalidate = orders_of_status(self.orders, 'prevalidate')
-		preval = logic.get_orders_by_user_id(prevalidate, self.chat.user_id)
+		prevalidate = logic.get_orders_by_user_id(prevalidate, self.chat.user_id)
 		if orders_of_type(prevalidate, 'sketch'):
 			buttons.append(['Валидация чертежа', 'sketch,prevalidate'])
 		if orders_of_type(prevalidate, 'item'):
 			buttons.append(['Валидация фото', 'item,prevalidate'])
-			
-		if orders_of_type(validate, 'sketch'):
-			buttons.append(['Разработка модели по чертежу', 'sketch'])
-		if orders_of_type(validate, 'item'):
-			buttons.append(['Разработка модели по образцу', 'item'])
+		
+		# design
+		waiting_for_design = orders_of_status(self.orders, 'waiting_for_design')
+		waiting_for_design = logic.get_orders_by_user_id(waiting_for_design, self.chat.user_id)
+		if orders_of_type(waiting_for_design, 'sketch'):
+			buttons.append(['Разработка модели по чертежу', 'sketch,waiting_for_design'])
+		if orders_of_type(waiting_for_design, 'item'):
+			buttons.append(['Разработка модели по образцу', 'item,waiting_for_design'])
 
+		# production
 		if orders_of_type(validate, 'production'):
 			buttons.append(['Заявка на мелкосерийное производство', 'production'])
 

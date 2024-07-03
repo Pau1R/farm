@@ -69,12 +69,10 @@ class Client:
 					self.process_top_menu()
 				if function == '2':
 					self.process_order_menu()
-				elif function == '4':
-					self.process_price()
-				elif function == '5':
+				elif function == '3':
 					self.process_orders()
-				elif function == '6':
-					self.process_order()
+				elif function == '4':
+					self.process_order_payed()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -110,7 +108,6 @@ class Client:
 	def show_orders(self):
 		text = 'Мои заказы'
 		buttons = []
-		# orders = self.get_orders(['prevalidate', 'validate', 'validated', 'prepayed', 'parameters_set', 'waiting_for_item', 'sample_aquired', 'waiting_for_design'])
 		orders = self.app.order_logic.get_client_orders(self.chat.user_id)
 		orders.sort(key=self.get_object_date)
 		for order in orders:
@@ -118,7 +115,12 @@ class Client:
 		if not buttons:
 			self.show_top_menu()
 		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
+		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
+
+	def show_order_payed(self, order, amount):
+		text = f'К заказу "{order.name}" поступил платеж в размере {amount} рублей'
+		buttons = [['Перейти к заказу','show']]
+		self.GUI.tell_buttons(text, buttons, buttons, 4, order.id)
 
 	def show_becomes_employee(self):
 		self.GUI.tell('Вы стали сотрудником, поздравляем!')
@@ -192,6 +194,11 @@ class Client:
 			self.message.instance_id = int(self.message.btn_data)
 			self.order_GUI.last_data = ''
 			self.order_GUI.first_message(self.message)
+
+	def process_order_payed(self):
+		if self.message.btn_data == 'show':
+			self.order_GUI.order = self.app.order_logic.get_order_by_id(self.message.instance_id)
+			self.order_GUI.show_order()
 
 #---------------------------- LOGIC ----------------------------
 

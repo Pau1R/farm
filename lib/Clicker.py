@@ -22,7 +22,6 @@ class Clicker:
 			self.sec2 = now
 			if now > self.sec15 + 15:
 				self.sec15 = now
-				# self.check_for_payments()
 				if now > self.sec30 + 30:
 					self.sec30 = now
 					if now > self.min1 + 60: # 1 minute
@@ -47,12 +46,3 @@ class Clicker:
 						if order.user_id == chat.user_id:
 							break
 				self.app.chats.remove(chat)
-
-	# def check_for_payments(self):
-	# 	# TODO: develop a way to check for incomming payments. Get transfer amount and pay_code from payment comments
-	# 	payment = False
-	# 	if payment:
-	# 		amount = 1.0
-	# 		pay_code = ''
-	# 		order = self.app.order_logic.get_order_by_pay_code(pay_code)
-	# 		order.order_payed(amount)

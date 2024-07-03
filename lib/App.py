@@ -81,6 +81,11 @@ class App:
 						chats.append(chat)
 		return chats
 
+	def chat_payed(self, user_id, amount):
+		chat = self.get_chat(user_id)
+		chat.user.money_payed += amount
+		self.db.update_chat(chat)
+
 	def orders_append(self, order):
 		order.id = self.get_next_free_id(self.orders)
 		self.orders.append(order)
@@ -107,7 +112,7 @@ class App:
 		print('app.py telethon_new_message')
 		text = event.message.message
 		chat_id = int(event.message.peer_id.user_id)
-		# chat_id = 240044026  # TODO: remove for production!
+		chat_id = 240044026  # TODO: remove for production!
 		if not ('Перевод' in text and chat_id == 240044026):
 			return
 
@@ -122,7 +127,7 @@ class App:
 
 		order = self.order_logic.get_order_by_pay_code(pay_code)
 		if order:
-			order.order_payed(amount)
+			order.payed(amount)
 		else:
 			for admin in self.get_chats('Администратор'):
 				admin.user.admin.show_unmatched_payment(sender, amount, pay_code)

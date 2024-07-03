@@ -78,7 +78,7 @@ class Delivery:
 			text = f'Предоставьте заказ № {self.order.id} клиенту для ознакомления.\n'
 			text += f'Заказ оплачен не полностью. Сумма доплаты: {self.order.remaining_payment()} рублей\n\n'
 			text += 'Клиент может оплатить наличными либо переводом по инструкции на странице заказа.'
-			buttons = [['Клиент оплатил наличными', 'payed']]
+			buttons = [['Клиент оплатил наличными', 'cash']]
 			buttons.append(['Клиент отказался от заказа', 'refused'])
 			buttons.append(['Обновить данные', 'reload'])
 			buttons.append('Назад')
@@ -155,11 +155,13 @@ class Delivery:
 		data = self.message.btn_data
 		if data == 'issued':
 			# self.order_issued(self.order)
+			chat = self.app.get_chat(self.order.user_id)
+			chat.user.GUI.tell(f'Заказ {self.order.name} выдан')
 			self.order.logical_status = 'issued'
 			self.order.remove()
 			self.show_top_menu()
-		elif data == 'payed':
-			self.order.payed += self.order.remaining_payment()
+		elif data == 'cash':
+			self.order.payed(self.order.remaining_payment())
 			self.show_client()
 		elif data == 'refused':
 			self.order.logical_status = 'client_refused' # client doesn't get refund for prepayment
@@ -218,7 +220,7 @@ class Delivery:
 	def process_prepay_confirmation(self):
 		data = self.message.btn_data
 		if data == 'confirm':
-			self.order.order_payed(self.accepted_money)
+			self.order.payed(self.accepted_money)
 			self.app.db.update_order(self.order)
 			self.update_pay_status()
 		else:

@@ -13,7 +13,7 @@ app = App(bot, conf)
 
 client = TelegramClient('session_name', conf.api_id, conf.api_hash)
 
-@bot.message_handler(func=lambda msg: True)
+@bot.message_handler(func=lambda msg: True, content_types=['text', 'document', 'photo', 'video'])
 @bot.callback_query_handler(func=lambda call: True)
 def handle_all_messages(message: Union[types.Message, types.CallbackQuery]):
     app.new_message(message)

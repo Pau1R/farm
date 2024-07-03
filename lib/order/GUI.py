@@ -141,7 +141,7 @@ class Order_GUI:
 		order.set_pay_code()
 
 		if order.is_prepayed():
-			price = order.price
+			price = order.price - order.payed
 		else:
 			price = order.get_prepayment_price()
 
