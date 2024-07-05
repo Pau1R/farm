@@ -79,6 +79,7 @@ class Order_GUI:
 		buttons = []
 		if self.is_admin():
 			buttons.append(['Редактировать заказ','edit'])
+			buttons.append(['Отменить заказ','reject'])
 		else:
 			if not order.type == 'production':
 				# Уборка поддержек и выбор цвета
@@ -196,6 +197,9 @@ class Order_GUI:
 				self.chat.user.admin.show_orders()
 			elif data == 'edit':
 				self.edit.first_message(self.message)
+			elif data == 'reject':
+				x = ''
+				# TODO:
 			return
 		if data == 'color':
 			self.client_color.last_data = ''

@@ -43,6 +43,10 @@ class Edit:
 					self.process_finances()
 				elif function == '6':
 					self.process_delivery()
+				elif function == '7':
+					self.process_value()
+				elif function == '8':
+					self.process_selection()
 		self.chat.add_if_text(self)
 
 	def set_order(self):
@@ -55,6 +59,7 @@ class Edit:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
+		order = self.order
 		buttons = []
 		buttons.append(['Общие','general'])
 		buttons.append(['Настройки печати','print_settings'])
@@ -62,7 +67,7 @@ class Edit:
 		buttons.append(['Финансы','finances'])
 		buttons.append(['Доставка','delivery'])
 		buttons.append(['Назад'])
-		self.GUI.tell_buttons('Выберите тип параметров:', buttons, buttons, 1, self.order.id)
+		self.GUI.tell_buttons(f'Выберите тип параметров заказа {order.id}:', buttons, buttons, 1, order.id)
 
 	def show_general(self):
 		order = self.order
@@ -81,11 +86,11 @@ class Edit:
 		buttons.append([f'Дата готовности: {date}','completion_date'])
 		buttons.append([f'Количество экземпляров: {order.quantity}','quantity'])
 		color = self.app.equipment.color_logic.get_color_name(order.color_id)
-		buttons.append([f'Цвет: {color}','color'])
+		buttons.append([f'Цвет: {color}','color_id'])
 		designer = self.app.get_chat(order.assigned_designer_id)
-		buttons.append([f'Назначенный дизайнер: {designer.user_name}','user_name'])
+		buttons.append([f'Назначенный дизайнер: {designer.user_name}','assigned_designer_id'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Общие:', buttons, buttons, 2, order.id)
+		self.GUI.tell_buttons(f'Редактирование общих параметров заказа {order.id}:', buttons, buttons, 2, order.id)
 		
 	def show_print_settings(self):
 		order = self.order
@@ -94,7 +99,7 @@ class Edit:
 		buttons.append([f'Тип принтера: {order.printer_type}','printer_type'])
 		buttons.append([f'Высота слоя: {order.layer_height}','layer_height'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Настройки печати:', buttons, buttons, 3, order.id)
+		self.GUI.tell_buttons(f'Редактирование настроек печати заказа {order.id}:', buttons, buttons, 3, order.id)
 
 	def show_files(self):
 		order = self.order
@@ -103,7 +108,7 @@ class Edit:
 		buttons.append([f'Ссылка: {1 if order.link else 0}','link'])
 		buttons.append([f'Чертежы/фото: {len(order.sketches)}','sketches'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Файлы:', buttons, buttons, 4, order.id)
+		self.GUI.tell_buttons(f'Редактирование файлов заказа {order.id}:', buttons, buttons, 4, order.id)
 
 	def show_finances(self):
 		order = self.order
@@ -114,7 +119,7 @@ class Edit:
 		buttons.append([f'Процент предоплаты: {int(order.prepayment_percent)}','prepayment_percent'])
 		buttons.append([f'Удаление поддержек: {order.support_remover}','support_remover'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Финансы:', buttons, buttons, 5, order.id)
+		self.GUI.tell_buttons(f'Редактирование параметров оплаты заказа {order.id}:', buttons, buttons, 5, order.id)
 
 	def show_delivery(self):
 		order = self.order
@@ -124,7 +129,84 @@ class Edit:
 		delivery = self.app.get_chat(order.delivery_user_id)
 		buttons.append([f'Чат выдачи: {delivery}','delivery_user_id'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Доставка:', buttons, buttons, 6, order.id)
+		self.GUI.tell_buttons(f'Редактирование параметров получения/выдачи заказа {order.id}:', buttons, buttons, 6, order.id)
+
+#---------------------------- INPUTS ----------------------------
+
+	def input_value(self, name, value, type):
+		self.chat.set_context(self.address, 7)
+		if not name and not value and not type:
+			name = self.name
+			value = self.value
+			type = self.type
+		else:
+			self.name = name
+			self.value = value
+			self.type = type
+		text = f'Текущее значение поля "{name}" заказа {self.order.id}: {value}.\n\nВведите новое значение'
+		self.GUI.tell(text)
+
+	def input_selection(self, field_name, current_value, buttons):
+		order = self.order
+		text = f'Текущее значение поля "{field_name}" заказа {order.id}: {current_value}.\n\nВыберите новое значение'
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 8, order.id)
+
+	def value_error(self):
+		self.GUI.tell('Ошибка ввода данных')
+
+	def process_value(self):
+		text = self.message.text
+		if data in ['name', 'comment', 'link']: # str
+			new = data
+		elif data in ['priority','quantity','price','payed','support_time','prepayment_percent','pay_code','delivery_code','completion_date']: # int
+			try:
+				new = int(text)
+			except:
+				self.value_error()
+				self.input_value('','','')
+				return
+		elif data in ['layer_height']: # float
+			try:
+				new = float(text)
+			except:
+				self.value_error()
+				self.input_value('','','')
+				return
+		setattr(self.order, data, new)
+		self.app.db.update_order(self.order)
+		self.show_top_menu()
+
+	def process_selection(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.message.btn_data = self.parameters_type
+			self.process_top_menu()
+			return
+		else:
+			data, value = data.split('^')	
+		if data in ['type','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
+			x = ''
+		elif data == 'status':
+			self.set_status(value)
+			return
+		
+		setattr(self.order, data, value)
+		self.app.db.update_order(self.order)
+		self.message.btn_data = self.parameters_type
+		self.process_top_menu()
+
+	def set_status(self, value):
+		order = self.order
+		if value in self.app.data.logical_statuses:
+			order.logical_status = value
+			order.physical_status = 'prepare'
+		elif value in self.app.data.physical_statuses:
+			order.logical_status = ''
+			order.physical_status = value
+		self.app.db.update_order(order)
+		self.message.btn_data = self.parameters_type
+		self.process_top_menu()
 
 #---------------------------- PROCESS ----------------------------
 
@@ -141,17 +223,36 @@ class Edit:
 		elif data == 'delivery':
 			self.show_delivery()
 		elif data == 'Назад':
-			self.chat.user.admin.last_data = ''
-			self.chat.user.admin.show_orders()
+			self.chat.user.admin.order_GUI.last_data = ''
+			self.chat.user.admin.order_GUI.order = self.order
+			self.chat.user.admin.order_GUI.show_order()
+			return
+		self.parameters_type = data
 
 	def process_general(self):
 		data = self.message.btn_data
-		if data == 'type':
+		if data == 'Назад':
+			self.show_top_menu()
+			return
+		dictionary = self.app.data
+		attributes = self.app.data.attributes
+		order = self.order
+		
+		field_name_ru = attributes[data]
+		if data == 'name':
 			x = ''
-		elif data == 'name':
-			x = ''
+		elif data == 'type':
+			current_value = dictionary.types[order.type]
+			buttons = [[value, f'{data}^{key}'] for key, value in dictionary.types.items()]
+			self.input_selection(field_name_ru, current_value, buttons)
 		elif data == 'status':
-			x = ''
+			current_value = order.logical_status
+			if not current_value:
+				current_value = order.physical_status
+			# TODO: convert current_value to russian
+			current_value = dictionary.statuses[current_value]
+			buttons = [[value, f'{data}^{key}'] for key, value in dictionary.statuses.items()]
+			self.input_selection(field_name_ru, current_value, buttons)
 		elif data == 'comment':
 			x = ''
 		elif data == 'priority':
@@ -160,12 +261,10 @@ class Edit:
 			x = ''
 		elif data == 'quantity':
 			x = ''
-		elif data == 'color':
+		elif data == 'color_id': # TODO: rerun color selection
 			x = ''
-		elif data == 'user_name':
+		elif data == 'assigned_designer_id':
 			x = ''
-		elif data == 'Назад':
-			self.show_top_menu()
 
 	def process_print_settings(self):
 		data = self.message.btn_data
@@ -182,11 +281,11 @@ class Edit:
 		data = self.message.btn_data
 		if data == '':
 			x = ''
-		elif data == 'model_file':
+		elif data == 'model_file': # TODO: think
 			x = ''
 		elif data == 'link':
 			x = ''
-		elif data == 'sketches':
+		elif data == 'sketches': # TODO: think
 			x = ''
 		elif data == 'Назад':
 			self.show_top_menu()
