@@ -10,20 +10,19 @@ class Test:
 
 	def testing(self):
 		for chat in self.app.chats:
-			if chat.user_id == 7333126996:
-				general = chat.user.designer.general
+			if chat.user_id == 7246224587:
 				for order in self.app.orders:
-					if order.id == 1:
-						general.order = order
-						general.gcode_gui.order = order
+					if order.id == 2:
+						chat.user.admin.order_GUI.edit.order = order
+						chat.user.admin.order_GUI.edit.show_top_menu()
 
-				general.printer_type = 'Creality ender 3 s1 pro'
-				general.plastic_type = 'PETG'
-				general.weight = 4
-				general.support_time = 0
+				# general.printer_type = 'Creality ender 3 s1 pro'
+				# general.plastic_type = 'PETG'
+				# general.weight = 4
+				# general.support_time = 0
 
-				general.gcode_gui.gcode = Gcode(self.app, 0)
-				general.gcode_gui.show_top_menu()
+				# general.gcode_gui.gcode = Gcode(self.app, 0)
+				# general.gcode_gui.show_top_menu()
 				
 				# general.message = Message('')
 				# general.message.btn_data = '2'

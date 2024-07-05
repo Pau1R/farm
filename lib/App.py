@@ -1,6 +1,7 @@
 from lib.Database import Database
 from lib.equipment.Equipment import Equipment
 from lib.Chat import Chat
+from lib.Data import Data
 from datetime import date
 import re
 from lib.Msg import Message
@@ -41,8 +42,9 @@ class App:
 		self.printer_logic = Printer_logic(self)
 		self.request_logic = Request_logic(self)
 		self.functions = Functions()
+		self.data = Data()
 		
-		# test = Test(self)
+		test = Test(self)
 
 	def new_message(self, message):
 		self.clicker.click()
@@ -109,10 +111,10 @@ class App:
 		return id
 
 	def telethon_new_message(self, event):
-		print('app.py telethon_new_message')
+		# print('app.py telethon_new_message')
 		text = event.message.message
 		chat_id = int(event.message.peer_id.user_id)
-		chat_id = 240044026  # TODO: remove for production!
+		# chat_id = 240044026
 		if not ('Перевод' in text and chat_id == 240044026):
 			return
 

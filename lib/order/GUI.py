@@ -3,6 +3,7 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Color import Client_color
+from lib.order.Edit import Edit
 import time
 import random
 
@@ -15,6 +16,7 @@ class Order_GUI:
 		self.address = address
 		self.GUI = Gui(app, chat, address)
 		self.client_color = Client_color(app, chat, address + '/1')
+		self.edit = Edit(app, chat, address + '/2')
 		self.message = None
 		self.order = None
 		self.order_waiting = None
@@ -36,6 +38,8 @@ class Order_GUI:
 		if message.data_special_format:
 			if file == '1':
 				self.client_color.new_message(message)
+			if file == '2':
+				self.edit.new_message(message)
 			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_order()
@@ -74,26 +78,7 @@ class Order_GUI:
 		
 		buttons = []
 		if self.is_admin():
-			buttons.append(['Сменить тип заказа','type'])
-			buttons.append(['Сменить статуc','status'])
-			if order.price:
-				buttons.append(['Изменить цену','price'])
-				buttons.append(['Изменить внесенную сумму', 'payed'])
-				buttons.append(['Изменить количество','quantity'])
-			if order.quantity:
-				buttons.append(['Изменить количество','quantity'])
-			if order.plastic_type:
-				buttons.append(['Изменить тип пластика','plastic_type'])
-			if order.color_id:
-				buttons.append(['Изменить цвет','color'])
-			if order.completion_date:
-				buttons.append(['Изменить дату готовности','completion_date'])
-			if order.link:
-				buttons.append(['Изменить ссылку','files'])
-			text = 'Добавить файлы'
-			if order.sketches:
-				text = 'Редактировать файлы'
-			buttons.append([text,'files'])
+			buttons.append(['Редактировать заказ','edit'])
 		else:
 			if not order.type == 'production':
 				# Уборка поддержек и выбор цвета
@@ -205,14 +190,13 @@ class Order_GUI:
 
 	def process_order(self):
 		data = self.message.btn_data
-
 		if self.is_admin():
 			if data == 'Назад':
 				self.chat.user.admin.last_data = ''
 				self.chat.user.admin.show_orders()
-			# TODO: transfer to admin functions
+			elif data == 'edit':
+				self.edit.first_message(self.message)
 			return
-
 		if data == 'color':
 			self.client_color.last_data = ''
 			self.client_color.first_message(self.message)

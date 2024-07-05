@@ -229,7 +229,7 @@ class Delivery:
 
 	def process_item_received(self):
 		if self.message.btn_data == 'Задача выполнена':
-			self.order.logical_status = 'item_received' # TODO: admin or operator take the item: write code to process that
+			self.order.logical_status = 'item_received'
 			self.app.db.update_order(self.order)
 			self.show_top_menu()
 

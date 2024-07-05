@@ -89,6 +89,9 @@ class Admin:
 
 	def show_top_menu(self):
 		text = 'Здравствуйте, Администратор ' + self.chat.user_name
+		items = self.app.order_logic.get_orders_by_status(self.app.orders, 'item_received')
+		if items:
+			text += f'\n\nНеобходимо забрать предметы из доставки: {len(items)} шт.'
 		buttons = ['Заказы', 'Оборудование', 'Настройки']
 		if len(self.app.requests):
 			buttons.append(['Обращения в поддержку', 'request'])

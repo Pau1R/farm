@@ -93,7 +93,6 @@ class Gcode_gui:
 				self.show_gcode_screenshot()
 			else:
 				self.show_top_menu()
-		# TODO: process case when wrong file is uploaded
 
 	def process_gcode_screenshot(self):
 		self.chat.context = ''
