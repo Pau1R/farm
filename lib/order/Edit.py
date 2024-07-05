@@ -22,11 +22,12 @@ class Edit:
 	def new_message(self, message):
 		self.GUI.clear_chat()
 		self.message = message
-		self.set_order()
+		function = message.function
+		if function != '7':
+			self.set_order()
 		self.GUI.clear_order_chat(self.order.id)
 
 		file = self.chat.next_level_id(self)
-		function = message.function
 		if message.data_special_format:
 			if file == '1':
 				return
@@ -131,83 +132,6 @@ class Edit:
 		buttons.append('Назад')
 		self.GUI.tell_buttons(f'Редактирование параметров получения/выдачи заказа {order.id}:', buttons, buttons, 6, order.id)
 
-#---------------------------- INPUTS ----------------------------
-
-	def input_value(self, name, value, type):
-		self.chat.set_context(self.address, 7)
-		if not name and not value and not type:
-			name = self.name
-			value = self.value
-			type = self.type
-		else:
-			self.name = name
-			self.value = value
-			self.type = type
-		text = f'Текущее значение поля "{name}" заказа {self.order.id}: {value}.\n\nВведите новое значение'
-		self.GUI.tell(text)
-
-	def input_selection(self, field_name, current_value, buttons):
-		order = self.order
-		text = f'Текущее значение поля "{field_name}" заказа {order.id}: {current_value}.\n\nВыберите новое значение'
-		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, buttons, 8, order.id)
-
-	def value_error(self):
-		self.GUI.tell('Ошибка ввода данных')
-
-	def process_value(self):
-		text = self.message.text
-		if data in ['name', 'comment', 'link']: # str
-			new = data
-		elif data in ['priority','quantity','price','payed','support_time','prepayment_percent','pay_code','delivery_code','completion_date']: # int
-			try:
-				new = int(text)
-			except:
-				self.value_error()
-				self.input_value('','','')
-				return
-		elif data in ['layer_height']: # float
-			try:
-				new = float(text)
-			except:
-				self.value_error()
-				self.input_value('','','')
-				return
-		setattr(self.order, data, new)
-		self.app.db.update_order(self.order)
-		self.show_top_menu()
-
-	def process_selection(self):
-		data = self.message.btn_data
-		if data == 'Назад':
-			self.message.btn_data = self.parameters_type
-			self.process_top_menu()
-			return
-		else:
-			data, value = data.split('^')	
-		if data in ['type','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
-			x = ''
-		elif data == 'status':
-			self.set_status(value)
-			return
-		
-		setattr(self.order, data, value)
-		self.app.db.update_order(self.order)
-		self.message.btn_data = self.parameters_type
-		self.process_top_menu()
-
-	def set_status(self, value):
-		order = self.order
-		if value in self.app.data.logical_statuses:
-			order.logical_status = value
-			order.physical_status = 'prepare'
-		elif value in self.app.data.physical_statuses:
-			order.logical_status = ''
-			order.physical_status = value
-		self.app.db.update_order(order)
-		self.message.btn_data = self.parameters_type
-		self.process_top_menu()
-
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
@@ -231,43 +155,41 @@ class Edit:
 
 	def process_general(self):
 		data = self.message.btn_data
-		if data == 'Назад':
-			self.show_top_menu()
-			return
-		dictionary = self.app.data
-		attributes = self.app.data.attributes
 		order = self.order
-		
-		field_name_ru = attributes[data]
+		self.desired_field = data
+		dictionary = self.app.data
 		if data == 'name':
-			x = ''
+			self.input_value(data, order.name)
 		elif data == 'type':
 			current_value = dictionary.types[order.type]
 			buttons = [[value, f'{data}^{key}'] for key, value in dictionary.types.items()]
-			self.input_selection(field_name_ru, current_value, buttons)
+			self.input_selection(data, current_value, buttons)
 		elif data == 'status':
 			current_value = order.logical_status
 			if not current_value:
 				current_value = order.physical_status
-			# TODO: convert current_value to russian
-			current_value = dictionary.statuses[current_value]
+			current_value = dictionary.statuses[current_value] # translate to russian
 			buttons = [[value, f'{data}^{key}'] for key, value in dictionary.statuses.items()]
-			self.input_selection(field_name_ru, current_value, buttons)
+			self.input_selection(data, current_value, buttons)
 		elif data == 'comment':
-			x = ''
+			self.input_value(data, order.comment)
 		elif data == 'priority':
-			x = ''
+			self.input_value(data, order.priority)
 		elif data == 'completion_date':
 			x = ''
 		elif data == 'quantity':
-			x = ''
+			self.input_value(data, order.quantity)
 		elif data == 'color_id': # TODO: rerun color selection
 			x = ''
 		elif data == 'assigned_designer_id':
 			x = ''
+		elif data == 'Назад':
+			self.show_top_menu()
 
 	def process_print_settings(self):
 		data = self.message.btn_data
+		order = self.order
+		self.desired_field = data
 		if data == 'plastic_type':
 			x = ''
 		elif data == 'printer_type':
@@ -279,12 +201,14 @@ class Edit:
 
 	def process_files(self):
 		data = self.message.btn_data
+		order = self.order
+		self.desired_field = data
 		if data == '':
 			x = ''
 		elif data == 'model_file': # TODO: think
 			x = ''
 		elif data == 'link':
-			x = ''
+			self.input_value(data, order.link)
 		elif data == 'sketches': # TODO: think
 			x = ''
 		elif data == 'Назад':
@@ -292,14 +216,16 @@ class Edit:
 
 	def process_finances(self):
 		data = self.message.btn_data
+		order = self.order
+		self.desired_field = data
 		if data == 'price':
-			x = ''
+			self.input_value(data, int(order.price))
 		elif data == 'payed':
-			x = ''
+			self.input_value(data, int(order.payed))
 		elif data == 'support_time':
-			x = ''
+			self.input_value(data, int(order.support_time))
 		elif data == 'prepayment_percent':
-			x = ''
+			self.input_value(data, int(order.prepayment_percent))
 		elif data == 'support_remover':
 			x = ''
 		elif data == 'Назад':
@@ -307,11 +233,102 @@ class Edit:
 
 	def process_delivery(self):
 		data = self.message.btn_data
+		order = self.order
+		self.desired_field = data
 		if data == 'pay_code':
-			x = ''
+			self.input_value(data, order.pay_code)
 		elif data == 'delivery_code':
-			x = ''
+			self.input_value(data, order.delivery_code)
 		elif data == 'delivery_user_id':
 			x = ''
 		elif data == 'Назад':
 			self.show_top_menu()
+
+#---------------------------- INPUT SHOW ----------------------------
+
+	def input_value(self, field_name, current_value):
+		self.chat.set_context(self.address, 7)
+		if not field_name and not current_value:
+			field_name = self.field_name
+			current_value = self.current_value
+		else:
+			self.field_name = field_name
+			self.current_value = current_value
+		field_name = self.app.data.attributes[field_name] # translating to russian
+		text = f'Текущее значение поля "{field_name}" заказа {self.order.id}: "{current_value}"\n\nВведите новое значение'
+		# self.GUI.tell(text)
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 7, self.order.id)
+
+	def input_selection(self, field_name, current_value, buttons):
+		order = self.order
+		text = f'Текущее значение поля "{field_name}" заказа {order.id}: "{current_value}"\n\nВыберите новое значение'
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 8, order.id)
+
+	def value_error(self):
+		self.GUI.tell('Ошибка ввода данных')
+
+#---------------------------- INPUT PROCESS ----------------------------
+
+	def process_value(self):
+		text = self.message.text
+		data = self.desired_field
+		if self.message.btn_data == 'Назад':
+			self.chat.context = ''
+			self.message.btn_data = self.parameters_type
+			self.process_top_menu()
+			return
+		if data in ['name', 'comment', 'link']: # str
+			new = text
+		elif data in ['priority','quantity','price','payed','support_time','prepayment_percent','pay_code','delivery_code','completion_date']: # int
+			try:
+				new = int(text)
+			except:
+				self.value_error()
+				self.input_value('','')
+				return
+		elif data in ['layer_height']: # float
+			try:
+				new = float(text)
+			except:
+				self.value_error()
+				self.input_value('','')
+				return
+		setattr(self.order, data, new)
+		self.app.db.update_order(self.order)
+		self.message.btn_data = self.parameters_type
+		self.process_top_menu()
+
+	def process_selection(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.message.btn_data = self.parameters_type
+			self.process_top_menu()
+			return
+		else:
+			data, value = data.split('^')
+		if data in ['type','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
+			x = ''
+		elif data == 'status':
+			self.set_status(value)
+			return
+		
+		setattr(self.order, data, value)
+		self.app.db.update_order(self.order)
+		self.message.btn_data = self.parameters_type
+		self.process_top_menu()
+
+#---------------------------- LOGIC ----------------------------
+
+	def set_status(self, value):
+		order = self.order
+		if value in self.app.data.logical_statuses:
+			order.logical_status = value
+			order.physical_status = 'prepare'
+		elif value in self.app.data.physical_statuses:
+			order.logical_status = ''
+			order.physical_status = value
+		self.app.db.update_order(order)
+		self.message.btn_data = self.parameters_type
+		self.process_top_menu()

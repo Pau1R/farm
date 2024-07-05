@@ -66,10 +66,11 @@ class Data:
 #  layer_height
 
 # selection
-#  'type','status','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id '
+#  'type','status','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id'
 
-# other
+# частные случаи:
 #  model_file
 #  sketches
-
 #  color_id
+# 'completion_date'
+# 'assigned_designer_id'
