@@ -130,8 +130,12 @@ class Client_color:
 	def process_order_colors(self):
 		data = self.message.btn_data
 		if data == 'Назад':
-			self.chat.user.order_GUI.last_data = ''
-			self.chat.user.order_GUI.first_message(self.message)
+			if self.is_admin():
+				self.chat.user.admin.order_GUI.edit.last_data = ''
+				self.chat.user.admin.order_GUI.edit.show_general()
+			else:
+				self.chat.user.order_GUI.last_data = ''
+				self.chat.user.order_GUI.first_message(self.message)
 		elif data == 'ordered':
 			self.show_order_colors_ordered()
 		else:
@@ -170,9 +174,16 @@ class Client_color:
 			self.order.logical_status = 'parameters_set'
 			self.order.set_price()
 			self.app.db.update_order(self.order)
-			self.show_booked()
+			if self.is_admin():
+				self.chat.user.admin.order_GUI.edit.last_data = ''
+				self.chat.user.admin.order_GUI.edit.show_general()
+			else:
+				self.show_booked()
 
 	def process_booked(self):
 		if self.message.btn_data == 'ok':
 			self.chat.user.order_GUI.last_data = ''
 			self.chat.user.order_GUI.first_message(self.message)
+
+	def is_admin(self):
+		return self.chat.is_employee and 'Администратор' in self.chat.user.roles

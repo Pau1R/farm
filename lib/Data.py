@@ -6,7 +6,7 @@ class Data:
 			'prevalidate': 'ожидается предварительная валидация',
 			'validate': 'ожидается валидация',
 			'validated': 'валидирован',
-			'parameters_set': 'цвет выбран',
+			'parameters_set': 'ожидание оплаты',
 			'waiting_for_item': 'ожидание предмета',
 			'item_received': 'предмет в выдаче',
 			'sample_aquired': '',
@@ -55,6 +55,10 @@ class Data:
 		    'delivery_user_id': 'назначенный доставщик'
 		}
 
+		self.plastics = ['']
+
+		self.supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
+
 
 # str
 #  'name', 'comment', 'link'
@@ -73,4 +77,3 @@ class Data:
 #  sketches
 #  color_id
 # 'completion_date'
-# 'assigned_designer_id'

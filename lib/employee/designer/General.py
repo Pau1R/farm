@@ -145,7 +145,7 @@ class General:
 		buttons = []
 		for type_ in self.app.equipment.printer_types:
 			buttons.append([type_.name, type_.id])
-		buttons.append('Любой')
+		buttons.append(['Любой','*'])
 		self.GUI.tell_buttons('Выберите тип принтера', buttons, buttons, 5, self.order.id)
 
 	def show_plastic_type(self):
@@ -260,10 +260,7 @@ class General:
 		if data == '*':
 			self.printer_type = '*'
 		else:
-			data = int(data)
-			for type_ in self.app.equipment.printer_types:
-				if type_.id == data:
-					self.printer_type = type_.name
+			self.printer_type = int(data)
 		self.show_plastic_type()
 
 	def process_plastic_type(self):

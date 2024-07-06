@@ -10,6 +10,7 @@ from lib.order.Logic import Order_logic
 from lib.order.gcode.Gcode import Gcode
 from lib.order.gcode.Logic import Gcode_logic
 from lib.equipment.printer.Logic import Printer_logic
+from lib.equipment.printer_type.Logic import Printer_type_logic
 from lib.request.Logic import Request_logic
 from lib.setting.Setting import Setting
 from lib.Clicker import Clicker
@@ -40,6 +41,7 @@ class App:
 		self.gcode_logic = Gcode_logic(self)
 		self.clicker = Clicker(self)
 		self.printer_logic = Printer_logic(self)
+		self.printer_type_logic = Printer_type_logic(self)
 		self.request_logic = Request_logic(self)
 		self.functions = Functions()
 		self.data = Data()
@@ -160,3 +162,5 @@ class App:
 
 # TODO:
 # - admin: view all orders, clients (their name) and client orders, tell info to client
+# - set order delivery_user_id somewhere
+# - refine spool booking process. spool.booked is not saved and order.booked is incorrect

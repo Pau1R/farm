@@ -184,11 +184,11 @@ class Equipment:
 	def sort_printers(self):
 		self.printers.sort(key=self.get_object_id)
 
-	def printer_cost(self, type_):
-		for printer in self.printer_types:
-			if printer.name == type_:
-				return printer.hour_cost
-		print('Equipment.py, print_cost: possible error, self.printer_types:', self.printer_types, ', type_:', type_)
+	def printer_cost(self, id):
+		for printer_type in self.printer_types:
+			if printer_type.id == int(id):
+				return printer_type.hour_cost
+		print('Equipment.py, print_cost: possible error, self.printer_types:', self.printer_types, ', id:', id)
 		return None
 
 	def create_new_spool(self, type, diameter, weight, density, color_id, dried, brand, used, price, status, delivery_date_estimate):

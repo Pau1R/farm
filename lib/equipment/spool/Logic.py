@@ -47,7 +47,7 @@ class Spool_logic:
 	def filament_available(self, statuses, type_, color_id, all_weight, one_copy_weight):
 		spools = sorted(self.spools.copy(), key=lambda item: item.created)
 		selected_spools = []
-		small_spools = {}
+		small_spools = []
 		weight = 0
 		for spool in spools:
 			if all_weight > 0 and spool.status in statuses and spool.type == type_ and spool.color_id == color_id:
@@ -204,6 +204,13 @@ class Spool_logic:
 		for spool in self.spools:
 			if spool.id == int(id):
 				return spool
+
+	def get_all_types(self):
+		types = []
+		for spool in self.spools:
+			if spool.type not in types:
+				types.append(spool.type)
+		return types
 
 	def get_list_element_0(self, lst):
 		return lst[0]

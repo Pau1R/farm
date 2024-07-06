@@ -4,8 +4,8 @@ from lib.Gui import Gui
 from lib.client.place_order.GUI.General import General_parameters
 
 class Stl_link:
-	supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
-
+	last_data = ''
+	
 	def __init__(self, app, chat, address):
 		self.app = app
 		self.chat = chat
@@ -38,7 +38,7 @@ class Stl_link:
 	def show_top_menu(self):
 		self.chat.set_context(self.address, 1)
 		if self.order.type == 'stl':
-			text = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(self.supported_files)
+			text = 'Загрузите свой 3д файл. Поддерживаются следующие форматы: ' + ', '.join(self.app.data.supported_files)
 		elif self.order.type == 'link':
 			text = 'Отправьте ссылку на модель из интернета'
 		self.GUI.tell(text)
@@ -52,7 +52,7 @@ class Stl_link:
 	def process_top_menu(self):
 		self.chat.context = ''
 		if self.order.type == 'stl':
-			if self.message.type == 'document' and self.message.file_name.split(".")[-1] in self.supported_files:
+			if self.message.type == 'document' and self.message.file_name.split(".")[-1] in self.app.data.supported_files:
 				self.order.model_file = self.message.file_id
 				self.general_parameters.first_message(self.message)
 			else:
