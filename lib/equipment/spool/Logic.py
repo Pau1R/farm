@@ -38,52 +38,75 @@ class Spool_logic:
 			gram_price = self.spools_average_price(plastic_types)
 		return gram_price
 
-	def available_weight(self, spool, minimal_weight):
-		weight = spool.weight - spool.used - spool.booked - minimal_weight - 15
+	def available_weight(self, spool):
+		weight = spool.weight - spool.used - spool.booked - 15
 		if weight < 0 :
-			return 0
-		return weight
+			weight = 0
+		return int(weight)
 
 	def filament_available(self, statuses, type_, color_id, all_weight, one_copy_weight):
-		spools = sorted(self.spools.copy(), key=lambda item: item.created)
+		# There is a list of spools. Each spool contains type, weight (usually 1 kg), booked_weight, used_weight, color and status. Some spools are partially booked or used.
+		# Now a new order comes in and spools need to be booked. The order type is PETG, amount of copies is 6, one copy weight is 200 grams, color is black and status is stock.
+		# Write an algorithm that looks over the spools and optimizes their usage so the spools with the smallest amount of remaining weight are used first. Remaining weight should be enough for at least one copy
+		if color_id == 2 and len(statuses) > 1:
+			x = ''
+		spools = [spool for spool in self.spools.copy() if spool.type == type_ and spool.color_id == color_id and spool.status in statuses]
+		if not spools:
+			return []
+		spools = sorted(spools, key=lambda spool: (self.available_weight(spool), spool.created))
 		selected_spools = []
 		small_spools = []
-		weight = 0
+		small_weight = 0
+
 		for spool in spools:
-			if all_weight > 0 and spool.status in statuses and spool.type == type_ and spool.color_id == color_id:
-				spool_weight = self.available_weight(spool, 0)
-				# 1) try to fit all order
-				if spool_weight > all_weight:
-					all_weight = 0
-					selected_spools.append([spool, all_weight])
-				# 2) try to fit several copies
-				elif spool_weight > one_copy_weight:
-					fits_weight = (spool_weight // one_copy_weight) * one_copy_weight
-					all_weight -= fits_weight
-					selected_spools.append([spool, fits_weight])
-				# 3) spread copy over several spools
-				elif spool_weight > 30:
-					small_spools.append([spool, spool_weight])
-					weight += spool_weight
-					if weight > one_copy_weight:
-						selected_spools.extend(small_spools)
-						small_spools = []
-						weight -= one_copy_weight
-						all_weight -= one_copy_weight
-		return selected_spools, all_weight
+			spool_weight = self.available_weight(spool)
+			# if spool_weight >= one_copy_weight:
+			# 1) try to fit all order
+			if spool_weight > all_weight:
+				selected_spools.append([spool, all_weight])
+				all_weight = 0
+			# 2) try to fit several copies
+			elif spool_weight > one_copy_weight:
+				fits_weight = int((spool_weight // one_copy_weight) * one_copy_weight)
+				all_weight -= fits_weight
+				selected_spools.append([spool, fits_weight])
+				# save remainder for (3)
+				if spool_weight - fits_weight > 30:
+					small_spools.append([spool, spool_weight - fits_weight])
+					small_weight += spool_weight
+			# 3) gather info for spreading copy over several spools
+			elif spool_weight > 30:
+				small_spools.append([spool, self.available_weight(spool)])
+				small_weight += spool_weight
+
+		if all_weight > 0:
+			small_spools = sorted(small_spools, key=lambda spool: self.available_weight(spool[0]), reverse=True) # sort from heaviest to lightest
+			for spool in small_spools:
+				spool_weight = spool[1]
+				spool = spool[0]
+				# spool_weight = self.available_weight(spool)
+				if all_weight < spool_weight:
+					spool_weight = all_weight
+				all_weight -= spool_weight
+				selected_spools.append([spool, spool_weight])
+		if all_weight > 0:
+			return []
+		return selected_spools
+
+		# - order: [spool_id, booked_weight] (save booking info to order for prebooking. When gcodes are added remove booking from spools and rerun booking saving the info to gcodes and maximizing (if available) one gcode = one spool) 
+		# - gcode: [spool_id, booked_weight], 
+		# - spools,
 
 	def satisfy(self, statuses, types, color_id, order_weight, one_copy_weight):
 		plastic_types = self.normalize_materials(types)
-		booked = [] 
+		booked = []
 		for type_ in plastic_types:
-			spools, order_weight = self.filament_available(statuses, type_, color_id, order_weight, one_copy_weight)
+			spools = self.filament_available(statuses, type_, color_id, order_weight, one_copy_weight)
 			booked.extend(spools)
-			if order_weight < 1:
-				return booked
-		if order_weight > 0: return [] # Not enough spools to satisfy order
+		return booked
 			
 	def book(self, statuses, types, color_id, one_copy_weight, order_quantity):
-		order_weight = one_copy_weight * order_quantity
+		order_weight = int(one_copy_weight * order_quantity)
 
 		booked = self.satisfy(statuses, types, color_id, order_weight, one_copy_weight)
 		if not booked: return
@@ -167,7 +190,7 @@ class Spool_logic:
 			stock_spools = [sublist[0] for sublist in stock_spools]
 			ordered.extend(ordered_spools)
 			stock.extend(stock_spools)
-			
+
 		ordered = [spool for spool in ordered if spool not in stock] # remove color if stock buttons already contain it
 
 		# get latest delivery date for each color
@@ -175,7 +198,7 @@ class Spool_logic:
 			if spool.color_id not in colors:
 				colors.add(spool.color_id)
 		for color in colors:
-			latest_date = max(spool.delivery_date_estimate for spool in ordered if spool.color_id == color)
+			latest_date = max(spool.delivery_date_estimate for spool in ordered if spool.color_id == color and spool.delivery_date_estimate is not None)
 			latest_dates[color] = latest_date
 
 		# convert to button format list

@@ -14,8 +14,12 @@ class Test:
 				for order in self.app.orders:
 					if order.id == 2:
 						chat.user.admin.order_GUI.edit.order = order
-						chat.user.admin.order_GUI.edit.show_top_menu()
+						chat.user.admin.order_GUI.edit.show_general()
 
+
+						# chat.user.admin.order_GUI.edit.client_color.last_data = ''
+						# chat.user.admin.order_GUI.edit.client_color.order = order
+						# chat.user.admin.order_GUI.edit.client_color.show_colors()
 				# general.printer_type = 'Creality ender 3 s1 pro'
 				# general.plastic_type = 'PETG'
 				# general.weight = 4

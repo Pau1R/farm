@@ -93,6 +93,7 @@ class Edit:
 		date = self.app.functions.russian_date(order.completion_date)
 		buttons.append([f'Дата готовности: {date}','completion_date'])
 		buttons.append([f'Количество экземпляров: {order.quantity}','quantity'])
+		# TODO: add one copy weight
 		color = self.app.equipment.color_logic.get_color_name(order.color_id)
 		buttons.append([f'Цвет: {color}','color_id'])
 		designer = self.app.get_chat(order.assigned_designer_id)
@@ -314,7 +315,7 @@ class Edit:
 		field_name = self.app.data.attributes[field_name] # translating to russian
 		text = f'Текущее значение поля "{field_name}" заказа {order.id}: "{current_value}"\n\nВыберите новое значение'
 		buttons.append('Назад')
-		self.GUI.tell_buttons(text, buttons, [], 8, order.id)
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 8, order.id)
 
 	def value_error(self):
 		self.GUI.tell('Ошибка ввода данных')
@@ -360,6 +361,7 @@ class Edit:
 			data, value = data.split('^')
 		if data == 'status':
 			self.set_status(value)
+			return
 		elif data not in ['type','completion_date','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
 			return
 		if data in ['completion_date']:

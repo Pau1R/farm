@@ -137,6 +137,8 @@ class Order:
 		return False
 
 	def reserve_plastic(self, statuses, color_id):
+		if self.booked:
+			self.remove_reserve()
 		self.booked = self.app.equipment.spool_logic.book(statuses, self.plastic_type, color_id, self.weight, self.quantity)
 		self.booked_time = int(time.time())
 		self.app.db.update_order(self)
@@ -148,10 +150,10 @@ class Order:
 			spool = self.spool_logic.get_spool(book[0])
 			if spool.booked >= book[1]:
 				spool.booked -= book[1]
+				self.app.db.update_spool(spool)
 		self.booked = []
 		self.booked_time = 0
 		self.color_id = 0
-		self.completion_date = None
 		self.app.db.update_order(self)
 
 	def booking_canceled(self):
