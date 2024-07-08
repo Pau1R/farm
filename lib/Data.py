@@ -37,6 +37,7 @@ class Data:
 		    'priority': 'приоритет',
 		    'completion_date': 'дата завершения',
 		    'quantity': 'количество',
+		    'weight': 'вес экзмепляра',
 		    'color_id': 'цвет',
 		    'assigned_designer_id': 'назначенный дизайнер',
 		    'plastic_type': 'тип пластика',

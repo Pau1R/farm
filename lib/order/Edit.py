@@ -93,7 +93,7 @@ class Edit:
 		date = self.app.functions.russian_date(order.completion_date)
 		buttons.append([f'Дата готовности: {date}','completion_date'])
 		buttons.append([f'Количество экземпляров: {order.quantity}','quantity'])
-		# TODO: add one copy weight
+		buttons.append([f'Вес экземпляра: {int(order.weight)}','weight'])
 		color = self.app.equipment.color_logic.get_color_name(order.color_id)
 		buttons.append([f'Цвет: {color}','color_id'])
 		designer = self.app.get_chat(order.assigned_designer_id)
@@ -130,7 +130,7 @@ class Edit:
 		remover = order.support_remover
 		if not remover:
 			remover = 'Студия'
-		buttons.append([f'Удаление поддержек: {remover}','support_remover']) # TODO: 
+		buttons.append([f'Удаление поддержек: {remover}','support_remover'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(f'Редактирование параметров оплаты заказа {order.id}:', buttons, buttons, 5, order.id)
 
@@ -210,7 +210,10 @@ class Edit:
 			self.input_selection(data, current, buttons)
 		elif data == 'quantity':
 			self.input_value(data, order.quantity)
+		elif data == 'weight':
+			self.input_value(data, int(order.weight))
 		elif data == 'color_id':
+			# TODO: add button to remove color all together
 			self.client_color.last_data = ''
 			self.client_color.first_message(self.message)
 		elif data == 'assigned_designer_id':
@@ -250,7 +253,7 @@ class Edit:
 			self.show_load_stl()
 		elif data == 'link':
 			self.input_value(data, order.link)
-		elif data == 'sketches': # TODO: show list of files: delete, add
+		elif data == 'sketches':
 			self.show_load_sketch()
 		elif data == 'Назад':
 			self.show_top_menu()
@@ -332,7 +335,7 @@ class Edit:
 			return
 		if data in ['name', 'comment', 'link']: # str
 			new = text
-		elif data in ['priority','quantity','price','payed','support_time','prepayment_percent','pay_code','delivery_code','completion_date']: # int
+		elif data in ['priority','quantity','weight','price','payed','support_time','prepayment_percent','pay_code','delivery_code','completion_date']: # int
 			try:
 				new = int(text)
 			except:

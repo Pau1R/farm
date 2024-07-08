@@ -84,7 +84,6 @@ class Spool_logic:
 			for spool in small_spools:
 				spool_weight = spool[1]
 				spool = spool[0]
-				# spool_weight = self.available_weight(spool)
 				if all_weight < spool_weight:
 					spool_weight = all_weight
 				all_weight -= spool_weight
@@ -92,10 +91,6 @@ class Spool_logic:
 		if all_weight > 0:
 			return []
 		return selected_spools
-
-		# - order: [spool_id, booked_weight] (save booking info to order for prebooking. When gcodes are added remove booking from spools and rerun booking saving the info to gcodes and maximizing (if available) one gcode = one spool) 
-		# - gcode: [spool_id, booked_weight], 
-		# - spools,
 
 	def satisfy(self, statuses, types, color_id, order_weight, one_copy_weight):
 		plastic_types = self.normalize_materials(types)

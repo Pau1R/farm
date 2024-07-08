@@ -137,10 +137,18 @@ class Order:
 		return False
 
 	def reserve_plastic(self, statuses, color_id):
-		if self.booked:
-			self.remove_reserve()
-		self.booked = self.app.equipment.spool_logic.book(statuses, self.plastic_type, color_id, self.weight, self.quantity)
+		while self.app.booking_busy:
+			time.sleep(0.1)
+		self.app.booking_busy = True
+		self.remove_reserve()
+		if self.app.gcode_logic.get_gcodes(self):
+			# TODO: if their are gcode file available - book them
+			self.app.gcode_logic.book(self, statuses, color_id)
+		else:
+			self.booked = self.app.equipment.spool_logic.book(statuses, self.plastic_type, color_id, self.weight, self.quantity)
+		self.app.booking_busy = False
 		self.booked_time = int(time.time())
+		self.color_id = color_id
 		self.app.db.update_order(self)
 		self.set_completion_date()
 		return self.booked
@@ -151,6 +159,7 @@ class Order:
 			if spool.booked >= book[1]:
 				spool.booked -= book[1]
 				self.app.db.update_spool(spool)
+		self.app.gcode_logic.remove_reserve(self)
 		self.booked = []
 		self.booked_time = 0
 		self.color_id = 0

@@ -38,7 +38,7 @@ class Order_GUI:
 		if message.data_special_format:
 			if file == '1':
 				self.client_color.new_message(message)
-			if file == '2':
+			elif file == '2':
 				self.edit.new_message(message)
 			elif self.chat.not_repeated_button(self):
 				if function == '1':

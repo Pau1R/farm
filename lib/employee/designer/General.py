@@ -159,7 +159,7 @@ class General:
 		buttons.append(['Подходящего пластика нет', 'unavailable'])
 		self.GUI.tell_buttons(text, buttons, buttons, 6, self.order.id)
 
-	def show_weight(self):
+	def show_weight(self): # TODO: remove. Calculate weight from gcode inputs
 		self.chat.set_context(self.address, 7)
 		text = 'Введите вес'
 		if self.order.logical_status == 'prevalidate':

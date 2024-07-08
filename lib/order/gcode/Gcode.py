@@ -9,6 +9,8 @@ class Gcode:
 		self.screenshot = ''
 		self.status = ''
 		self.duration = 0
+		self.weight = 0
+		self.booked = []
 		self.start_datetime = None
 		
 		self.quantity = 1 # temporary value for created gcodes

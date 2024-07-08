@@ -274,6 +274,8 @@ class Database:
 			gcode.screenshot = data['screenshot']
 			gcode.status = data['status']
 			gcode.duration = data['duration']
+			gcode.weight = data['weight']
+			gcode.booked = ast.literal_eval(data['booked'])
 			gcode.start_datetime = data['start_datetime']
 			self.app.gcodes.append(gcode)
 

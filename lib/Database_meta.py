@@ -112,6 +112,8 @@ class Meta:
         "screenshot": "TEXT DEFAULT ''",
         "status": "TEXT DEFAULT ''",
         "duration": "INTEGER DEFAULT 0",
+        "weight": "INTEGER DEFAULT 0",
+        "booked": "TEXT DEFAULT ''",
         "start_datetime": "DATETIME DEFAULT ''"}
     setting = {
         "id": "INTEGER DEFAULT 0",

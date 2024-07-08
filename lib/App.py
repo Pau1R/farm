@@ -45,8 +45,10 @@ class App:
 		self.request_logic = Request_logic(self)
 		self.functions = Functions()
 		self.data = Data()
+
+		self.booking_busy = False
 		
-		test = Test(self)
+		# test = Test(self)
 
 	def new_message(self, message):
 		self.clicker.click()
@@ -163,4 +165,5 @@ class App:
 # TODO:
 # - admin: view all orders, clients (their name) and client orders, tell info to client
 # - set order delivery_user_id somewhere
-# - refine spool booking process. spool.booked is not saved and order.booked is incorrect
+# - when order has gcodes book spools to them. For prevalidated orders rebook when adding gcode files
+#   - rules: if available do one gcode = one spool
