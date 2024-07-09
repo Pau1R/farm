@@ -72,6 +72,8 @@ class Order_GUI:
 	def show_order(self):
 		text = self.get_text()
 		order = self.order
+		order.color_id = 0 # TODO: remove for production!
+		order.logical_status = 'validated' # TODO: remove for production!
 
 		logical = order.logical_status
 		physical = order.physical_status

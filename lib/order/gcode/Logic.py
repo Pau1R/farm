@@ -23,14 +23,16 @@ class Gcode_logic:
 	def remove_reserve(self, order):
 		gcodes = self.get_gcodes(order)
 		for gcode in gcodes:
-			for spool in gcode.booked:
-				weight = spool[1]
-				spool = self.app.equipment.spool_logic.get_spool(spool[0])
-				if spool.booked >= weight:
-					spool.booked -= weight
-					self.app.db.update_spool(spool)
-			gcode.booked = []
-			self.app.db.update_gcode(gcode)
+			booked = gcode.booked
+			if booked:
+				for spool in booked:
+					weight = spool[1]
+					spool = self.app.equipment.spool_logic.get_spool(spool[0])
+					if spool.booked >= weight:
+						spool.booked -= weight
+						self.app.db.update_spool(spool)
+				gcode.booked = []
+				self.app.db.update_gcode(gcode)
 
 	def is_booked(self, order):
 		gcodes = self.get_gcodes(order)
@@ -79,3 +81,4 @@ class Gcode_logic:
 				spool = self.app.equipment.spool_logic.get_spool(spool[0])
 				spool.booked += weight
 				self.app.db.update_spool(spool)
+		return gcode_spools

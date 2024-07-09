@@ -320,6 +320,14 @@ class General:
 					gcode.screenshot = temp_gcode.screenshot
 					self.app.gcodes_append(gcode)
 					self.app.db.create_gcode(gcode)
+			if order.booked:
+				statuses = ['stock']
+				if 'ordered' not in statuses:
+					for book in order.booked:
+						spool = self.app.equipment.spool_logic.get_spool(book[0])
+						if spool.status == 'ordered':
+							statuses.append('ordered')
+				order.reserve_plastic(statuses, order.color_id)
 			order.design_time = self.design_time
 			order.print_time = self.print_time
 			order.weight = self.weight

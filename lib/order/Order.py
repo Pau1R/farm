@@ -142,16 +142,17 @@ class Order:
 		self.app.booking_busy = True
 		self.remove_reserve()
 		if self.app.gcode_logic.get_gcodes(self):
-			# TODO: if their are gcode file available - book them
-			self.app.gcode_logic.book(self, statuses, color_id)
+			booked = self.app.gcode_logic.book(self, statuses, color_id) # returns {'gcode': [[spool_id, weight],...]}
+			self.booked = []
 		else:
-			self.booked = self.app.equipment.spool_logic.book(statuses, self.plastic_type, color_id, self.weight, self.quantity)
+			booked = self.app.equipment.spool_logic.book(statuses, self.plastic_type, color_id, self.weight, self.quantity) # returns [[spool_id, weight],...]
+			self.booked = booked
 		self.app.booking_busy = False
 		self.booked_time = int(time.time())
 		self.color_id = color_id
 		self.app.db.update_order(self)
 		self.set_completion_date()
-		return self.booked
+		return booked
 
 	def remove_reserve(self):
 		for book in self.booked:
