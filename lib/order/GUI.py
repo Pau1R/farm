@@ -72,18 +72,29 @@ class Order_GUI:
 	def show_order(self):
 		text = self.get_text()
 		order = self.order
-		order.color_id = 0 # TODO: remove for production!
-		order.logical_status = 'validated' # TODO: remove for production!
+		# order.logical_status = 'validated' # TODO: remove for production!
 
 		logical = order.logical_status
 		physical = order.physical_status
 		
 		buttons = []
-		if self.is_admin():
+		if self.chat.is_admin():
 			buttons.append(['Редактировать заказ','edit'])
 			buttons.append(['Отменить заказ','reject'])
-		else:
-			if not order.type == 'production':
+		elif self.chat.is_designer():
+			if order.type == 'production':
+				if order.assigned_designer_id:
+					buttons.append(['Редактировать заказ','edit'])
+					buttons.append(['Перевести в чат', 'chat'])
+					buttons.append(['Отказать','reject'])
+				else:
+					buttons.append(['Взять в работу', 'take'])
+			else:
+				buttons.append(['Принять заказ','accept'])
+		elif not self.chat.is_employee:
+			if order.type == 'production':
+				x = '' # show only 'Назад' button
+			else:
 				# Уборка поддержек и выбор цвета
 				if logical == 'validated':
 					# TODO: if type == 'sketch' ask client to confirm photos, else: create dialog with client for clarification.
@@ -106,17 +117,18 @@ class Order_GUI:
 				    buttons.append('Отменить заказ')
 		buttons.append('Назад')
 
-		# show order and buttons
+		# show
 		type_ = order.type
 		if type_ == 'stl':
 			self.GUI.tell_document(order.model_file, '')
 			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
-			# self.GUI.tell_document_buttons(order.model_file, text, buttons, buttons, 1, order.id)
 		elif type_ == 'link':
 			self.GUI.tell_link_buttons(order.link, text, buttons, buttons, 1, order.id)
 		elif type_ == 'sketch' or type_ == 'item':
 			for file in order.sketches:
 				self.GUI.tell_file(file[0], file[1], '')
+			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
+		elif type_ == 'production':
 			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
 
 	def show_supports(self):
@@ -193,35 +205,47 @@ class Order_GUI:
 
 	def process_order(self):
 		data = self.message.btn_data
-		if self.is_admin():
+		if self.chat.is_admin():
 			if data == 'Назад':
 				self.chat.user.admin.last_data = ''
 				self.chat.user.admin.show_orders()
 			elif data == 'edit':
 				self.edit.first_message(self.message)
 			elif data == 'reject':
-				x = ''
-				# TODO:
-			return
-		if data == 'color':
-			self.client_color.last_data = ''
-			self.client_color.first_message(self.message)
-		elif data == 'supports':
-			self.show_supports()
-		elif data == 'continue':
-			if type_ == 'stl' or type_ == 'link':
-				self.order.physical_status = 'in_line'
-			self.order.logical_status = 'prepayed'
-		elif data == 'pay':
-			self.show_pay()
-		elif data == 'Отменить заказ':
-			if self.is_admin():
 				self.show_reject_reason()
-			else:
-				self.show_cancel_confirmation()
-		elif data == 'Назад':
-			self.chat.user.last_data = ''
-			self.chat.user.show_orders()
+		elif self.chat.is_designer():
+			if data == 'take':
+				self.order.assigned_designer_id = self.chat.user_id
+				self.app.db.update_order(self.order)
+				self.show_order()
+			elif data == 'accept':
+				self.chat.user.designer.general.last_data = ''
+				self.chat.user.designer.general.order_accepted()
+			elif data == 'chat':
+				chat = self.app.get_chat(self.order.user_id)
+				chat.user.show_redirect_to_chat(self.order)
+				self.order.miscellaneous += '\nЗаказ переведен в чат'
+				self.show_order()
+			elif data == 'edit':
+				self.edit.first_message(self.message)
+			elif data == 'reject':
+				self.show_reject_reason()
+			elif data == 'Назад':
+				self.chat.user.designer.general.last_data = ''
+				self.chat.user.designer.general.show_top_menu()
+		elif not self.chat.is_employee:
+			if data == 'Назад':
+				self.chat.user.last_data = ''
+				self.chat.user.show_orders()
+			elif data == 'reject':
+				self.show_cancel_confirmation() # inform about payments
+			elif data == 'color':
+				self.client_color.last_data = ''
+				self.client_color.first_message(self.message)
+			elif data == 'supports':
+				self.show_supports()
+			elif data == 'pay':
+				self.show_pay()
 
 	def process_supports(self):
 		self.order.support_remover = self.message.btn_data
@@ -242,7 +266,7 @@ class Order_GUI:
 	def process_cancel_confirmation(self):
 		order = self.order
 		if self.message.btn_data == 'confirm':
-			if self.is_admin():
+			if self.chat.is_employee:
 				for chat in self.app.chats:
 					if chat.user_id == order.user_id:
 						chat.user.order_GUI.show_rejected_by_admin(order, self.reject_reason)
@@ -253,7 +277,7 @@ class Order_GUI:
 			order.remove()
 			order = None
 			self.chat.user.last_data = ''
-			if self.is_admin():
+			if self.chat.is_employee:
 				self.chat.user.admin.last_data = ''
 				self.chat.user.admin.show_orders()
 			else:
@@ -268,11 +292,9 @@ class Order_GUI:
 
 #---------------------------- LOGIC ----------------------------
 
-	def is_admin(self):
-		return self.chat.is_employee and 'Администратор' in self.chat.user.roles
-
 	def get_text(self):
 		order = self.order
+		data = self.app.data
 
 		# set parameters
 		free_start = order.is_free_start()
@@ -284,32 +306,38 @@ class Order_GUI:
 		plastic_type.lower()
 
 		# convert order status to readable format
-		status = ''
-		delivery_text = ''
-		logical = order.logical_status
-		physical = order.physical_status
-		if logical in ['prevalidate','validate']:
-			status = 'Ожидание дизайнера'
-		elif logical == 'validated':
-			status = 'Ожидание действий клиента'
-		elif logical == 'parameters_set':
-			status = 'Ожидание оплаты'
-		# statuses for item order
-		elif logical == 'waiting_for_item':
-			status = 'Принесите предмет в пункт выдачи'
-			delivery_text = 'Код передачи'
-		elif logical in ['sample_aquired','waiting_for_design']:
-			status = 'Ожидание дизайнера'
-		# physical statuses
-		elif physical == 'in_line':
-			status = 'В очереди на печать'
-		elif physical == 'printing':
-			status = 'Печатается'
-		elif physical == 'finished':
-			status = 'Печать завершена'
-		elif physical == 'in_pick-up':
-			status = 'В пункте выдачи'
-			delivery_text = 'Код получения'
+		if self.chat.is_employee:
+			status = order.logical_status
+			if not status:
+				status = order.physical_status
+			status = data.statuses[status]
+			delivery_text = 'Код передачи/получения'
+		else:
+			delivery_text = ''
+			logical = order.logical_status
+			physical = order.physical_status
+			if logical in ['prevalidate','validate']:
+				status = 'Ожидание дизайнера'
+			elif logical == 'validated':
+				status = 'Ожидание действий клиента'
+			elif logical == 'parameters_set':
+				status = 'Ожидание оплаты'
+			# statuses for item order
+			elif logical == 'waiting_for_item':
+				status = 'Принесите предмет в пункт выдачи'
+				delivery_text = 'Код передачи'
+			elif logical in ['sample_aquired','waiting_for_design']:
+				status = 'Ожидание дизайнера'
+			# physical statuses
+			elif physical == 'in_line':
+				status = 'В очереди на печать'
+			elif physical == 'printing':
+				status = 'Печатается'
+			elif physical == 'finished':
+				status = 'Печать завершена'
+			elif physical == 'in_pick-up':
+				status = 'В пункте выдачи'
+				delivery_text = 'Код получения'
 
 		# set text
 		text = order.name + '\n\n'
@@ -322,6 +350,8 @@ class Order_GUI:
 			text += f'Стоимость: {order.price} рублей\n'
 		if order.quantity > 1:
 			text += f'Кол-во экземпляров: {order.quantity}\n'
+		if order.quality:
+			text += f'Качество: {data.quality[order.quality]}\n'
 		if order.weight:
 			text0 = 'Общий вес' if order.quantity else 'Вес'
 			text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
@@ -336,7 +366,38 @@ class Order_GUI:
 			text += f"Удаление поддержек: {'клиент' if order.support_remover == 'Клиент' else 'студия'}\n"
 		if order.payed:
 			if not free_start and not prepayed:
-				text += f'Предоплачено: {int(order.payed)}/{int(order.get_prepayment_price())} рублей'
+				text += f'Предоплачено: {int(order.payed)}/{int(order.get_prepayment_price())} рублей\n'
 			else:
-				text += f'Предоплачено: {int(order.payed)} рублей'
+				text += f'Предоплачено: {int(order.payed)} рублей\n'
+		if order.comment:
+			text += f'Комментарий: {order.comment}\n'
+		if self.chat.is_employee:
+			text += f'Тип заказа: {data.types[order.type]}\n'
+			if order.priority:
+				text += f'Приоритет: {order.priority}\n'
+			if order.assigned_designer_id:
+				designer = self.app.get_chat(order.assigned_designer_id)
+				text += f'Назначенный дизайнер: {designer.user_name}\n'
+			if order.printer_type:
+				printer_type = self.app.printer_type_logic.get_printer_type(order.printer_type)
+				text += f'Тип принтера: {printer_type.name}\n'
+			if order.layer_height:
+				text += f'Высота слоя: {order.layer_height}\n'
+			if order.model_file:
+				text += 'stl файл: 1\n'
+			if order.link:
+				text += 'Ссылка: 1\n'
+			if order.sketches:
+				text += f'Чертежы/фото: {len(order.sketches)}\n'
+			if order.support_time:
+				text += f'Время удаления поддержек c 1 шт.: {int(order.support_time)}\n'
+			if order.prepayment_percent:
+				text += f'Процент предоплаты: {int(order.prepayment_percent)}\n'
+			if order.pay_code:
+				text += f'Код оплаты: {order.pay_code}\n'
+			if order.delivery_user_id:
+				delivery = self.app.get_chat(order.delivery_user_id)
+				text += f'Точка выдачи: {delivery.user_name}\n'
+			if order.miscellaneous:
+				text += f'Дополнительная информация: {order.miscellaneous}\n'
 		return text

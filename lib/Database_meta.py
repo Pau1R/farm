@@ -104,7 +104,8 @@ class Meta:
         "booked": "TEXT DEFAULT ''",
         "booked_time": "INTEGER DEFAULT 0",
         "delivery_code": "INTEGER DEFAULT 0",
-        "delivery_user_id": "INTEGER DEFAULT 0"}
+        "delivery_user_id": "INTEGER DEFAULT 0",
+        "miscellaneous": "TEXT DEFAULT ''"}
     gcode = {
         "id": "INTEGER PRIMARY KEY",
         "order_id": "INTEGER DEFAULT 0",

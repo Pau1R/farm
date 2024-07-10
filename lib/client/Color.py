@@ -81,6 +81,8 @@ class Client_color:
 		buttons = self.spool_logic.get_in_stock_buttons(self.order.plastic_type, self.order.weight, self.order.quantity) # get weight info from gcodes
 		if self.spool_logic.is_ordered(self.order.plastic_type, self.order.weight, self.order.quantity):
 			buttons.append(['Ожидающие поставки', 'ordered'])
+		if self.is_admin():
+			buttons.append(['Удалить цвет', 'reset'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons('Выберите цвет', buttons, buttons, 3, self.order.id)
 
@@ -129,8 +131,10 @@ class Client_color:
 
 	def process_order_colors(self):
 		data = self.message.btn_data
-		if data == 'Назад':
+		if data in ['Назад','reset']:
 			if self.is_admin():
+				if data == 'reset':
+					self.order.remove_reserve()
 				self.chat.user.admin.order_GUI.edit.last_data = ''
 				self.chat.user.admin.order_GUI.edit.show_general()
 			else:

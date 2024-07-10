@@ -4,7 +4,6 @@ from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
 from lib.employee.designer.General import General
-from lib.employee.designer.Production import Production
 import ast
 
 class Designer:
@@ -19,7 +18,6 @@ class Designer:
 		self.GUI = Gui(app, chat, address)
 
 		self.general = General(app, chat, address + '/1')
-		self.production = Production(app, chat, address + '/2')
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -33,8 +31,6 @@ class Designer:
 		if message.data_special_format:
 			if file == '1':
 				self.general.new_message(message)
-			if file == '2':
-				self.production.new_message(message)
 			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
@@ -50,7 +46,7 @@ class Designer:
 		orders_of_type = logic.get_orders_by_type
 		orders_of_status = logic.get_orders_by_status
 
-		orders = orders_of_type(self.app.orders, ['stl','link','sketch','item'])
+		orders = orders_of_type(self.app.orders, ['stl','link','sketch','item','production'])
 		orders = orders_of_status(orders, ['validate', 'prevalidate', 'waiting_for_design'])
 		orders = logic.get_orders_by_user_id(orders, self.chat.user_id)
 		amount = len(orders)
@@ -103,11 +99,8 @@ class Designer:
 		if data == 'Назад':
 			self.message.text = '/start'
 			self.chat.user.new_message(self.message)
-		elif data in ['stl','link','sketch','item']:
+		elif data in ['stl','link','sketch','item','production']:
 			self.general.last_data = ''
 			self.general.first_message(self.message, data, status)
-		elif data == 'production':
-			self.production.last_data = ''
-			self.production.first_message(self.message)
 		# if data == 'parametric':
 		# 	self.show_orders_parametric()

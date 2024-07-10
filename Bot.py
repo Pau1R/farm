@@ -6,7 +6,6 @@ from lib.App import App
 from lib.Conf import Conf
 from typing import Union
 
-# Initialize configurations and bots
 conf = Conf()
 bot = TeleBot(conf.bot_token)
 app = App(bot, conf)

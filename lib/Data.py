@@ -9,7 +9,7 @@ class Data:
 			'parameters_set': 'ожидание оплаты',
 			'waiting_for_item': 'ожидание предмета',
 			'item_received': 'предмет в выдаче',
-			'sample_aquired': '',
+			'sample_aquired': 'предмет у студии',
 			'waiting_for_design': 'ожидание дизайнера'}
 
 		self.physical_statuses = {
@@ -53,13 +53,20 @@ class Data:
 		    'support_remover': 'удалитель поддержек',
 		    'pay_code': 'код оплаты',
 		    'delivery_code': 'код доставки',
-		    'delivery_user_id': 'назначенный доставщик'
+		    'delivery_user_id': 'назначенный доставщик',
+		    'miscellaneous': 'информация'
 		}
 
 		self.plastics = ['']
 
 		self.supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
+		self.quality = {
+			'cheap': 'максимально дешевое',
+		    'optimal': 'оптимальное цена/качество',
+		    'quality': 'максимальное качество',
+		    'durability': 'максимальная прочность',
+		}
 
 # str
 #  'name', 'comment', 'link'

@@ -60,6 +60,8 @@ class Order:
 		self.delivery_code = 0
 		self.delivery_user_id = 0
 
+		self.miscellaneous = ''
+
 	def set_price(self):
 		if not self.prepayment_percent:
 			self.prepayment_percent = int(self.app.setting.get('prepayment_percent'))

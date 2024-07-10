@@ -140,9 +140,9 @@ class Production:
 	def process_confirmation(self):
 		data = self.message.btn_data
 		if data == 'confirm':
-			self.order.quality = f'Цвет: {self.color}'  # misuse of order.quality field, may cause errors in the future
+			self.order.miscellaneous = f'Цвет: {self.color}'
 			if self.need_design:
-				self.order.quality += '\nТребуется 3д дизайн'
+				self.order.miscellaneous += '\nТребуется 3д дизайн'
 			self.order.weight = self.weight
 			self.order.plastic_type = self.plastic_type
 			self.order.plastic_type = self.plastic_type

@@ -96,8 +96,10 @@ class Edit:
 		buttons.append([f'Вес экземпляра: {int(order.weight)}','weight'])
 		color = self.app.equipment.color_logic.get_color_name(order.color_id)
 		buttons.append([f'Цвет: {color}','color_id'])
-		designer = self.app.get_chat(order.assigned_designer_id)
-		buttons.append([f'Назначенный дизайнер: {designer.user_name}','assigned_designer_id'])
+		designer = ''
+		if order.assigned_designer_id:
+			designer = self.app.get_chat(order.assigned_designer_id).user_name
+		buttons.append([f'Назначенный дизайнер: {designer}','assigned_designer_id'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(f'Редактирование общих параметров заказа {order.id}:', buttons, buttons, 2, order.id)
 		
@@ -105,8 +107,12 @@ class Edit:
 		order = self.order
 		buttons = []
 		buttons.append([f'Тип пластика: {order.plastic_type}','plastic_type'])
-		printer_type = self.app.printer_type_logic.get_printer_type(order.printer_type)
-		buttons.append([f'Тип принтера: {printer_type.name}','printer_type'])
+		if order.printer_type:
+			printer_type = self.app.printer_type_logic.get_printer_type(order.printer_type)
+			printer_type = printer_type.name
+		else:
+			printer_type = ''
+		buttons.append([f'Тип принтера: {printer_type}','printer_type'])
 		buttons.append([f'Высота слоя: {order.layer_height}','layer_height'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(f'Редактирование настроек печати заказа {order.id}:', buttons, buttons, 3, order.id)
@@ -139,8 +145,12 @@ class Edit:
 		buttons = []
 		buttons.append([f'Код оплаты: {order.pay_code}','pay_code'])
 		buttons.append([f'Код получения/выдачи: {order.delivery_code}','delivery_code'])
-		delivery = self.app.get_chat(order.delivery_user_id)
-		buttons.append([f'Точка выдачи: {delivery.user_name}','delivery_user_id'])
+		if order.delivery_user_id:
+			delivery = self.app.get_chat(order.delivery_user_id)
+			delivery = delivery.user_name
+		else:
+			delivery = ''
+		buttons.append([f'Точка выдачи: {delivery}','delivery_user_id'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(f'Редактирование параметров получения/выдачи заказа {order.id}:', buttons, buttons, 6, order.id)
 
@@ -213,7 +223,6 @@ class Edit:
 		elif data == 'weight':
 			self.input_value(data, int(order.weight))
 		elif data == 'color_id':
-			# TODO: add button to remove color all together
 			self.client_color.last_data = ''
 			self.client_color.first_message(self.message)
 		elif data == 'assigned_designer_id':

@@ -253,6 +253,7 @@ class Database:
 			order.booked_time = data['booked_time']
 			order.delivery_code = data['delivery_code']
 			order.delivery_user_id = data['delivery_user_id']
+			order.miscellaneous = data['miscellaneous']
 			self.app.orders.append(order)
 
 	def create_order(self, order):

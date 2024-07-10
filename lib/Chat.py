@@ -109,3 +109,9 @@ class Chat:
             chat.last_data = data
             return True
         return False
+
+    def is_designer(self):
+        return self.is_employee and self.user.role == 'Дизайнер'
+
+    def is_admin(self):
+        return self.is_employee and self.user.role == 'Администратор'

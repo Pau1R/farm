@@ -10,6 +10,7 @@ from telebot import types as tbot
 class Employee:
 	address = '1'
 
+	role = ''
 	last_data = ''
 
 	def __init__(self, app, chat):
@@ -61,18 +62,24 @@ class Employee:
 		elif role == 'Выдача' in self.roles:
 			employee = self.delivery
 
+		self.role == role
 		if employee != None:
 			employee.last_data = ''
 			employee.first_message(message)
 
 	def send_new_message(self, message):
 		if message.file2 == '1':
+			self.role = 'Владелец'
 			self.owner.new_message(message)
 		elif message.file2 == '2':
+			self.role = 'Администратор'
 			self.admin.new_message(message)
 		elif message.file2 == '3':
+			self.role = 'Оператор'
 			self.operator.new_message(message)
 		elif message.file2 == '4':
+			self.role = 'Дизайнер'
 			self.designer.new_message(message)
 		elif message.file2 == '5':
+			self.role = 'Выдача'
 			self.delivery.new_message(message)
