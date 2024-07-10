@@ -372,6 +372,8 @@ class Order_GUI:
 		if order.comment:
 			text += f'Комментарий: {order.comment}\n'
 		if self.chat.is_employee:
+			chat = self.app.get_chat(order.user_id)
+			text += f'Клиент: {chat.user_name} (id: {chat.user_id})\n'
 			text += f'Тип заказа: {data.types[order.type]}\n'
 			if order.priority:
 				text += f'Приоритет: {order.priority}\n'

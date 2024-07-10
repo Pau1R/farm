@@ -80,9 +80,9 @@ class Admin:
 				elif function == '2':
 					self.process_orders()
 				elif function == '3':
-					self.process_equipment()
+					self.process_orders_by_type()
 				elif function == '4':
-					self.process_settings()
+					self.process_equipment()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -100,19 +100,49 @@ class Admin:
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
 
 	def show_orders(self):
+		orders = self.app.orders.copy()
+		data = self.app.data
 		text = 'Все активные заказы'
+		removed = []
+		buttons_2 = []
+		if len(orders) > 10:
+			quantities = {}
+			for order in orders:
+			   quantities[order.type] = quantities.get(order.type, 0) + 1
+			quantities = dict(sorted(quantities.items(), key=lambda item: item[1], reverse=True))
+			total_orders = len(orders)
+			for order_type, count in quantities.items():
+				if total_orders + len(buttons_2) >= 10:
+					orders = [order for order in orders if order.type != order_type]
+					buttons_2.append([data.types[order_type], order_type])
+					removed.append(order_type)
+				else:
+					break
+				total_orders -= count
 		buttons = []
-		for order in self.app.orders:
-			buttons.append([f'{order.id}: {order.name}', order.id])
+		for order in orders:
+			chat = self.app.get_chat(order.user_id)
+			buttons.append([f'{order.id}: {order.name} ({chat.user_name})', order.id])
+		buttons.extend(buttons_2)
 		if not buttons:
 			self.show_top_menu()
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 2, 0)
 
+	def show_orders_by_type(self, type_):
+		data = self.app.data
+		text = f'Заказы "{data.types[type_]}"'
+		buttons = []
+		for order in self.app.orders:
+			if order.type == type_:
+				buttons.append([f'{order.id}: {order.name}', order.id])
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
+
 	def show_equipment(self):
 		buttons = ['Локации', 'Типы принтеров', 'Принтеры', 'Экструдеры', 'Поверхности', 'Сушилки', 'Катушки', 'Цвета', 'Ящики']
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Выберите оборудование', buttons, ['Назад'], 3, 0)
+		self.GUI.tell_buttons('Выберите оборудование', buttons, ['Назад'], 4, 0)
 
 	def show_unmatched_payment(self, sender, amount, pay_code):
 		text = 'Поступил некорректный платеж.\n\n'
@@ -139,8 +169,20 @@ class Admin:
 			self.requestGUI.first_message(self.message)
 
 	def process_orders(self):
-		if self.message.btn_data == 'Назад':
+		data = self.message.btn_data
+		if data == 'Назад':
 			self.show_top_menu()
+		elif data in ['stl','link','sketch','item','production']:
+			self.show_orders_by_type(data)
+		else:
+			self.message.instance_id = self.message.btn_data
+			self.order_GUI.last_data = ''
+			self.order_GUI.first_message(self.message)
+
+	def process_orders_by_type(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_orders()
 		else:
 			self.message.instance_id = self.message.btn_data
 			self.order_GUI.last_data = ''

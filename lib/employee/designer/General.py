@@ -182,7 +182,7 @@ class General:
 			text += 'предмета по фотографиям'
 		elif order.type == 'production':
 			text += 'мелкосерийного заказа'
-		text += ': ' + order.name
+		text += f': {order.name} (№ {order.id})'
 		self.GUI.tell(text)
 
 #---------------------------- PROCESS ----------------------------

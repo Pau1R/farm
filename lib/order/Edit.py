@@ -93,6 +93,7 @@ class Edit:
 		date = self.app.functions.russian_date(order.completion_date)
 		buttons.append([f'Дата готовности: {date}','completion_date'])
 		buttons.append([f'Количество экземпляров: {order.quantity}','quantity'])
+		buttons.append([f'Качество: {data.quality[order.quality]}','quality'])
 		buttons.append([f'Вес экземпляра: {int(order.weight)}','weight'])
 		color = self.app.equipment.color_logic.get_color_name(order.color_id)
 		buttons.append([f'Цвет: {color}','color_id'])
@@ -100,6 +101,7 @@ class Edit:
 		if order.assigned_designer_id:
 			designer = self.app.get_chat(order.assigned_designer_id).user_name
 		buttons.append([f'Назначенный дизайнер: {designer}','assigned_designer_id'])
+		buttons.append([f'Информация: {order.miscellaneous}','miscellaneous'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(f'Редактирование общих параметров заказа {order.id}:', buttons, buttons, 2, order.id)
 		
@@ -220,6 +222,10 @@ class Edit:
 			self.input_selection(data, current, buttons)
 		elif data == 'quantity':
 			self.input_value(data, order.quantity)
+		elif data == 'quality':
+			current = dictionary.quality[order.quality]
+			buttons = [[value, f'{data}^{key}'] for key, value in dictionary.quality.items()]
+			self.input_selection(data, current, buttons)
 		elif data == 'weight':
 			self.input_value(data, int(order.weight))
 		elif data == 'color_id':
@@ -231,6 +237,8 @@ class Edit:
 			for row in designers:
 				buttons.append([row.user_name, f'{data}^{row.user_id}'])
 			self.input_selection(data, designer.user_name, buttons)
+		elif data == 'miscellaneous':
+			self.input_value(data, order.miscellaneous)
 		elif data == 'Назад':
 			self.show_top_menu()
 
@@ -342,7 +350,7 @@ class Edit:
 			self.message.btn_data = self.parameters_type
 			self.process_top_menu()
 			return
-		if data in ['name', 'comment', 'link']: # str
+		if data in ['name', 'comment', 'link', 'miscellaneous']: # str
 			new = text
 		elif data in ['priority','quantity','weight','price','payed','support_time','prepayment_percent','pay_code','delivery_code','completion_date']: # int
 			try:
@@ -374,7 +382,7 @@ class Edit:
 		if data == 'status':
 			self.set_status(value)
 			return
-		elif data not in ['type','completion_date','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
+		elif data not in ['type','completion_date','quality','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
 			return
 		if data in ['completion_date']:
 			value = datetime.strptime(value, "%Y-%m-%d").date()
