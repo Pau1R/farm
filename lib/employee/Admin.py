@@ -40,6 +40,8 @@ class Admin:
 		self.order_GUI = Order_GUI(app, chat, address + '/11')
 		self.requestGUI = RequestGUI(app, chat, address + '/12')
 
+		self.client = None
+
 	def first_message(self, message):
 		self.show_top_menu()
 
@@ -82,6 +84,12 @@ class Admin:
 				elif function == '3':
 					self.process_orders_by_type()
 				elif function == '4':
+					self.process_clients()
+				elif function == '5':
+					self.process_client()
+				elif function == '6':
+					self.process_message()
+				elif function == '7':
 					self.process_equipment()
 		self.chat.add_if_text(self)
 
@@ -92,7 +100,7 @@ class Admin:
 		items = self.app.order_logic.get_orders_by_status(self.app.orders, 'item_received')
 		if items:
 			text += f'\n\nНеобходимо забрать предметы из доставки: {len(items)} шт.'
-		buttons = ['Заказы', 'Оборудование', 'Настройки']
+		buttons = ['Заказы', 'Клиенты', 'Оборудование', 'Настройки']
 		if len(self.app.requests):
 			buttons.append(['Обращения в поддержку', 'request'])
 		if len(self.chat.user.roles) > 1:
@@ -139,10 +147,47 @@ class Admin:
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
 
+	def show_clients(self):
+		text = 'Клиенты активных заказов'
+		buttons = []
+		unique_chats = set()
+		for order in self.app.orders:
+			chat = self.app.get_chat(order.user_id)
+			if chat.user_id not in unique_chats:
+				buttons.append([chat.user_name, chat.user_id])
+				unique_chats.add(chat.user_id)
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 4, 0)
+
+	def show_client(self):
+		chat = self.client
+		text = f'Имя: {chat.user_name}\n'
+		text += f'Id: {chat.user_id}\n'
+		text += f'Дата последней активности: {self.app.functions.russian_date(chat.last_access_date)}\n'
+		text += f'Код оплаты: {chat.user.payId}\n'
+		text += f'Оплачено клиентом: {int(chat.user.money_payed)} рублей\n'
+		text += f'Отмененных заказов: {chat.user.orders_canceled}\n'
+		text += f'Дата последней блокировки: {self.app.functions.russian_date(chat.user.limit_date)}\n\n'
+		orders = self.app.order_logic.get_client_orders(chat.user_id)
+		if orders:
+			text += 'Активные заказы:\n'
+			for order in orders:
+				text += f'{order.id}: {order.name}\n'
+		buttons = [['Написать сообщение','message']]
+		if False: # TODO: manage history
+			buttons.append(['Завершенные заказы','finished'])
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, ['Назад'], 5, 0)
+
+	def show_message(self):
+		self.chat.set_context(self.address, 6)
+		text = 'Напишите сообщение клиенту'
+		self.GUI.tell(text)
+
 	def show_equipment(self):
 		buttons = ['Локации', 'Типы принтеров', 'Принтеры', 'Экструдеры', 'Поверхности', 'Сушилки', 'Катушки', 'Цвета', 'Ящики']
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Выберите оборудование', buttons, ['Назад'], 4, 0)
+		self.GUI.tell_buttons('Выберите оборудование', buttons, ['Назад'], 7, 0)
 
 	def show_unmatched_payment(self, sender, amount, pay_code):
 		text = 'Поступил некорректный платеж.\n\n'
@@ -154,17 +199,20 @@ class Admin:
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
-		if self.message.btn_data == 'Назад':
+		data = self.message.btn_data
+		if data == 'Назад':
 			self.message.text = '/start'
 			self.chat.user.new_message(self.message)
-		if self.message.btn_data == 'Заказы':
+		if data == 'Заказы':
 			self.show_orders()
-		elif self.message.btn_data == 'Оборудование':
+		if data == 'Клиенты':
+			self.show_clients()
+		elif data == 'Оборудование':
 			self.show_equipment()
-		elif self.message.btn_data == 'Настройки':
+		elif data == 'Настройки':
 			self.settingsGUI.last_data = ''
 			self.settingsGUI.first_message(self.message)
-		elif self.message.btn_data == 'request':
+		elif data == 'request':
 			self.requestGUI.last_data = ''
 			self.requestGUI.first_message(self.message)
 
@@ -187,6 +235,28 @@ class Admin:
 			self.message.instance_id = self.message.btn_data
 			self.order_GUI.last_data = ''
 			self.order_GUI.first_message(self.message)
+
+	def process_clients(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_top_menu()
+		else:
+			self.client = self.app.get_chat(data)
+			self.show_client()
+
+	def process_client(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_clients()
+		if data == 'message':
+			self.show_message()
+		if data == 'finished':
+			x = ''
+
+	def process_message(self):
+		self.chat.context = ''
+		text = f'Сообщение от администратора: {self.message.text}'
+		self.GUI.tell_id(self.client.user_id, text)
 
 	def process_equipment(self):
 		if self.message.btn_data == 'Ящики':

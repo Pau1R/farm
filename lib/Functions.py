@@ -18,22 +18,27 @@ class Functions:
 		12:'декабря'}
 
 	def russian_date(self, date_):
-		if date_ == None:
+		if date_ is None:
 			return ''
 		if isinstance(date_, datetime):
 			date_ = date_.date()
-		if date_ == date.today():
+		today = date.today()
+		delta = (today - date_).days
+		if date_ == today:
 			return 'сегодня'
-		elif date_ == date.today() + timedelta(days=1):
+		elif date_ == today + timedelta(days=1):
 			return 'завтра'
-		elif date_ == date.today() + timedelta(days=2):
+		elif date_ == today + timedelta(days=2):
 			return 'послезавтра'
-		elif date_ == date.today() - timedelta(days=1):
+		elif date_ == today - timedelta(days=1):
 			return 'вчера'
-		elif date_ == date.today() - timedelta(days=2):
+		elif date_ == today - timedelta(days=2):
 			return 'позавчера'
 		else:
-			return str(date_.day) + ' ' + self.months[date_.month]
+			formatted_date = str(date_.day) + ' ' + self.months[date_.month]
+			if abs(delta) >= 365:
+				formatted_date += ' ' + str(date_.year)
+			return formatted_date
 
 	def russian_date_2(self, date_):
 		if date_ < date.today():
@@ -42,11 +47,11 @@ class Functions:
 			return self.russian_date(date_)
 
 	def get_weight_string(self, weight):
-	    if weight % 1000 == 0:
-	        return str(weight // 1000) + ' кг'
-	    else:
-	        weight_str = '{:.2f}'.format(weight / 1000).rstrip('0').rstrip('.')
-	        return weight_str + ' кг'
+		if weight % 1000 == 0:
+			return str(weight // 1000) + ' кг'
+		else:
+			weight_str = '{:.2f}'.format(weight / 1000).rstrip('0').rstrip('.')
+			return weight_str + ' кг'
 
 	def get_next_free_id(self, array):
 		ids = []

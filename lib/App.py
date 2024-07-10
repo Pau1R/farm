@@ -61,6 +61,7 @@ class App:
 			if chat.user_id == user_id:
 				self.chat = chat
 				self.chat.last_access_date = date.today()
+				self.db.update_chat(chat)
 		if self.chat == None:
 			self.chat = self.create_chat(message)
 		self.chat.new_message(message)
@@ -163,7 +164,6 @@ class App:
 #	5 Delivery
 
 # TODO:
-# - admin: view all orders, clients (their name) and client orders, tell info to client
 # - set order delivery_user_id somewhere
 # - when order has gcodes book spools to them. For prevalidated orders rebook when adding gcode files
 #   - rules: if available do one gcode = one spool
