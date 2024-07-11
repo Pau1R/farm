@@ -161,7 +161,7 @@ class Delivery:
 			self.order.remove()
 			self.show_top_menu()
 		elif data == 'cash':
-			self.order.payed(self.order.remaining_payment())
+			self.order.payment(self.order.remaining_payment())
 			self.show_client()
 		elif data == 'refused':
 			self.order.logical_status = 'client_refused' # client doesn't get refund for prepayment
@@ -220,7 +220,7 @@ class Delivery:
 	def process_prepay_confirmation(self):
 		data = self.message.btn_data
 		if data == 'confirm':
-			self.order.payed(self.accepted_money)
+			self.order.payment(self.accepted_money)
 			self.app.db.update_order(self.order)
 			self.update_pay_status()
 		else:

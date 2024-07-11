@@ -49,7 +49,7 @@ class Order_logic:
 	def get_orders_by_user_id(self, orders, user_id):
 		orders_ = []
 		for order in orders:
-			designer = order.assigned_designer_id
+			designer = order.designer_id
 			if not user_id or not designer or designer == user_id:
 				orders_.append(order)
 		return orders_

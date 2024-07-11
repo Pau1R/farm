@@ -52,7 +52,8 @@ class Gui:
 			x = ''
 
 	def tell(self, text):
-		self.messages_append(Message(self.app.bot.send_message(self.chat.user_id, text)))
+		if text:
+			self.messages_append(Message(self.app.bot.send_message(self.chat.user_id, text)))
 
 	def tell_permanent(self, text):
 		message = Message(self.app.bot.send_message(self.chat.user_id, text))

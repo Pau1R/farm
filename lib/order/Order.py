@@ -24,7 +24,7 @@ class Order:
 		#   - validate
 		# - bot:
 		#   - validated: prepayed
-		self.assigned_designer_id = 0 # not used yet
+		self.designer_id = 0 # not used yet
 		self.priority = 0
 
 		# user settings
@@ -43,7 +43,7 @@ class Order:
 		self.design_time = 0
 		self.print_time = 0
 		self.plastic_type = ''
-		self.printer_type = ''
+		self.printer_type = 0
 		self.weight = 0
 		self.completion_date = None
 		self.start_datetime = None # date and time when order started printing
@@ -76,7 +76,12 @@ class Order:
 		if self.support_remover == 'Клиент':
 			supports_price = 0
 		total_price = plastic_price + design_price + time_price + supports_price + bring_to_delivery_price + delivery_price
-		self.price = int(math.ceil((total_price) / 10) * 10)  # round to upper side by tens
+		if total_price > 10000:
+			self.price = int(round((total_price) / 1000) * 1000)  # round to thousands
+		elif total_price > 1000:
+			self.price = int(round((total_price) / 100) * 100)  # round to hundreds
+		else:
+			self.price = int(math.ceil((total_price) / 10) * 10)  # round to tens (upper side)
 		self.app.db.update_order(self)
 
 	def get_printing_time(self):
@@ -222,7 +227,7 @@ class Order:
 	def get_gcodes_past_time(self):
 	    return self.get_gcodes_all_time() - self.get_gcodes_future_time()
 
-	def payed(self, amount):
+	def payment(self, amount):
 		previous = self.is_prepayed()
 		self.payed += amount
 		current = self.is_prepayed()

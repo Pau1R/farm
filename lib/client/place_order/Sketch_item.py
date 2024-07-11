@@ -38,7 +38,7 @@ class Sketch_item:
 	def show_top_menu(self):
 		self.chat.set_context(self.address, 1)
 		if self.order.type == 'sketch':
-			text = 'Загрузите ваши чертежи. Один или несколько файлов.'
+			text = 'Загрузите ваши чертежи. Один или несколько файлов или фото.'
 		elif self.order.type == 'item':
 			text = 'Сделайте несколько фотографий предмета и загрузите их.\n\n'
 			text += 'Рекомендации к фото:\n'

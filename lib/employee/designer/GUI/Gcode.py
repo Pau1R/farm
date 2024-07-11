@@ -36,18 +36,18 @@ class Gcode_gui:
 				elif function == '3':
 					self.process_weight()
 				elif function == '4':
-					self.process_quantity()
-				elif function == '5':
 					self.process_hours()
-				elif function == '6':
+				elif function == '5':
 					self.process_minutes()
+				elif function == '6':
+					self.process_quantity()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
 		self.chat.set_context(self.address, 1)
-		text = 'Загрузите файл gcode'
+		text = 'Загрузка информации из слайсера\n\n1) Загрузите файл gcode'
 		if self.gcodes:
 			text += f'\n\nфайлов загружено: {len(self.gcodes)}'
 			buttons = [['Загрузку закончил', 'uploaded']]
@@ -57,31 +57,28 @@ class Gcode_gui:
 
 	def show_screenshot(self):
 		self.chat.set_context(self.address, 2)
-		text = 'Сделайте скриншот в слайсере загруженного файла'
+		text = 'Загрузка информации из слайсера\n\n2) Загрузите скриншот'
 		self.GUI.tell(text)
 
 	def show_weight(self):
 		self.chat.set_context(self.address, 3)
-		text = 'Напишите вес загруженного файла'
+		text = 'Загрузка информации из слайсера\n\n3) Введите вес'
 		self.GUI.tell(text)
 
+	def show_hours(self):
+		text = 'Загрузка информации из слайсера\n\n4.1) Выберите длительность печати файла (часы):'
+		buttons = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']
+		self.GUI.tell_buttons(text, buttons, [], 4, self.order.id)
+
+	def show_minutes(self):
+		text = 'Загрузка информации из слайсера\n\n4.2) Выберите длительность печати файла (минуты):'
+		buttons = ['0','5','10','15','20','25','30','35','40','45','50','55']
+		self.GUI.tell_buttons(text, buttons, [], 5, self.order.id)
+
 	def show_quantity(self):
-		if self.order.quantity == 1:
-			self.show_hours()
-			return
 		self.chat.set_context(self.address, 4)
 		text = 'Выберите либо введите сколько раз печатать загруженный файл'
 		buttons = ['1','2','3','4','5','6','7','8','9','10']
-		self.GUI.tell_buttons(text, buttons, [], 4, self.order.id)
-
-	def show_hours(self):
-		text = 'Выберите длительность печати файла (часы):'
-		buttons = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']
-		self.GUI.tell_buttons(text, buttons, [], 5, self.order.id)
-
-	def show_minutes(self):
-		text = 'Выберите длительность печати файла (минуты):'
-		buttons = ['0','5','10','15','20','25','30','35','40','45','50','55']
 		self.GUI.tell_buttons(text, buttons, [], 6, self.order.id)
 
 #---------------------------- PROCESS ----------------------------
@@ -114,21 +111,9 @@ class Gcode_gui:
 		self.chat.context = ''
 		try:
 			self.gcode.weight = int(self.message.text)
-			self.show_quantity()
-		except:
-			self.show_weight()
-
-	def process_quantity(self):
-		self.chat.context = ''
-		try:
-			if self.message.btn_data:
-				quantity = self.message.btn_data
-			else:
-				quantity = self.message.text
-			self.gcode.quantity = int(quantity)
 			self.show_hours()
 		except:
-			self.show_quantity()
+			self.show_weight()
 
 	def process_hours(self):
 		try:
@@ -142,6 +127,21 @@ class Gcode_gui:
 		try:
 			minutes = int(self.message.btn_data)
 			self.gcode.duration += minutes
-			self.show_top_menu()
+			if self.order.quantity == 1:
+				self.show_top_menu()
+			else:
+				self.show_quantity()
 		except:
 			self.show_minutes()
+
+	def process_quantity(self):
+		self.chat.context = ''
+		try:
+			if self.message.btn_data:
+				quantity = self.message.btn_data
+			else:
+				quantity = self.message.text
+			self.gcode.quantity = int(quantity)
+			self.show_top_menu()
+		except:
+			self.show_quantity()

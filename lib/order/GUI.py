@@ -82,15 +82,20 @@ class Order_GUI:
 			buttons.append(['Редактировать заказ','edit'])
 			buttons.append(['Отменить заказ','reject'])
 		elif self.chat.is_designer():
-			if order.type == 'production':
-				if order.assigned_designer_id:
+			if order.designer_id:
+				if order.type in ['stl','link']:
+					buttons.append(['Модель пригодна к 3д печати','accept'])
+				elif order.type in ['sketch','item']:
+					if order.logical_status == 'prevalidate':
+						buttons.append(['Примерное понимание заказа сформировано','accept'])
+					else:
+						buttons.append(['Моделирование и слайсинг выполнены','accept'])
+				elif order.type == 'production':
 					buttons.append(['Редактировать заказ','edit'])
 					buttons.append(['Перевести в чат', 'chat'])
 					buttons.append(['Отказать','reject'])
-				else:
-					buttons.append(['Взять в работу', 'take'])
 			else:
-				buttons.append(['Принять заказ','accept'])
+				buttons.append(['Взять в работу', 'take'])
 		elif not self.chat.is_employee:
 			if order.type == 'production':
 				x = '' # show only 'Назад' button
@@ -113,7 +118,7 @@ class Order_GUI:
 					buttons.append(['Оплатить оставшуюся часть', 'pay'])
 				# Отмена заказа
 				if ((order.type in ['stl', 'link'] and physical in ['prepare', 'in_line']) or 
-				    (order.type in ['sketch', 'item'] and not order.assigned_designer_id)):
+				    (order.type in ['sketch', 'item'] and not order.designer_id)):
 				    buttons.append('Отменить заказ')
 		buttons.append('Назад')
 
@@ -132,7 +137,12 @@ class Order_GUI:
 			self.GUI.tell_buttons(text, buttons, buttons, 1, order.id)
 
 	def show_supports(self):
-		text = 'Вы хотите убрать поддержки самостоятельно? Цена заказа будет меньше на ' + str(self.order.get_supports_price()) + ' рублей'
+		text = 'Вы хотите убрать поддержки самостоятельно? '
+		price = self.order.get_supports_price()
+		if (price >= 100 and price < 10000) or self.order.price <= 1000:
+			text += f'Цена заказа будет меньше на {price} рублей.'
+		else:
+			text += 'Цена заказа может снизится.'
 		buttons = [['Да, уберу сам', 'Клиент'], ['Нет, уберите вы', 'Компания'], 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.order.id)
 
@@ -169,7 +179,7 @@ class Order_GUI:
 
 	def show_confirmed_by_designer(self, order):
 		text = f'Оценка заказа {order.name} выполнена'
-		buttons = [['Перейти к заказу', 'now'], ['Перейти к заказу попозже', 'then']]
+		buttons = [['Перейти к заказу', 'now']]
 		message = self.GUI.tell_buttons(text, buttons, buttons, 5, order.id)
 		message.general_clear = False
 
@@ -180,8 +190,8 @@ class Order_GUI:
 		self.GUI.tell(text)
 
 	def show_reject_reason(self):
-		self.order_waiting = self.order
 		self.chat.set_context(self.address, 6)
+		self.order_waiting = self.order
 		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 6, self.order.id)
 
 	def show_rejected_by_admin(self, order, reason):
@@ -215,7 +225,7 @@ class Order_GUI:
 				self.show_reject_reason()
 		elif self.chat.is_designer():
 			if data == 'take':
-				self.order.assigned_designer_id = self.chat.user_id
+				self.order.designer_id = self.chat.user_id
 				self.app.db.update_order(self.order)
 				self.show_order()
 			elif data == 'accept':
@@ -257,6 +267,7 @@ class Order_GUI:
 		self.show_order()
 
 	def process_reject_reason(self):
+		self.chat.context = ''
 		if self.message.btn_data == 'none':
 			self.reject_reason = ''
 		else:
@@ -306,10 +317,10 @@ class Order_GUI:
 		plastic_type.lower()
 
 		# convert order status to readable format
+		status = order.logical_status
+		if not status:
+			status = order.physical_status
 		if self.chat.is_employee:
-			status = order.logical_status
-			if not status:
-				status = order.physical_status
 			status = data.statuses[status]
 			delivery_text = 'Код передачи/получения'
 		else:
@@ -338,6 +349,8 @@ class Order_GUI:
 			elif physical == 'in_pick-up':
 				status = 'В пункте выдачи'
 				delivery_text = 'Код получения'
+			else:
+				status = data.statuses[status]
 
 		# set text
 		text = order.name + '\n\n'
@@ -377,8 +390,8 @@ class Order_GUI:
 			text += f'Тип заказа: {data.types[order.type]}\n'
 			if order.priority:
 				text += f'Приоритет: {order.priority}\n'
-			if order.assigned_designer_id:
-				designer = self.app.get_chat(order.assigned_designer_id)
+			if order.designer_id:
+				designer = self.app.get_chat(order.designer_id)
 				text += f'Назначенный дизайнер: {designer.user_name}\n'
 			if order.printer_type:
 				printer_type = self.app.printer_type_logic.get_printer_type(order.printer_type)

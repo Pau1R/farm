@@ -3,6 +3,7 @@ sys.path.append('../lib')
 from lib.Msg import Message
 from lib.Gui import Gui
 from lib.order.Order import Order
+from lib.order.GUI import Order_GUI
 from lib.employee.designer.General import General
 import ast
 
@@ -18,6 +19,7 @@ class Designer:
 		self.GUI = Gui(app, chat, address)
 
 		self.general = General(app, chat, address + '/1')
+		self.order_GUI = Order_GUI(app, chat, address + '/2')
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -31,9 +33,15 @@ class Designer:
 		if message.data_special_format:
 			if file == '1':
 				self.general.new_message(message)
+			if file == '2':
+				self.order_GUI.new_message(message)
 			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_top_menu()
+				if function == '2':
+					self.process_new_order()
+				if function == '3':
+					self.process_sketch_prepayed()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -86,9 +94,31 @@ class Designer:
 		if orders_of_type(validate, 'production'):
 			buttons.append(['Заявка на мелкосерийное производство', 'production'])
 
+		buttons.append(['Обновить','update'])
 		if len(self.chat.user.roles) > 1:
 			buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
+
+	def show_new_order(self, order):
+		text = 'Новая задача - валидация '
+		if order.type == 'stl':
+			text += 'файла'
+		elif order.type == 'link':
+			text += 'ссылки'
+		elif order.type == 'sketch':
+			text += 'чертежа'
+		elif order.type == 'item':
+			text += 'предмета по фотографиям'
+		elif order.type == 'production':
+			text += 'мелкосерийного заказа'
+		text += f': {order.name} (№ {order.id})'
+		buttons = [['Перейти к заказу','show']]
+		self.GUI.tell_buttons(text, buttons, buttons, 2, order.id)
+
+	def show_sketch_prepayed(self, order):
+		text = f'Новая задача - разработка модели: {order.name} (№ {order.id})'
+		buttons = [['Перейти к заказу','show']]
+		self.GUI.tell_buttons(text, buttons, buttons, 3, order.id)
 
 #---------------------------- PROCESS ----------------------------
 	
@@ -99,8 +129,20 @@ class Designer:
 		if data == 'Назад':
 			self.message.text = '/start'
 			self.chat.user.new_message(self.message)
+		elif data == 'update':
+			self.show_top_menu()
 		elif data in ['stl','link','sketch','item','production']:
 			self.general.last_data = ''
 			self.general.first_message(self.message, data, status)
 		# if data == 'parametric':
 		# 	self.show_orders_parametric()
+
+	def process_new_order(self):
+		if self.message.btn_data == 'show':
+			self.order_GUI.last_data = ''
+			self.order_GUI.first_message(self.message)
+
+	def process_sketch_prepayed(self):
+		if self.message.btn_data == 'show':
+			self.order_GUI.last_data = ''
+			self.order_GUI.first_message(self.message)

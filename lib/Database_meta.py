@@ -44,7 +44,7 @@ class Meta:
         "id": "INTEGER PRIMARY KEY", 
         "created": "DATETIME DEFAULT ''",
         "name": "TEXT DEFAULT ''",
-        "type_": "TEXT DEFAULT ''"}
+        "type_": "INTEGER DEFAULT 0"}
     spool = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
@@ -78,7 +78,7 @@ class Meta:
         "type": "TEXT DEFAULT ''",
         "physical_status": "TEXT DEFAULT ''",
         "logical_status": "TEXT DEFAULT ''",
-        "assigned_designer_id": "INTEGER DEFAULT ''",
+        "designer_id": "INTEGER DEFAULT ''",
         "priority": "INTEGER DEFAULT 0",
         "quantity": "INTEGER DEFAULT 0",
         "quality": "TEXT DEFAULT ''",

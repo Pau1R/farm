@@ -58,6 +58,19 @@ class General_parameters:
 		self.GUI.tell_buttons('Напишите комментарий', buttons, [], 4, self.order.id)
 
 	def show_confirmation(self):
+		text = 'Ваши дальнейшие действия по заказу:\n'
+		if self.order.type == 'sketch':
+			text += '1) Дождаться результатов предварительной оценки,\n'
+			text += '2) Выбрать желаемый цвет изделия и внести предоплату,\n'
+			text += '3) Дождаться разработки модели и подтвердить ее соответствие вашим ожиданиям (при необходимости запросив корректировку),\n'
+			text += '4) Ожидать исполнения заказа.'
+		elif self.order.type == 'item':
+			text += '1) Дождаться результатов предварительной оценки,\n'
+			text += '2) Выбрать желаемый цвет изделия и внести предоплату,\n'
+			text += '3) Принести предмет в пункт выдачи (адрес указан в разделе информации),\n'
+			text += '4) Ожидать исполнения заказа.'
+		# TODO: show aproximate start date
+		self.GUI.tell(text)
 		text = 'Подтвердите создание заказа'
 		buttons = [['Подтверждаю', 'confirm'], ['Удалить заказ', 'remove']]
 		self.GUI.tell_buttons(text, buttons, buttons, 5, self.order.id)
@@ -111,7 +124,7 @@ class General_parameters:
 			self.chat.user.show_wait_for_designer()
 			for chat in self.app.chats:
 				if chat.is_employee and 'Дизайнер' in chat.user.roles:
-					chat.user.designer.general.show_new_order(self.order)
+					chat.user.designer.show_new_order(self.order)
 		self.chat.user.reset_order()
 		self.chat.user.show_top_menu()
 

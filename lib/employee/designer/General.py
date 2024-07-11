@@ -5,6 +5,7 @@ from lib.order.Order import Order
 from lib.order.GUI import Order_GUI
 from lib.order.gcode.Gcode import Gcode
 from lib.employee.designer.GUI.Gcode import Gcode_gui
+import time
 
 class General:
 	type = ''
@@ -106,7 +107,7 @@ class General:
 		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
 
 	def show_print_time(self):
-		text = 'Примерно сколько времено нужно на печать (с запасом)'
+		text = 'Примерно сколько времени нужно на печать (с запасом)'
 		if self.order.quantity > 1:
 			text += ' одного экземпляра?'
 		else:
@@ -157,6 +158,10 @@ class General:
 		buttons = ['Подтвердить', 'Отмена']
 		self.GUI.tell_buttons('Подтвердите валидацию', buttons, [], 9, self.order.id)
 
+	def show_booking_error(self):
+		self.GUI.tell('Ошибка при бронировании катушек, статус заказа оставлен без изменений')
+		self.GUI.tell('Внесенные вами данные сохранены')
+
 	# def show_reject(self):
 	# 	self.chat.set_context(self.address, 10)
 	# 	self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none'], 'Назад'], [], 10, self.order.id)
@@ -169,21 +174,6 @@ class General:
 	# разработка модели
 
 	# внесение конкретизированных данных (стандартная валидация)
-
-	def show_new_order(self, order):
-		text = 'Новое задание - валидация '
-		if order.type == 'stl':
-			text += 'файла'
-		elif order.type == 'link':
-			text += 'ссылки'
-		elif order.type == 'sketch':
-			text += 'чертежа'
-		elif order.type == 'item':
-			text += 'предмета по фотографиям'
-		elif order.type == 'production':
-			text += 'мелкосерийного заказа'
-		text += f': {order.name} (№ {order.id})'
-		self.GUI.tell(text)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -198,7 +188,7 @@ class General:
 					self.gcode_gui.order = order
 					self.show_order()
 
-	def order_accepted(self, data):
+	def order_accepted(self):
 		if self.order.type in ['sketch','item']:
 			self.show_design_time()
 		else:
@@ -207,11 +197,13 @@ class General:
 	def process_design_time(self):
 		try:
 			self.design_time = int(float(self.message.btn_data) * 60)
-			self.show_printer_type()
 			if self.order.logical_status == 'prevalidate':
 				self.show_print_time()
 			else:
-				self.show_printer_type()
+				if self.order.type == 'sketch':
+					self.show_supports()
+				else:
+					self.show_printer_type()
 		except:
 			self.show_design_time()
 
@@ -268,33 +260,39 @@ class General:
 		if self.message.btn_data == 'Отмена':
 			self.show_order()
 		else:
-			for temp_gcode in self.gcodes:
-				for i in range(1, temp_gcode.quantity + 1):
-					self.print_time = 0
-					gcode = Gcode(self.app, 0)
-					gcode.order_id = order.id
-					gcode.file_id = temp_gcode.file_id
-					gcode.screenshot = temp_gcode.screenshot
-					self.app.gcodes_append(gcode)
-					self.app.db.create_gcode(gcode)
-			if order.booked:
+			if self.gcodes:
+				for temp_gcode in self.gcodes:
+					for i in range(1, temp_gcode.quantity + 1):
+						self.print_time = 0
+						gcode = Gcode(self.app, 0)
+						gcode.order_id = order.id
+						gcode.file_id = temp_gcode.file_id
+						gcode.screenshot = temp_gcode.screenshot
+						self.app.gcodes_append(gcode)
+						self.app.db.create_gcode(gcode)
+				# add ordered spools if client included them in previous steps
 				statuses = ['stock']
-				if 'ordered' not in statuses:
+				if order.booked and 'ordered' not in statuses:
 					for book in order.booked:
 						spool = self.app.equipment.spool_logic.get_spool(book[0])
 						if spool.status == 'ordered':
 							statuses.append('ordered')
-				order.reserve_plastic(statuses, order.color_id)
 			order.design_time = self.design_time
 			order.print_time = self.print_time
 			order.weight = self.weight
 			order.support_time = self.support_minutes
 			order.plastic_type = self.material
 			order.printer_type = self.printer_type
-			order.set_price()
-			user = self.get_user(order.user_id)
-			order.logical_status = 'validated'
-			user.order_GUI.show_confirmed_by_designer(order)
+			booked = order.reserve_plastic(statuses, order.color_id) # rebook  # TODO: there is an error somewhere there
+			if booked:
+				order.set_price()
+				# TODO: if this is secondary validation change status to waiting for print
+				order.logical_status = 'validated'
+				user = self.get_user(order.user_id)
+				user.order_GUI.show_confirmed_by_designer(order)
+			else:
+				self.show_booking_error()
+				time.sleep(3)
 			self.app.db.update_order(order)
 			self.show_top_menu()
 

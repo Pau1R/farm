@@ -47,9 +47,9 @@ class Info:
 		text = 'Информация о студии'
 		buttons = []
 		buttons.append(['Доступные цвета и типы пластика', 'colors'])
-		buttons.append(['Получение заказов и срок выполнения', 'receive'])
+		buttons.append(['Пункт выдачи, пересылка и сроки выполнения', 'receive'])
 		buttons.append(['Технические подробности', 'tech'])
-		buttons.append(['Дисклеймер', 'disclaimer'])
+		# buttons.append(['Дисклеймер', 'disclaimer'])
 		buttons.append(['Поддержка', 'request'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, buttons, 1, 0)
@@ -70,7 +70,7 @@ class Info:
 		buttons = ['Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
 
-	def show_disclaimer(self): # TODO: rethink
+	def show_disclaimer(self):
 		text = """
 Дисклеймер:
 1) не даю гарантии на изделие

@@ -3,10 +3,12 @@ class Data:
 
 	def __init__(self):
 		self.logical_statuses = {
-			'prevalidate': 'ожидается предварительная валидация',
-			'validate': 'ожидается валидация',
+			'prevalidate': 'ожидание предварительной валидации',
+			'validate': 'ожидание валидации',
 			'validated': 'валидирован',
 			'parameters_set': 'ожидание оплаты',
+			'client_confirm': 'ожидание подтверждения клиентом', # TODO: for sketch type when design is finished. Ask client to confirm. If yes: in_line, else: client_declined
+			'remodel': 'ожидание дизайнера',
 			'waiting_for_item': 'ожидание предмета',
 			'item_received': 'предмет в выдаче',
 			'sample_aquired': 'предмет у студии',
@@ -40,7 +42,7 @@ class Data:
 		    'quality': 'качество',
 		    'weight': 'вес экзмепляра',
 		    'color_id': 'цвет',
-		    'assigned_designer_id': 'назначенный дизайнер',
+		    'designer_id': 'назначенный дизайнер',
 		    'plastic_type': 'тип пластика',
 		    'printer_type': 'тип принтера',
 		    'layer_height': 'высота слоя',
@@ -79,7 +81,7 @@ class Data:
 #  layer_height
 
 # selection
-#  'type','status','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id'
+#  'type','status','designer_id','plastic_type','printer_type','support_remover','delivery_user_id'
 
 # частные случаи:
 #  model_file

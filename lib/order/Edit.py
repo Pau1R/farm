@@ -98,9 +98,9 @@ class Edit:
 		color = self.app.equipment.color_logic.get_color_name(order.color_id)
 		buttons.append([f'Цвет: {color}','color_id'])
 		designer = ''
-		if order.assigned_designer_id:
-			designer = self.app.get_chat(order.assigned_designer_id).user_name
-		buttons.append([f'Назначенный дизайнер: {designer}','assigned_designer_id'])
+		if order.designer_id:
+			designer = self.app.get_chat(order.designer_id).user_name
+		buttons.append([f'Назначенный дизайнер: {designer}','designer_id'])
 		buttons.append([f'Информация: {order.miscellaneous}','miscellaneous'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(f'Редактирование общих параметров заказа {order.id}:', buttons, buttons, 2, order.id)
@@ -231,8 +231,8 @@ class Edit:
 		elif data == 'color_id':
 			self.client_color.last_data = ''
 			self.client_color.first_message(self.message)
-		elif data == 'assigned_designer_id':
-			designer = self.app.get_chat(order.assigned_designer_id)
+		elif data == 'designer_id':
+			designer = self.app.get_chat(order.designer_id)
 			designers = self.app.get_chats('Дизайнер')
 			for row in designers:
 				buttons.append([row.user_name, f'{data}^{row.user_id}'])
@@ -382,11 +382,11 @@ class Edit:
 		if data == 'status':
 			self.set_status(value)
 			return
-		elif data not in ['type','completion_date','quality','assigned_designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
+		elif data not in ['type','completion_date','quality','designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
 			return
 		if data in ['completion_date']:
 			value = datetime.strptime(value, "%Y-%m-%d").date()
-		if data in ['assigned_designer_id','delivery_user_id']:
+		if data in ['designer_id','delivery_user_id']:
 			value = int(value)
 		setattr(self.order, data, value)
 		self.app.db.update_order(self.order)

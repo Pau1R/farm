@@ -134,7 +134,10 @@ class App:
 
 		order = self.order_logic.get_order_by_pay_code(pay_code)
 		if order:
-			order.payed(amount)
+			order.payment(amount)
+			if order.is_prepayed() and order.type == 'sketch':
+				chat = self.get_chat(order.designer_id)
+				chat.user.designer.show_sketch_prepayed(order)
 		else:
 			for admin in self.get_chats('Администратор'):
 				admin.user.admin.show_unmatched_payment(sender, amount, pay_code)
@@ -162,8 +165,3 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
-
-# TODO:
-# - set order delivery_user_id somewhere
-# - when order has gcodes book spools to them. For prevalidated orders rebook when adding gcode files
-#   - rules: if available do one gcode = one spool

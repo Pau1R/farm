@@ -226,7 +226,7 @@ class Database:
 			order.type = data['type']
 			order.physical_status = data['physical_status']
 			order.logical_status = data['logical_status']
-			order.assigned_designer_id = data['assigned_designer_id']
+			order.designer_id = data['designer_id']
 			order.priority = data['priority']
 			order.quantity = data['quantity']
 			order.quality = data['quality']
