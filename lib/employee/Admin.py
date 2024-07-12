@@ -97,7 +97,7 @@ class Admin:
 
 	def show_top_menu(self):
 		text = 'Здравствуйте, Администратор ' + self.chat.user_name
-		items = self.app.order_logic.get_orders_by_status(self.app.orders, 'item_received')
+		items = self.app.order_logic.get_orders_by_status(self.app.orders, 'item_received') # TODO: 'waiting_for_design' status after item is at designer
 		if items:
 			text += f'\n\nНеобходимо забрать предметы из доставки: {len(items)} шт.'
 		buttons = ['Заказы', 'Клиенты', 'Оборудование', 'Настройки']
@@ -174,7 +174,7 @@ class Admin:
 			for order in orders:
 				text += f'{order.id}: {order.name}\n'
 		buttons = [['Написать сообщение','message']]
-		if False: # TODO: manage history
+		if False: # FUTURE_TODO: manage history
 			buttons.append(['Завершенные заказы','finished'])
 		buttons.append('Назад')
 		self.GUI.tell_buttons(text, buttons, ['Назад'], 5, 0)

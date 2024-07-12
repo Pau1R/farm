@@ -7,8 +7,8 @@ class Data:
 			'validate': 'ожидание валидации',
 			'validated': 'валидирован',
 			'parameters_set': 'ожидание оплаты',
-			'client_confirm': 'ожидание подтверждения клиентом', # TODO: for sketch type when design is finished. Ask client to confirm. If yes: in_line, else: client_declined
-			'remodel': 'ожидание дизайнера',
+			'client_check': 'ожидание подтверждения клиентом',
+			'clarify': 'ожидание дизайнера',
 			'waiting_for_item': 'ожидание предмета',
 			'item_received': 'предмет в выдаче',
 			'sample_aquired': 'предмет у студии',
@@ -37,6 +37,7 @@ class Data:
 		    'status': 'статус',
 		    'comment': 'комментарий',
 		    'priority': 'приоритет',
+		    'confirmed': 'подтвержден клиентом',
 		    'completion_date': 'дата завершения',
 		    'quantity': 'количество',
 		    'quality': 'качество',

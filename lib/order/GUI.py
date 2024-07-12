@@ -53,6 +53,10 @@ class Order_GUI:
 					self.process_confirmed_by_designer()
 				elif function == '6':
 					self.process_reject_reason()
+				elif function == '7':
+					self.process_clarify()
+				elif function == '8':
+					self.process_clarify_reason()
 		self.chat.add_if_text(self)
 
 	def set_order(self):
@@ -88,8 +92,11 @@ class Order_GUI:
 				elif order.type in ['sketch','item']:
 					if order.logical_status == 'prevalidate':
 						buttons.append(['Примерное понимание заказа сформировано','accept'])
-					else:
+				if order.type == 'sketch' and order.logical_status == 'waiting_for_design':
+					if order.confirmed:
 						buttons.append(['Моделирование и слайсинг выполнены','accept'])
+					else:
+						buttons.append(['Согласовать модель с клиентом','client_check'])
 				elif order.type == 'production':
 					buttons.append(['Редактировать заказ','edit'])
 					buttons.append(['Перевести в чат', 'chat'])
@@ -102,7 +109,6 @@ class Order_GUI:
 			else:
 				# Уборка поддержек и выбор цвета
 				if logical == 'validated':
-					# TODO: if type == 'sketch' ask client to confirm photos, else: create dialog with client for clarification.
 					if (order.support_time and 
 						not order.support_remover):
 						buttons.append(['Выбрать кто уберет поддержки', 'supports'])
@@ -116,6 +122,8 @@ class Order_GUI:
 						buttons.append(['Внести предоплату', 'pay'])
 				elif physical in ['in_line','printing','finished','in_pick-up'] and not order.is_payed() and order.is_prepayed():
 					buttons.append(['Оплатить оставшуюся часть', 'pay'])
+				if order.type == 'sketch' and order.logical_status == 'client_check':
+					buttons.append(['Проверить модель', 'client_check'])
 				# Отмена заказа
 				if ((order.type in ['stl', 'link'] and physical in ['prepare', 'in_line']) or 
 				    (order.type in ['sketch', 'item'] and not order.designer_id)):
@@ -194,6 +202,21 @@ class Order_GUI:
 		self.order_waiting = self.order
 		self.GUI.tell_buttons('Напишите причину отказа', [['Не уточнять причину', 'none']], [], 6, self.order.id)
 
+	def show_clarify(self):
+		text = 'Подтвердите соответствие разработанной модели вашим чертежам'
+		for screenshot in self.order.screenshots:
+			self.GUI.tell_photo('', screenshot)
+		buttons = [['Подтверждаю','confirm']]
+		buttons.append(['Не соответствует, нужна доработка','clarify'])
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 7, self.order.id)
+
+	def show_clarify_reason(self):
+		self.chat.set_context(self.address, 8)
+		text = 'Напишите что в модели не соответствует чертежам'
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 8, self.order.id)
+
 	def show_rejected_by_admin(self, order, reason):
 		text = ''
 		if reason != '':
@@ -238,6 +261,8 @@ class Order_GUI:
 				self.show_order()
 			elif data == 'edit':
 				self.edit.first_message(self.message)
+			elif data == 'client_check':
+				self.chat.user.designer.show_screenshots(self.order)
 			elif data == 'reject':
 				self.show_reject_reason()
 			elif data == 'Назад':
@@ -256,6 +281,8 @@ class Order_GUI:
 				self.show_supports()
 			elif data == 'pay':
 				self.show_pay()
+			elif data == 'client_check':
+				self.show_clarify()
 
 	def process_supports(self):
 		self.order.support_remover = self.message.btn_data
@@ -301,6 +328,35 @@ class Order_GUI:
 		if self.message.btn_data == 'now':
 			self.show_order()
 
+	def process_clarify(self):
+		order = self.order
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_order()
+		elif data == 'confirm':
+			order.logical_status = 'waiting_for_design'
+			order.confirmed = True
+			self.app.db.update_order(order)
+			chat = self.app.get_chat(order.designer_id)
+			chat.user.designer.show_design_confirmed(order)
+			self.show_order()
+		elif data == 'clarify':
+			self.show_clarify_reason()
+
+	def process_clarify_reason(self):
+		self.chat.context = ''
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_clarify()
+		else:
+			text = self.message.text
+			# TODO: send text to designer
+			chat = self.app.get_chat(self.order.designer_id)
+			# chat.user.designer.
+			self.order.logical_status = 'clarify'
+			self.app.db.update_order(self.order)
+			self.show_order()
+
 #---------------------------- LOGIC ----------------------------
 
 	def get_text(self):
@@ -339,6 +395,8 @@ class Order_GUI:
 				delivery_text = 'Код передачи'
 			elif logical in ['sample_aquired','waiting_for_design']:
 				status = 'Ожидание дизайнера'
+			elif logical == 'client_check':
+				status = 'Ожидание действий клиента'
 			# physical statuses
 			elif physical == 'in_line':
 				status = 'В очереди на печать'
@@ -390,6 +448,11 @@ class Order_GUI:
 			text += f'Тип заказа: {data.types[order.type]}\n'
 			if order.priority:
 				text += f'Приоритет: {order.priority}\n'
+			if order.type == 'sketch':
+				confirmed = 'нет'
+				if order.confirmed:
+					confirmed = 'да'
+				text += f'Подтвержден клиентом: {confirmed}\n'
 			if order.designer_id:
 				designer = self.app.get_chat(order.designer_id)
 				text += f'Назначенный дизайнер: {designer.user_name}\n'

@@ -58,18 +58,23 @@ class General_parameters:
 		self.GUI.tell_buttons('Напишите комментарий', buttons, [], 4, self.order.id)
 
 	def show_confirmation(self):
-		text = 'Ваши дальнейшие действия по заказу:\n'
+		text = ''
 		if self.order.type == 'sketch':
+			text = 'Ваши дальнейшие действия по заказу:\n'
 			text += '1) Дождаться результатов предварительной оценки,\n'
 			text += '2) Выбрать желаемый цвет изделия и внести предоплату,\n'
 			text += '3) Дождаться разработки модели и подтвердить ее соответствие вашим ожиданиям (при необходимости запросив корректировку),\n'
-			text += '4) Ожидать исполнения заказа.'
+			text += '4) Ожидать исполнения заказа.\n'
 		elif self.order.type == 'item':
+			text = 'Ваши дальнейшие действия по заказу:\n'
 			text += '1) Дождаться результатов предварительной оценки,\n'
 			text += '2) Выбрать желаемый цвет изделия и внести предоплату,\n'
 			text += '3) Принести предмет в пункт выдачи (адрес указан в разделе информации),\n'
-			text += '4) Ожидать исполнения заказа.'
-		# TODO: show aproximate start date
+			text += '4) Ожидать исполнения заказа.\n'
+		self.GUI.tell(text)
+		start_date = self.app.order_logic.get_completion_date(0, '*')
+		start_day = self.app.functions.russian_date(start_date)
+		text = 'Примерный срок запуска в печать: ' + start_day
 		self.GUI.tell(text)
 		text = 'Подтвердите создание заказа'
 		buttons = [['Подтверждаю', 'confirm'], ['Удалить заказ', 'remove']]
@@ -118,6 +123,8 @@ class General_parameters:
 				self.order.logical_status = 'prevalidate'
 			else:
 				self.order.logical_status = 'validate'
+			if self.order.type == 'sketch':
+				self.order.confirmed = False
 			self.order.user_id = self.app.chat.user_id
 			self.app.orders_append(self.order)
 			self.app.db.create_order(self.order)

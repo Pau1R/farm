@@ -73,6 +73,8 @@ class Client:
 					self.process_orders()
 				elif function == '4':
 					self.process_order_payed()
+				elif function == '5':
+					self.process_sketch_screenshots()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -121,6 +123,11 @@ class Client:
 		text = f'К заказу "{order.name}" поступил платеж в размере {amount} рублей'
 		buttons = [['Перейти к заказу','show']]
 		self.GUI.tell_buttons(text, buttons, buttons, 4, order.id)
+
+	def show_sketch_screenshots(self, order):
+		text = f'Модель к заказу "{order.name}" создана. Подтвердите соответствие модели чертежам.'
+		buttons = [['Перейти к заказу','show']]
+		self.GUI.tell_buttons(text, buttons, buttons, 5, order.id)
 
 	def show_becomes_employee(self):
 		self.GUI.tell('Вы стали сотрудником, поздравляем!')
@@ -196,6 +203,11 @@ class Client:
 			self.order_GUI.first_message(self.message)
 
 	def process_order_payed(self):
+		if self.message.btn_data == 'show':
+			self.order_GUI.order = self.app.order_logic.get_order_by_id(self.message.instance_id)
+			self.order_GUI.show_order()
+
+	def process_sketch_screenshots(self):
 		if self.message.btn_data == 'show':
 			self.order_GUI.order = self.app.order_logic.get_order_by_id(self.message.instance_id)
 			self.order_GUI.show_order()

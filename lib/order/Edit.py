@@ -90,6 +90,11 @@ class Edit:
 		buttons.append([f'Статуc: {data.statuses[status]}','status'])
 		buttons.append([f'Комментарий: {order.comment}','comment'])
 		buttons.append([f'Приоритет: {order.priority}','priority'])
+		if order.type == 'sketch':
+			confirmed = 'нет'
+			if order.confirmed:
+				confirmed = 'да'
+			buttons.append([f'Подтвержден клиентом: {confirmed}','confirmed'])
 		date = self.app.functions.russian_date(order.completion_date)
 		buttons.append([f'Дата готовности: {date}','completion_date'])
 		buttons.append([f'Количество экземпляров: {order.quantity}','quantity'])
@@ -200,6 +205,12 @@ class Edit:
 			self.input_value(data, order.comment)
 		elif data == 'priority':
 			self.input_value(data, order.priority)
+		elif data == 'confirmed':
+			current_value = 'нет'
+			if order.confirmed:
+				current_value = 'да'
+			buttons = [['Да','confirmed^1'], ['Нет','confirmed^0']]
+			self.input_selection(data, current_value, buttons)
 		elif data == 'completion_date':
 			today = date.today()
 			completion_date = order.completion_date
@@ -382,7 +393,7 @@ class Edit:
 		if data == 'status':
 			self.set_status(value)
 			return
-		elif data not in ['type','completion_date','quality','designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
+		elif data not in ['type','confirmed','completion_date','quality','designer_id','plastic_type','printer_type','support_remover','delivery_user_id']: # selection
 			return
 		if data in ['completion_date']:
 			value = datetime.strptime(value, "%Y-%m-%d").date()

@@ -117,6 +117,7 @@ class App:
 
 	def telethon_new_message(self, event):
 		# print('app.py telethon_new_message')
+		# FUTURE_TODO: track interaction with user in str3d_chat
 		text = event.message.message
 		chat_id = int(event.message.peer_id.user_id)
 		# chat_id = 240044026

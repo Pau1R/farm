@@ -103,7 +103,7 @@ class General:
 		text = 'Сколько часов ушло на разработку модели и слайсинг?'
 		if self.order.logical_status == 'prevalidate':
 			text = 'Примерно сколько часов нужно на разработку модели и слайсинг?'
-		buttons = ['0.25','0.5','0.75','1','1.5','2','2.5','3','3.5','4','4.5','5','5.5','6','6.5','7','7.5','8','9','10']
+		buttons = ['0.25','0.5','0.75','1','1.25','1.5','2','2.5','3','3.5','4','4.5','5','5.5','6','6.5','7','7.5','8','9','10']
 		self.GUI.tell_buttons(text, buttons, [], 3, self.order.id)
 
 	def show_print_time(self):
@@ -270,29 +270,35 @@ class General:
 						gcode.screenshot = temp_gcode.screenshot
 						self.app.gcodes_append(gcode)
 						self.app.db.create_gcode(gcode)
-				# add ordered spools if client included them in previous steps
-				statuses = ['stock']
-				if order.booked and 'ordered' not in statuses:
-					for book in order.booked:
-						spool = self.app.equipment.spool_logic.get_spool(book[0])
-						if spool.status == 'ordered':
-							statuses.append('ordered')
+			# add ordered spools if client included them in previous steps
+			statuses = ['stock']
+			if order.booked and 'ordered' not in statuses:
+				for book in order.booked:
+					spool = self.app.equipment.spool_logic.get_spool(book[0])
+					if spool.status == 'ordered':
+						statuses.append('ordered')
 			order.design_time = self.design_time
 			order.print_time = self.print_time
 			order.weight = self.weight
 			order.support_time = self.support_minutes
 			order.plastic_type = self.material
 			order.printer_type = self.printer_type
-			booked = order.reserve_plastic(statuses, order.color_id) # rebook  # TODO: there is an error somewhere there
-			if booked:
-				order.set_price()
-				# TODO: if this is secondary validation change status to waiting for print
-				order.logical_status = 'validated'
-				user = self.get_user(order.user_id)
-				user.order_GUI.show_confirmed_by_designer(order)
-			else:
-				self.show_booking_error()
-				time.sleep(3)
+			order.logical_status = 'validated'
+			if order.color_id:
+				booked = order.reserve_plastic(statuses, order.color_id) # rebook  # TODO: there is an error somewhere there
+				if booked:
+					order.set_price()
+					if order.logical_status == 'waiting_for_design':
+						order.logical_status = ''
+						order.physical_status = 'in_line'
+				else:
+					self.show_booking_error()
+					self.app.db.update_order(order)
+					time.sleep(3)
+					self.show_top_menu()
+					return
+			user = self.get_user(order.user_id)
+			user.order_GUI.show_confirmed_by_designer(order)
 			self.app.db.update_order(order)
 			self.show_top_menu()
 

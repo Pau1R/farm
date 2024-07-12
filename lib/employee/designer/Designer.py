@@ -21,6 +21,8 @@ class Designer:
 		self.general = General(app, chat, address + '/1')
 		self.order_GUI = Order_GUI(app, chat, address + '/2')
 
+		self.screenshots = []
+
 	def first_message(self, message):
 		self.show_top_menu()
 
@@ -42,6 +44,10 @@ class Designer:
 					self.process_new_order()
 				if function == '3':
 					self.process_sketch_prepayed()
+				if function == '4':
+					self.process_screenshots()
+				if function == '5':
+					self.process_design_confirmed()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -55,7 +61,7 @@ class Designer:
 		orders_of_status = logic.get_orders_by_status
 
 		orders = orders_of_type(self.app.orders, ['stl','link','sketch','item','production'])
-		orders = orders_of_status(orders, ['validate', 'prevalidate', 'waiting_for_design'])
+		orders = orders_of_status(orders, ['validate', 'prevalidate', 'waiting_for_design', 'clarify'])
 		orders = logic.get_orders_by_user_id(orders, self.chat.user_id)
 		amount = len(orders)
 		if amount > 0:
@@ -87,6 +93,7 @@ class Designer:
 		waiting_for_design = logic.get_orders_by_user_id(waiting_for_design, self.chat.user_id)
 		if orders_of_type(waiting_for_design, 'sketch'):
 			buttons.append(['Разработка модели по чертежу', 'sketch,waiting_for_design'])
+		# TODO: show button for 'clarify' orders
 		if orders_of_type(waiting_for_design, 'item'):
 			buttons.append(['Разработка модели по образцу', 'item,waiting_for_design'])
 
@@ -116,9 +123,25 @@ class Designer:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, order.id)
 
 	def show_sketch_prepayed(self, order):
-		text = f'Новая задача - разработка модели: {order.name} (№ {order.id})'
+		text = f'Новая задача - разработка модели: "{order.name}" (№ {order.id})'
 		buttons = [['Перейти к заказу','show']]
 		self.GUI.tell_buttons(text, buttons, buttons, 3, order.id)
+
+	def show_screenshots(self, order):
+		self.chat.set_context(self.address, 4)
+		self.order = order
+		text = 'Загрузите несколько скриншотов разработанной модели'
+		buttons = []
+		if self.screenshots:
+			text += f'\n\nскриншотов загружено: {len(self.screenshots)}'
+			buttons.append(['Загрузку закончил', 'uploaded'])
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 4, order.id)
+
+	def show_design_confirmed(self, order):
+		text = f'Клиент подтвердил модель заказа "{order.name}" (№ {order.id})'
+		buttons = [['Перейти к заказу','show']]
+		self.GUI.tell_buttons(text, buttons, buttons, 5, order.id)
 
 #---------------------------- PROCESS ----------------------------
 	
@@ -139,10 +162,37 @@ class Designer:
 
 	def process_new_order(self):
 		if self.message.btn_data == 'show':
-			self.order_GUI.last_data = ''
-			self.order_GUI.first_message(self.message)
+			self.show_order()
 
 	def process_sketch_prepayed(self):
 		if self.message.btn_data == 'show':
-			self.order_GUI.last_data = ''
-			self.order_GUI.first_message(self.message)
+			self.show_order()
+
+	def process_screenshots(self):
+		order = self.order
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.screenshots = []
+			self.order_GUI.show_order()
+		elif data == 'uploaded':
+			order.logical_status = 'client_check'
+			order.screenshots = self.screenshots
+			self.app.db.update_order(order)
+			chat = self.app.get_chat(order.user_id)
+			chat.user.show_sketch_screenshots(order)
+			self.general.show_top_menu()
+		else:
+			file_id = self.message.file_id
+			if file_id and self.message.type in ['photo']:
+				self.screenshots.append(file_id)
+			self.show_screenshots(order)
+
+	def process_design_confirmed(self):
+		if self.message.btn_data == 'show':
+			self.show_order()
+
+#---------------------------- LOGIC ----------------------------
+
+	def show_order(self):
+		self.order_GUI.last_data = ''
+		self.order_GUI.first_message(self.message)

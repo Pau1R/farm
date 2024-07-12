@@ -26,6 +26,7 @@ class Order:
 		#   - validated: prepayed
 		self.designer_id = 0 # not used yet
 		self.priority = 0
+		self.confirmed = True
 
 		# user settings
 		self.quantity = 1
@@ -36,6 +37,7 @@ class Order:
 
 		# files
 		self.sketches = []
+		self.screenshots = []
 		self.model_file = ''
 		self.link = ''
 
@@ -231,7 +233,7 @@ class Order:
 		previous = self.is_prepayed()
 		self.payed += amount
 		current = self.is_prepayed()
-		if current and not previous: # order gets fully prepayed
+		if current and not previous: # order gets prepayed
 			if self.type == 'sketch':
 				self.logical_status = 'waiting_for_design'
 			elif self.type == 'item':

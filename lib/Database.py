@@ -114,7 +114,10 @@ class Database:
 					data[field] = value
 				else:
 					if field_type == "LOGICAL":
-						value = bool(value)
+						if value in [1,'1','True']:
+							value = True
+						else:
+							value = False
 					elif field_type == "DECIMAL":
 						value = float(value)
 					elif field_type == "INTEGER":
@@ -228,12 +231,14 @@ class Database:
 			order.logical_status = data['logical_status']
 			order.designer_id = data['designer_id']
 			order.priority = data['priority']
+			order.confirmed = data['confirmed']
 			order.quantity = data['quantity']
 			order.quality = data['quality']
 			order.comment = data['comment']
 			order.color_id = data['color_id']
 			order.support_remover = data['support_remover']
 			order.sketches = ast.literal_eval(data['sketches'])
+			order.screenshots = ast.literal_eval(data['screenshots'])
 			order.model_file = data['model_file']
 			order.link = data['link']
 			order.design_time = data['design_time']
