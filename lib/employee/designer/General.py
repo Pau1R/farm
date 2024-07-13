@@ -9,7 +9,7 @@ import time
 
 class General:
 	type = ''
-	status = ''
+	statuses = ''
 	
 	last_data = ''
 
@@ -38,10 +38,10 @@ class General:
 		self.gcode_gui = Gcode_gui(app, chat, address + '/1', self)
 		self.order_GUI = Order_GUI(app, chat, address + '/2')
 
-	def first_message(self, message, type_, status):
+	def first_message(self, message, type_, statuses):
 		self.reset_values()
 		self.type = type_
-		self.status = status
+		self.statuses = statuses
 		self.show_top_menu()
 
 	def new_message(self, message):
@@ -85,7 +85,7 @@ class General:
 		text = f'Выберите заказ'
 		logic = self.app.order_logic
 		orders = logic.get_orders_by_type(self.app.orders, self.type)
-		orders = logic.get_orders_by_status(orders, self.status)
+		orders = logic.get_orders_by_status(orders, self.statuses)
 		orders = logic.get_orders_by_user_id(orders, self.chat.user_id)
 		buttons = logic.convert_orders_to_buttons(orders)
 		if buttons:

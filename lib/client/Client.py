@@ -120,11 +120,13 @@ class Client:
 		self.GUI.tell_buttons(text, buttons, buttons, 3, 0)
 
 	def show_order_payed(self, order, amount):
+		self.last_data = ''
 		text = f'К заказу "{order.name}" поступил платеж в размере {amount} рублей'
 		buttons = [['Перейти к заказу','show']]
 		self.GUI.tell_buttons(text, buttons, buttons, 4, order.id)
 
 	def show_sketch_screenshots(self, order):
+		self.last_data = ''
 		text = f'Модель к заказу "{order.name}" создана. Подтвердите соответствие модели чертежам.'
 		buttons = [['Перейти к заказу','show']]
 		self.GUI.tell_buttons(text, buttons, buttons, 5, order.id)

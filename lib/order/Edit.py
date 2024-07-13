@@ -90,6 +90,7 @@ class Edit:
 		buttons.append([f'Статуc: {data.statuses[status]}','status'])
 		buttons.append([f'Комментарий: {order.comment}','comment'])
 		buttons.append([f'Приоритет: {order.priority}','priority'])
+		# TODO: add confirmed setting
 		if order.type == 'sketch':
 			confirmed = 'нет'
 			if order.confirmed:

@@ -3,18 +3,20 @@ class Data:
 
 	def __init__(self):
 		self.logical_statuses = {
+			'':'',
 			'prevalidate': 'ожидание предварительной валидации',
 			'validate': 'ожидание валидации',
 			'validated': 'валидирован',
 			'parameters_set': 'ожидание оплаты',
 			'client_check': 'ожидание подтверждения клиентом',
-			'clarify': 'ожидание дизайнера',
+			'clarify': 'уточнение дизайна',
 			'waiting_for_item': 'ожидание предмета',
 			'item_received': 'предмет в выдаче',
 			'sample_aquired': 'предмет у студии',
 			'waiting_for_design': 'ожидание дизайнера'}
 
 		self.physical_statuses = {
+			'':'',
 			'in_line': 'в очереди на печать',
 			'printing': 'печатается',
 			'finished': 'отпечатан',
@@ -25,6 +27,7 @@ class Data:
 		self.statuses.update(self.physical_statuses)
 
 		self.types = {
+			'':'',
 			'stl': 'stl файл',
 			'link': 'модель из интернета',
 			'sketch': 'печать по чертежу',
@@ -32,6 +35,7 @@ class Data:
 			'production': 'мелкосерийное производство'}
 
 		self.attributes = {
+			'':'',
 		    'name': 'название',
 		    'type': 'тип',
 		    'status': 'статус',
@@ -66,6 +70,7 @@ class Data:
 		self.supported_files = ['stl', 'obj', 'step', 'svg', '3mf', 'amf']
 
 		self.quality = {
+			'':'',
 			'cheap': 'максимально дешевое',
 		    'optimal': 'оптимальное цена/качество',
 		    'quality': 'максимальное качество',

@@ -9,6 +9,7 @@ class Color_logic:
 		for color in colors:
 			if color.id == int(id):
 				return color.get_name()
+		return ''
 
 	def get_color(self, id):
 		for color in self.colors:

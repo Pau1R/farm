@@ -35,7 +35,7 @@ class Designer:
 		if message.data_special_format:
 			if file == '1':
 				self.general.new_message(message)
-			if file == '2':
+			elif file == '2':
 				self.order_GUI.new_message(message)
 			elif self.chat.not_repeated_button(self):
 				if function == '1':
@@ -48,6 +48,8 @@ class Designer:
 					self.process_screenshots()
 				if function == '5':
 					self.process_design_confirmed()
+				if function == '6':
+					self.process_clarify()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -84,18 +86,17 @@ class Designer:
 		prevalidate = orders_of_status(self.orders, 'prevalidate')
 		prevalidate = logic.get_orders_by_user_id(prevalidate, self.chat.user_id)
 		if orders_of_type(prevalidate, 'sketch'):
-			buttons.append(['Валидация чертежа', 'sketch,prevalidate'])
+			buttons.append(['Валидация чертежа', 'sketch^prevalidate'])
 		if orders_of_type(prevalidate, 'item'):
-			buttons.append(['Валидация фото', 'item,prevalidate'])
+			buttons.append(['Валидация фото', 'item^prevalidate'])
 		
 		# design
-		waiting_for_design = orders_of_status(self.orders, 'waiting_for_design')
+		waiting_for_design = orders_of_status(self.orders, ['waiting_for_design','clarify'])
 		waiting_for_design = logic.get_orders_by_user_id(waiting_for_design, self.chat.user_id)
 		if orders_of_type(waiting_for_design, 'sketch'):
-			buttons.append(['Разработка модели по чертежу', 'sketch,waiting_for_design'])
-		# TODO: show button for 'clarify' orders
+			buttons.append(['Разработка модели по чертежу', 'sketch^["waiting_for_design","clarify"]'])
 		if orders_of_type(waiting_for_design, 'item'):
-			buttons.append(['Разработка модели по образцу', 'item,waiting_for_design'])
+			buttons.append(['Разработка модели по образцу', 'item^waiting_for_design'])
 
 		# production
 		if orders_of_type(validate, 'production'):
@@ -130,6 +131,7 @@ class Designer:
 	def show_screenshots(self, order):
 		self.chat.set_context(self.address, 4)
 		self.order = order
+		self.screenshots = []
 		text = 'Загрузите несколько скриншотов разработанной модели'
 		buttons = []
 		if self.screenshots:
@@ -143,11 +145,20 @@ class Designer:
 		buttons = [['Перейти к заказу','show']]
 		self.GUI.tell_buttons(text, buttons, buttons, 5, order.id)
 
+	def show_clarify(self, order, text_):
+		text = f'Клиент указал несоответствие модели чертежу в заказе "{order.name}" (№ {order.id}). Причина: {text_}'
+		buttons = [['Перейти к заказу','show']]
+		self.GUI.tell_buttons(text, buttons, buttons, 6, order.id)
+
 #---------------------------- PROCESS ----------------------------
 	
 	def process_top_menu(self):
-		data = self.message.btn_data.split(",")
+		data = self.message.btn_data.split("^")
 		status = data[1] if len(data) > 1 else 'validate'
+		if status.startswith('[') and status.endswith(']'):
+			status = ast.literal_eval(status)
+		if type(status) == str:
+			status = [status]
 		data = data[0]
 		if data == 'Назад':
 			self.message.text = '/start'
@@ -188,6 +199,10 @@ class Designer:
 			self.show_screenshots(order)
 
 	def process_design_confirmed(self):
+		if self.message.btn_data == 'show':
+			self.show_order()
+
+	def process_clarify(self):
 		if self.message.btn_data == 'show':
 			self.show_order()
 

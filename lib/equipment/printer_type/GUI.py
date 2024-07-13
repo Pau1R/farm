@@ -89,6 +89,7 @@ class Printer_typeGUI:
 
 	def process_printer_type(self):
 		if self.message.btn_data == 'Удалить':
+			# TODO: don't allow deletion if there are any orders with it
 			self.show_delete_confirmation()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()

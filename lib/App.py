@@ -76,6 +76,7 @@ class App:
 		for chat in self.chats:
 			if chat.user_id == int(user_id):
 				return chat
+		return ''
 
 	def get_chats(self, roles):
 		if type(roles) == str:

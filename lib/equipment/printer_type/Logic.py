@@ -8,6 +8,7 @@ class Printer_type_logic:
 		for printer_type in self.app.equipment.printer_types:
 			if printer_type.id == int(id):
 				return printer_type
+		return ''
 
 	def get_all_types(self):
 		buttons = []

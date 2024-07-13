@@ -23,7 +23,6 @@ class Functions:
 		if isinstance(date_, datetime):
 			date_ = date_.date()
 		today = date.today()
-		delta = (today - date_).days
 		if date_ == today:
 			return 'сегодня'
 		elif date_ == today + timedelta(days=1):
@@ -35,10 +34,15 @@ class Functions:
 		elif date_ == today - timedelta(days=2):
 			return 'позавчера'
 		else:
-			formatted_date = str(date_.day) + ' ' + self.months[date_.month]
-			if abs(delta) >= 365:
-				formatted_date += ' ' + str(date_.year)
-			return formatted_date
+			return self.clean_date(date_)
+
+	def clean_date(self, date_):
+		today = date.today()
+		delta = (today - date_).days
+		clean_date = str(date_.day) + ' ' + self.months[date_.month]
+		if abs(delta) >= 365:
+			clean_date += ' ' + str(date_.year)
+		return clean_date
 
 	def russian_date_2(self, date_):
 		if date_ < date.today():

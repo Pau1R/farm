@@ -4,6 +4,7 @@ from lib.Msg import Message
 from lib.Gui import Gui
 from lib.client.Color import Client_color
 from lib.order.Edit import Edit
+from datetime import date
 import time
 import random
 
@@ -84,6 +85,7 @@ class Order_GUI:
 		buttons = []
 		if self.chat.is_admin():
 			buttons.append(['Редактировать заказ','edit'])
+			# TODO: add tell client functionality
 			buttons.append(['Отменить заказ','reject'])
 		elif self.chat.is_designer():
 			if order.designer_id:
@@ -92,11 +94,12 @@ class Order_GUI:
 				elif order.type in ['sketch','item']:
 					if order.logical_status == 'prevalidate':
 						buttons.append(['Примерное понимание заказа сформировано','accept'])
-				if order.type == 'sketch' and order.logical_status == 'waiting_for_design':
+				if order.type == 'sketch' and order.logical_status in ['waiting_for_design','clarify']:
 					if order.confirmed:
 						buttons.append(['Моделирование и слайсинг выполнены','accept'])
 					else:
 						buttons.append(['Согласовать модель с клиентом','client_check'])
+						buttons.append(['Перевести в чат', 'chat'])
 				elif order.type == 'production':
 					buttons.append(['Редактировать заказ','edit'])
 					buttons.append(['Перевести в чат', 'chat'])
@@ -122,7 +125,7 @@ class Order_GUI:
 						buttons.append(['Внести предоплату', 'pay'])
 				elif physical in ['in_line','printing','finished','in_pick-up'] and not order.is_payed() and order.is_prepayed():
 					buttons.append(['Оплатить оставшуюся часть', 'pay'])
-				if order.type == 'sketch' and order.logical_status == 'client_check':
+				if order.type == 'sketch' and order.logical_status == 'client_check' and not order.confirmed:
 					buttons.append(['Проверить модель', 'client_check'])
 				# Отмена заказа
 				if ((order.type in ['stl', 'link'] and physical in ['prepare', 'in_line']) or 
@@ -350,9 +353,14 @@ class Order_GUI:
 			self.show_clarify()
 		else:
 			text = self.message.text
-			# TODO: send text to designer
 			chat = self.app.get_chat(self.order.designer_id)
-			# chat.user.designer.
+			chat.user.designer.show_clarify(self.order, text)
+			now = date.today()
+			if now == self.order.created:
+				text = f'\nУточнение: {text}'
+			else:
+				text = f'\nУточнение ({self.app.functions.clean_date(now)}): {text}'
+			self.order.miscellaneous += text
 			self.order.logical_status = 'clarify'
 			self.app.db.update_order(self.order)
 			self.show_order()
@@ -366,21 +374,15 @@ class Order_GUI:
 		# set parameters
 		free_start = order.is_free_start()
 		prepayed = order.is_prepayed()
-		color = self.app.equipment.color_logic.get_color_name(order.color_id)
-		plastic_type = order.plastic_type
-		if plastic_type == 'basic':
-			plastic_type = 'любой базовый'
-		plastic_type.lower()
-
+		
 		# convert order status to readable format
 		status = order.logical_status
 		if not status:
 			status = order.physical_status
+		delivery_text = 'Код передачи/получения'
 		if self.chat.is_employee:
 			status = data.statuses[status]
-			delivery_text = 'Код передачи/получения'
 		else:
-			delivery_text = ''
 			logical = order.logical_status
 			physical = order.physical_status
 			if logical in ['prevalidate','validate']:
@@ -410,72 +412,165 @@ class Order_GUI:
 			else:
 				status = data.statuses[status]
 
-		# set text
-		text = order.name + '\n\n'
-		if status:
-			text += f'Статус: {status.upper()}\n'
-		if order.delivery_code and delivery_text:
-			text += f'{delivery_text}: {order.delivery_code}\n\n'
-		text += f'Дата создания: {self.app.functions.russian_date(order.created)}\n'
-		if order.price:
-			text += f'Стоимость: {order.price} рублей\n'
-		if order.quantity > 1:
-			text += f'Кол-во экземпляров: {order.quantity}\n'
-		if order.quality:
-			text += f'Качество: {data.quality[order.quality]}\n'
-		if order.weight:
-			text0 = 'Общий вес' if order.quantity else 'Вес'
-			text += f'{text0}: {int(order.weight) * order.quantity} грамм\n'
-		if plastic_type:
-			text += f'Тип материала: {plastic_type}\n'
-		if order.color_id:
-			text += f'Цвет изделия: {color.lower()}\n'
-		if order.completion_date:
-			date = self.app.functions.russian_date(order.completion_date)
-			text += f'Дата готовности (примерно): {date}\n'
-		if order.support_time:
-			text += f"Удаление поддержек: {'клиент' if order.support_remover == 'Клиент' else 'студия'}\n"
-		if order.payed:
+		# TODO: process situations when functions may retull null
+		# prepare data
+		name = order.name
+		id = order.id
+		status = status.upper()
+		delivery_code = order.delivery_code
+		created = self.app.functions.russian_date(order.created)
+		price = order.price
+		quantity = order.quantity
+		quality = data.quality[order.quality]
+		weight = int(order.weight) * quantity
+		total_weight = int(order.weight) * quantity
+		plastic_type = order.plastic_type
+		if plastic_type == 'basic':
+			plastic_type = 'любой базовый'
+		plastic_type.lower()
+		color_id = order.color_id
+		color = self.app.equipment.color_logic.get_color_name(order.color_id)
+		if color:
+			color = color.lower()
+		completion_date = self.app.functions.russian_date(order.completion_date)
+		support_time = int(order.support_time)
+		support_remover = 'клиент' if order.support_remover == 'Клиент' else 'студия'
+		payed = int(order.payed)
+		prepayment_price = int(order.get_prepayment_price())
+		if payed:
 			if not free_start and not prepayed:
-				text += f'Предоплачено: {int(order.payed)}/{int(order.get_prepayment_price())} рублей\n'
+				prepayed = f'Предоплачено: {payed}/{prepayment_price} рублей'
 			else:
-				text += f'Предоплачено: {int(order.payed)} рублей\n'
-		if order.comment:
-			text += f'Комментарий: {order.comment}\n'
-		if self.chat.is_employee:
-			chat = self.app.get_chat(order.user_id)
-			text += f'Клиент: {chat.user_name} (id: {chat.user_id})\n'
-			text += f'Тип заказа: {data.types[order.type]}\n'
-			if order.priority:
-				text += f'Приоритет: {order.priority}\n'
-			if order.type == 'sketch':
-				confirmed = 'нет'
-				if order.confirmed:
-					confirmed = 'да'
+				prepayed = f'Предоплачено: {payed} рублей'
+		else:
+			prepayed = 'Предоплачено: 0 рублей'
+		comment = order.comment
+		chat = self.app.get_chat(order.user_id)
+		user_name = chat.user_name
+		user_id = chat.user_id
+		type_ = data.types[order.type]
+		priority = order.priority
+		confirmed = ''
+		if order.type == 'sketch':
+			confirmed = 'нет'
+			if order.confirmed:
+				confirmed = 'да'
+		designer_user_name = self.app.get_chat(order.designer_id)
+		if designer_user_name:
+			designer_user_name = designer_user_name.user_name
+		printer_type_name = self.app.printer_type_logic.get_printer_type(order.printer_type)
+		if printer_type_name:
+			printer_type_name = printer_type_name.name
+		layer_height = order.layer_height
+		model_file = order.model_file
+		link = order.link
+		sketches = len(order.sketches)
+		prepayment_percent = int(order.prepayment_percent)
+		pay_code = order.pay_code
+		delivery_user_name = self.app.get_chat(order.delivery_user_id)
+		if delivery_user_name:
+			delivery_user_name = delivery_user_name.user_name
+		miscellaneous = order.miscellaneous
+
+		# set admin text
+		if self.chat.is_admin():
+			text = f'{id}: {name}\n\n'
+			text += f'Клиент: {user_name} (id: {user_id})\n'
+			text += '\n--- Общие ---\n'
+			text += f'Тип заказа: {type_}\n'
+			text += f'Статус: {status}\n'
+			text += f'Комментарий: {comment}\n'
+			text += f'Приоритет: {priority}\n'
+			if confirmed:
 				text += f'Подтвержден клиентом: {confirmed}\n'
-			if order.designer_id:
-				designer = self.app.get_chat(order.designer_id)
-				text += f'Назначенный дизайнер: {designer.user_name}\n'
-			if order.printer_type:
-				printer_type = self.app.printer_type_logic.get_printer_type(order.printer_type)
-				text += f'Тип принтера: {printer_type.name}\n'
-			if order.layer_height:
-				text += f'Высота слоя: {order.layer_height}\n'
-			if order.model_file:
+			text += f'Дата готовности (примерно): {completion_date}\n'
+			text += f'Кол-во экземпляров: {quantity}\n'
+			text += f'Качество: {quality}\n'
+			text += f'Вес экземпляра: {weight} грамм\n'
+			text += f'Цвет изделия: {color}\n'
+			text += f'Назначенный дизайнер: {designer_user_name}\n'
+			text += f'Дополнительная информация: {miscellaneous}\n'
+			text += '\n--- Настройки печати ---\n'
+			text += f'Тип материала: {plastic_type}\n'
+			text += f'Тип принтера: {printer_type_name}\n'
+			text += f'Высота слоя: {layer_height}\n'
+			text += '\n--- Файлы, ссылка, фото ---\n'
+			if model_file:
 				text += 'stl файл: 1\n'
-			if order.link:
+			else:
+				text += 'stl файл: 0\n'
+			if link:
 				text += 'Ссылка: 1\n'
-			if order.sketches:
-				text += f'Чертежы/фото: {len(order.sketches)}\n'
-			if order.support_time:
-				text += f'Время удаления поддержек c 1 шт.: {int(order.support_time)}\n'
-			if order.prepayment_percent:
-				text += f'Процент предоплаты: {int(order.prepayment_percent)}\n'
-			if order.pay_code:
-				text += f'Код оплаты: {order.pay_code}\n'
-			if order.delivery_user_id:
-				delivery = self.app.get_chat(order.delivery_user_id)
-				text += f'Точка выдачи: {delivery.user_name}\n'
-			if order.miscellaneous:
-				text += f'Дополнительная информация: {order.miscellaneous}\n'
+			else:
+				text += 'Ссылка: 0\n'
+			text += f'Чертежы/фото: {sketches}\n'
+			text += '\n--- Финансы ---\n'
+			text += f'Стоимость: {price} рублей\n'
+			text += f'{prepayed}\n'
+			text += f'Время удаления поддержек c 1 шт.: {support_time}\n'
+			text += f'Процент предоплаты: {prepayment_percent}\n'
+			text += f"Удаление поддержек: {support_remover}\n"
+			text += '\n--- Доставка ---\n'
+			text += f'Код оплаты: {pay_code}\n'
+			text += f'{delivery_text}: {delivery_code}\n\n'
+			text += f'Точка выдачи: {delivery_user_name}\n'
+
+		# set designer text
+		elif self.chat.is_designer():
+			text = f'{id}: {name}\n\n'
+			text += f'Тип заказа: {type_}\n'
+			text += f'Статус: {status}\n'
+			text += f'Дата создания: {created}\n'
+			if priority:
+				text += f'Приоритет: {priority}\n'
+			if color_id:
+				text += f'Цвет изделия: {color}\n'
+			if quantity > 1:
+				text += f'Кол-во экземпляров: {quantity}\n'
+			text += f'Качество: {quality}\n'
+			if printer_type_name:
+				text += f'Тип принтера: {printer_type_name}\n'
+			if plastic_type:
+				text += f'Тип материала: {plastic_type}\n'
+			if weight:
+				text += f'Вес экземпляра: {weight} грамм\n'
+			if layer_height:
+				text += f'Высота слоя: {layer_height}\n'
+			if support_time:
+				text += f'Время удаления поддержек c 1 шт.: {support_time}\n'
+			if comment:
+				text += f'Комментарий: {comment}\n'
+			if miscellaneous:
+				text += f'Дополнительная информация: {miscellaneous}\n'
+		
+		# set client text
+		elif not self.chat.is_employee:
+			text = ''
+			text = name + '\n\n'
+			text += f'Статус: {status}\n'
+			if delivery_code and delivery_text:
+				text += f'{delivery_text}: {delivery_code}\n\n'
+			text += f'Дата создания: {created}\n'
+			if priority:
+				text += f'Приоритет: {priority}\n'
+			if price:
+				text += f'Стоимость: {price} рублей\n'
+			if quantity > 1:
+				text += f'Кол-во экземпляров: {quantity}\n'
+			text += f'Качество: {quality}\n'
+			if total_weight:
+				text0 = 'Общий вес' if quantity else 'Вес'
+				text += f'{text0}: {total_weight} грамм\n'
+			if plastic_type:
+				text += f'Тип материала: {plastic_type}\n'
+			if color_id:
+				text += f'Цвет изделия: {color}\n'
+			if completion_date:
+				text += f'Дата готовности (примерно): {completion_date}\n'
+			if support_time:
+				text += f"Удаление поддержек: {support_remover}\n"
+			if prepayed:
+				text += f'{prepayed}\n'
+			if comment:
+				text += f'Комментарий: {comment}\n'
 		return text
