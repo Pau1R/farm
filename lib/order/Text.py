@@ -47,7 +47,6 @@ class Order_text:
 			else:
 				status = data.statuses[status]
 
-		# TODO: process situations when functions may retull null
 		# prepare data
 		name = order.name
 		id = order.id

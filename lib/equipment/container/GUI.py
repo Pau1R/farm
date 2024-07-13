@@ -60,6 +60,14 @@ class ContainerGUI:
 		buttons = ['Удалить', 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.container.id)
 
+	def show_busy(self):
+		# TODO: test function
+		spools = []
+		for spool in self.app.equipment.spools:
+			spools.append(spool.id)
+		spools = ', '.join(map(str, spools))
+		self.GUI.tell(f'Удалить нельзя. В ящике находятся катушки: {spools}')
+
 	def show_add_new_container(self):
 		buttons = []
 		for type in self.types:
@@ -95,6 +103,11 @@ class ContainerGUI:
 
 	def process_container(self):
 		if self.message.btn_data == 'Удалить':
+			for spool in self.app.equipment.spools:
+				if spool.location == self.container.id:
+					self.show_busy()
+					self.show_container()
+					return
 			self.show_delete_confirmation()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()

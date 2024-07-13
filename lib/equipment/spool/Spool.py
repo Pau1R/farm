@@ -6,6 +6,8 @@ class Spool:
 		self.app = app
 		self.id = id
 		self.created = date.today()
+		self.location_type = 0
+		self.location = 0
 		self.type = ''
 		self.diameter = 0.0
 		self.weight = 0

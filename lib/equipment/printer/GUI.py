@@ -94,6 +94,7 @@ class PrinterGUI:
 
 	def process_printer(self):
 		if self.message.btn_data == 'Удалить':
+			# TODO: refuse if any situations
 			self.show_delete_confirmation()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()

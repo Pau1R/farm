@@ -90,6 +90,7 @@ class LocationGUI:
 
 	def process_location(self):
 		if self.message.btn_data == 'Удалить':
+			# TODO: refuse if anything is in location
 			self.show_delete_confirmation()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()

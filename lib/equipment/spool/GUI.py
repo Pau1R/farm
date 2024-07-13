@@ -215,6 +215,7 @@ class SpoolGUI:
 		elif data == 'Изменить вес':
 			self.show_change_weight()
 		elif data == 'Удалить':
+			# TODO: refuse if spool is booked or is in use
 			self.show_delete_confirmation()
 		elif data == 'Назад':
 			if self.spool.status == 'ordered':

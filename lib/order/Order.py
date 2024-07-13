@@ -9,6 +9,8 @@ class Order:
 		self.app = app
 		self.id = id
 		self.created = datetime.today()
+		self.location_type = 0
+		self.location = 0
 		self.spools = self.app.equipment.spools
 		self.spool_logic = self.app.equipment.spool_logic
 		self.name = ''

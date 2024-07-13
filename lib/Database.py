@@ -225,6 +225,8 @@ class Database:
 		for order, data in zip(orders, full_data):
 			order.name = data['name']
 			order.created = data['created']
+			order.location_type = data['location_type']
+			order.location = data['location']
 			order.user_id = data['user_id']
 			order.type = data['type']
 			order.physical_status = data['physical_status']
@@ -302,6 +304,8 @@ class Database:
 		containers, full_data = self.get_table('container')
 		for container, data in zip(containers, full_data):
 			container.created = data['created']
+			container.location_type = data['location_type']
+			container.location = data['location']
 			container.type = data['type']
 			container.capacity = data['capacity']
 			self.app.equipment.containers.append(container)
@@ -321,6 +325,8 @@ class Database:
 		dryers, full_data = self.get_table('dryer')
 		for dryer, data in zip(dryers, full_data):
 			dryer.created = data['created']
+			dryer.location_type = data['location_type']
+			dryer.location = data['location']
 			dryer.name = data['name']
 			dryer.capacity = data['capacity']
 			dryer.minTemp = data['minTemp']
@@ -400,6 +406,8 @@ class Database:
 		printers, full_data = self.get_table('printer')
 		for printer, data in zip(printers, full_data):
 			printer.created = data['created']
+			printer.location_type = data['location_type']
+			printer.location = data['location']
 			printer.name = data['name']
 			printer.type_ = data['type_']
 			self.app.equipment.printers.append(printer)
@@ -419,6 +427,8 @@ class Database:
 		spools, full_data = self.get_table('spool')
 		for spool, data in zip(spools, full_data):
 			spool.created = data['created']
+			spool.location_type = data['location_type']
+			spool.location = data['location']
 			spool.type = data['type']
 			spool.diameter = data['diameter']
 			spool.weight = data['weight']
@@ -468,6 +478,8 @@ class Database:
 		surfaces, full_data = self.get_table('surface')
 		for surface, data in zip(surfaces, full_data):
 			surface.created = data['created']
+			surface.location_type = data['location_type']
+			surface.location = data['location']
 			surface.type = data['type']
 			self.app.equipment.surfaces.append(surface)
 

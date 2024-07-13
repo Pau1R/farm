@@ -1,5 +1,5 @@
 # This class should ONLY contain the metaschema for the database as the fields are converted to database structure
-# The database is constructed automatically based on this class field names and contents
+# The database is constructed automatically based on the class field names and contents
 class Meta:
     chat = {
         "user_id": "INTEGER PRIMARY KEY",
@@ -15,11 +15,15 @@ class Meta:
     container = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
+        "location_type": "INTEGER DEFAULT 0",
+        "location": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''",
         "capacity": "INTEGER DEFAULT 0"}
     dryer = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
+        "location_type": "INTEGER DEFAULT 0",
+        "location": "INTEGER DEFAULT 0",
         "name": "TEXT DEFAULT ''",
         "capacity": "INTEGER DEFAULT 0",
         "minTemp": "INTEGER DEFAULT 0",
@@ -31,6 +35,10 @@ class Meta:
         "name": "TEXT DEFAULT ''",
         "maxTemp": "INTEGER DEFAULT 0",
         "nozzleDiameter": "DECIMAL DEFAULT 0"}
+    location_type = {
+        "id": "INTEGER PRIMARY KEY",
+        "name": "TEXT DEFAULT ''", # ['','location','container','printer','dryer','delivery']
+    }
     location = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
@@ -43,14 +51,18 @@ class Meta:
     printer = {
         "id": "INTEGER PRIMARY KEY", 
         "created": "DATETIME DEFAULT ''",
+        "location_type": "INTEGER DEFAULT 0",
+        "location": "INTEGER DEFAULT 0",
         "name": "TEXT DEFAULT ''",
         "type_": "INTEGER DEFAULT 0"}
     spool = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
+        "location_type": "INTEGER DEFAULT 0",
+        "location": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''",
         "diameter": "DECIMAL DEFAULT 0",
-        "weight": "INTEGER DEFAULT ''",
+        "weight": "INTEGER DEFAULT 0",
         "density": "DECIMAL DEFAULT 0",
         "color_id": "INTEGER DEFAULT ''",
         "dried": "LOGICAL DEFAULT ''",
@@ -69,11 +81,15 @@ class Meta:
     surface = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
+        "location_type": "INTEGER DEFAULT 0",
+        "location": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''"}
     order = {
         "id": "INTEGER PRIMARY KEY",
         "name": "TEXT DEFAULT ''",
         "created": "DATETIME DEFAULT ''",
+        "location_type": "INTEGER DEFAULT 0",
+        "location": "INTEGER DEFAULT 0",
         "user_id": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''",
         "physical_status": "TEXT DEFAULT ''",
