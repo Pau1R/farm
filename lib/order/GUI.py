@@ -59,6 +59,8 @@ class Order_GUI:
 					self.process_clarify()
 				elif function == '8':
 					self.process_clarify_reason()
+				elif function == '9':
+					self.process_say()
 		self.chat.add_if_text(self)
 
 	def set_order(self):
@@ -86,7 +88,7 @@ class Order_GUI:
 		buttons = []
 		if self.chat.is_admin():
 			buttons.append(['Редактировать заказ','edit'])
-			buttons.append(['Написать клиенту','talk'])
+			buttons.append(['Написать клиенту','say'])
 			buttons.append(['Попросить перейти в чат', 'chat'])
 			buttons.append(['Отменить заказ','reject'])
 		elif self.chat.is_designer():
@@ -239,6 +241,12 @@ class Order_GUI:
 		text = f'Предоплата заказа "{order.name}" не выполнена в срок. Бронь материала отменена'
 		self.GUI.tell(text)
 
+	def show_say(self):
+		self.chat.set_context(self.address, 9)
+		text = 'Напишите сообщение клиенту'
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 9, self.order.id)
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_order(self):
@@ -250,9 +258,11 @@ class Order_GUI:
 			elif data == 'edit':
 				self.edit.first_message(self.message)
 			elif data == 'say':
-				x = '' # TODO: send text message to client
+				self.show_say()
 			elif data == 'chat':
-				x = '' # TODO: send client 
+				chat = self.app.get_chat(self.order.user_id)
+				chat.user.show_redirect_to_chat(self.order)
+				self.show_order()
 			elif data == 'reject':
 				self.show_reject_reason()
 		elif self.chat.is_designer():
@@ -369,6 +379,15 @@ class Order_GUI:
 			self.order.miscellaneous += text
 			self.order.logical_status = 'clarify'
 			self.app.db.update_order(self.order)
+			self.show_order()
+
+	def process_say(self):
+		data = self.message.btn_data
+		if data == 'Назад':
+			self.show_clarify()
+		else:
+			text = f'Сообщение от администратора: {self.message.text}'
+			self.GUI.tell_id(self.order.user_id, text)
 			self.show_order()
 
 #---------------------------- LOGIC ----------------------------

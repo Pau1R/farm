@@ -11,7 +11,7 @@ from lib.equipment.printer_type.GUI import Printer_typeGUI
 from lib.equipment.printer.GUI import PrinterGUI
 from lib.equipment.spool.GUI import SpoolGUI
 from lib.equipment.color.GUI import ColorGUI
-from lib.equipment.Bed.GUI import BedGUI
+from lib.equipment.bed.GUI import BedGUI
 from lib.setting.GUI import SettingsGUI
 from lib.order.GUI import Order_GUI
 from lib.request.GUI import RequestGUI

@@ -16,7 +16,7 @@ from lib.equipment.spool.Spool import Spool
 from lib.equipment.spool.Logic import Spool_logic
 from lib.equipment.color.Color import Color
 from lib.equipment.color.Logic import Color_logic
-from lib.equipment.Bed.Bed import Bed
+from lib.equipment.bed.Bed import Bed
 from lib.request.Request import Request
 
 import inspect

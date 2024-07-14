@@ -2,6 +2,7 @@ import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
 from datetime import datetime
+import time
 
 class General_parameters:
 	last_data = ''
@@ -74,11 +75,14 @@ class General_parameters:
 		self.GUI.tell(text)
 		start_date = self.app.order_logic.get_completion_date(0, '*')
 		start_day = self.app.functions.russian_date(start_date)
-		text = 'Примерный срок запуска в печать: ' + start_day
+		text = 'Ожидаемый срок запуска в печать: ' + start_day
 		self.GUI.tell(text)
 		text = 'Подтвердите создание заказа'
 		buttons = [['Подтверждаю', 'confirm'], ['Удалить заказ', 'remove']]
 		self.GUI.tell_buttons(text, buttons, buttons, 5, self.order.id)
+
+	def show_name_used(self):
+		self.GUI.tell('Введенное название уже используется для другого вашего заказа')
 
 #---------------------------- PROCESS ----------------------------
 
@@ -96,9 +100,15 @@ class General_parameters:
 		self.show_name()
 
 	def process_name(self):
-		self.chat.context = ''
-		self.order.name = self.message.text
-		self.show_comment()
+		text = self.message.text
+		if self.app.order_logic.is_unique_name(self.chat.user_id, text):
+			self.chat.context = ''
+			self.order.name = text
+			self.show_comment()
+		else:
+			self.show_name_used()
+			time.sleep(3)
+			self.show_name()
 
 	def process_comment(self):
 		self.chat.context = ''

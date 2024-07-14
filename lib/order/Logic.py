@@ -98,3 +98,10 @@ class Order_logic:
 
 	def get_object_date(self, object):
 		return object.created
+
+	def is_unique_name(self, user_id, name):
+		orders = self.get_client_orders(user_id)
+		for order in orders:
+			if order.name == name:
+				return False
+		return True
