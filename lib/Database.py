@@ -9,14 +9,14 @@ from lib.order.gcode.Gcode import Gcode
 from lib.equipment.container.Container import Container
 from lib.equipment.dryer.Dryer import Dryer
 from lib.equipment.extruder.Extruder import Extruder
-from lib.equipment.location.Location import Location
+from lib.equipment.zone.Zone import Zone
 from lib.equipment.printer_type.Printer_type import Printer_type
 from lib.equipment.printer.Printer import Printer
 from lib.equipment.spool.Spool import Spool
 from lib.equipment.spool.Logic import Spool_logic
 from lib.equipment.color.Color import Color
 from lib.equipment.color.Logic import Color_logic
-from lib.equipment.surface.Surface import Surface
+from lib.equipment.Bed.Bed import Bed
 from lib.request.Request import Request
 
 import inspect
@@ -365,23 +365,23 @@ class Database:
 		self.cursor.execute('DELETE FROM extruder WHERE id=?', (extruder.id,))
 		self.db.commit()
 
-	def get_locations(self):
-		locations, full_data = self.get_table('location')
-		for location, data in zip(locations, full_data):
-			location.created = data['created']
-			location.name = data['name']
-			location.type = data['type']
-			self.app.equipment.locations.append(location)
+	def get_zones(self):
+		zones, full_data = self.get_table('zone')
+		for zone, data in zip(zones, full_data):
+			zone.created = data['created']
+			zone.name = data['name']
+			zone.type = data['type']
+			self.app.equipment.zones.append(zone)
 
-	def add_location(self, location):
-		self.create_table_row('location (id)', (location.id,))
-		self.update_location(location)
+	def add_zone(self, zone):
+		self.create_table_row('zone (id)', (zone.id,))
+		self.update_zone(zone)
 
-	def update_location(self, location):
-		self.update_table('location', location)
+	def update_zone(self, zone):
+		self.update_table('zone', zone)
 
-	def remove_location(self, location):
-		self.cursor.execute('DELETE FROM location WHERE id=?', (location.id,))
+	def remove_zone(self, zone):
+		self.cursor.execute('DELETE FROM zone WHERE id=?', (zone.id,))
 		self.db.commit()
 
 	def get_printer_types(self):
@@ -474,24 +474,24 @@ class Database:
 		self.cursor.execute('DELETE FROM color WHERE id=?', (color.id,))
 		self.db.commit()
 	
-	def get_surfaces(self):
-		surfaces, full_data = self.get_table('surface')
-		for surface, data in zip(surfaces, full_data):
-			surface.created = data['created']
-			surface.location_type = data['location_type']
-			surface.location = data['location']
-			surface.type = data['type']
-			self.app.equipment.surfaces.append(surface)
+	def get_beds(self):
+		beds, full_data = self.get_table('bed')
+		for bed, data in zip(beds, full_data):
+			bed.created = data['created']
+			bed.location_type = data['location_type']
+			bed.location = data['location']
+			bed.type = data['type']
+			self.app.equipment.beds.append(bed)
 
-	def add_surface(self, surface):
-		self.create_table_row('surface (id)', (surface.id,))
-		self.update_surface(surface)
+	def add_bed(self, bed):
+		self.create_table_row('bed (id)', (bed.id,))
+		self.update_bed(bed)
 
-	def update_surface(self, surface):
-		self.update_table('surface', surface)
+	def update_bed(self, bed):
+		self.update_table('bed', bed)
 
-	def remove_surface(self, surface):
-		self.cursor.execute('DELETE FROM surface WHERE id=?', (surface.id,))
+	def remove_bed(self, bed):
+		self.cursor.execute('DELETE FROM bed WHERE id=?', (bed.id,))
 		self.db.commit()
 
 	def get_settings(self):

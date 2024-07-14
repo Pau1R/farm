@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
+import time
 
 class ContainerGUI:
 	last_data = ''
@@ -61,12 +62,8 @@ class ContainerGUI:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, self.container.id)
 
 	def show_busy(self):
-		# TODO: test function
-		spools = []
-		for spool in self.app.equipment.spools:
-			spools.append(spool.id)
-		spools = ', '.join(map(str, spools))
-		self.GUI.tell(f'Удалить нельзя. В ящике находятся катушки: {spools}')
+		content = self.location.readable_content()
+		self.GUI.tell(f'Удалить нельзя - ящик не пустой:\n{content.lower()}')
 
 	def show_add_new_container(self):
 		buttons = []
@@ -103,12 +100,14 @@ class ContainerGUI:
 
 	def process_container(self):
 		if self.message.btn_data == 'Удалить':
-			for spool in self.app.equipment.spools:
-				if spool.location == self.container.id:
-					self.show_busy()
-					self.show_container()
-					return
-			self.show_delete_confirmation()
+			self.location = self.app.locations.get('container', self.container.id)
+			if self.location.empty():
+				self.show_delete_confirmation()
+			else:
+				self.show_busy()
+				time.sleep(2)
+				self.last_data = ''
+				self.show_container()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 

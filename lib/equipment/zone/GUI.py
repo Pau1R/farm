@@ -3,7 +3,7 @@ import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
 
-class LocationGUI:
+class ZoneGUI:
 	last_data = ''
 
 	name = ''
@@ -14,7 +14,7 @@ class LocationGUI:
 		self.chat = chat
 		self.address = address
 		self.GUI = Gui(app, chat, self.address)
-		self.location = None
+		self.zone = None
 
 	def first_message(self, message):
 		self.show_top_menu()
@@ -29,11 +29,11 @@ class LocationGUI:
 				if function == '1':
 					self.process_top_menu()
 				elif function == '2':
-					self.process_location()
+					self.process_zone()
 				elif function == '3':
-					self.process_add_new_location()
+					self.process_add_new_zone()
 				elif function == '4':
-					self.process_add_new_location_type()
+					self.process_add_new_zone_type()
 				elif function == '5':
 					self.process_add_confirmation()
 				elif function == '6':
@@ -43,27 +43,27 @@ class LocationGUI:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
-		if len(self.app.equipment.locations) > 0:
+		if len(self.app.equipment.zones) > 0:
 			text = 'Все локации:'
 		else:
 			text = 'Локации отсутствуют'
 		buttons = []
-		for location in self.app.equipment.locations:
-			buttons.append([f'{location.id}: {location.type} {location.name}', location.id]) 
+		for zone in self.app.equipment.zones:
+			buttons.append([f'{zone.id}: {zone.type} {zone.name}', zone.id]) 
 		buttons.extend(['Добавить', 'Назад'])
 		self.GUI.tell_buttons(text, buttons, ['Добавить', 'Назад'], 1, 0)
 
-	def show_location(self):
-		text = f'номер локации: {self.location.id}\nдата добавления: {self.location.created}\n'
-		text += f'название: {self.location.name}\nтип: {self.location.type}\n'
+	def show_zone(self):
+		text = f'номер локации: {self.zone.id}\nдата добавления: {self.zone.created}\n'
+		text += f'название: {self.zone.name}\nтип: {self.zone.type}\n'
 		buttons = ['Удалить', 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
-	def show_add_new_location(self):
+	def show_add_new_zone(self):
 		self.chat.set_context(self.address, 3)
 		self.GUI.tell('Введите название локации')
 
-	def show_add_new_location_type(self):
+	def show_add_new_zone_type(self):
 		buttons = ['Помещение', 'Зона']
 		self.GUI.tell_buttons('Выберите тип локации:', buttons, [], 4, 0)
 
@@ -75,39 +75,48 @@ class LocationGUI:
 		buttons = ['Подтверждаю', 'Отменить удаление']
 		self.GUI.tell_buttons('Подтвердите удаление локации', buttons, buttons, 6, 0)
 
+	def show_busy(self):
+		content = self.location.readable_content()
+		self.GUI.tell(f'Удалить нельзя - локация не пустая:\n{content.lower()}')
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
 		if self.message.btn_data == 'Добавить':
-			self.show_add_new_location()
+			self.show_add_new_zone()
 		elif self.message.btn_data == 'Назад':
 			self.app.chat.user.admin.show_equipment()
 		else:
-			for location in self.app.equipment.locations:
-				if location.id == int(self.message.btn_data):
-					self.location = location
-					self.show_location()
+			for zone in self.app.equipment.zones:
+				if zone.id == int(self.message.btn_data):
+					self.zone = zone
+					self.show_zone()
 
-	def process_location(self):
+	def process_zone(self):
 		if self.message.btn_data == 'Удалить':
-			# TODO: refuse if anything is in location
-			self.show_delete_confirmation()
+			self.location = self.app.locations.get('zone', self.zone.id)
+			if self.location.empty():
+				self.show_delete_confirmation()
+			else:
+				self.show_busy()
+				self.last_data = ''
+				self.show_zone()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 
-	def process_add_new_location(self):
+	def process_add_new_zone(self):
 		self.name = self.message.text
-		self.show_add_new_location_type()
+		self.show_add_new_zone_type()
 
-	def process_add_new_location_type(self):
+	def process_add_new_zone_type(self):
 		self.type = self.message.btn_data
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
-			self.location = self.app.equipment.create_new_location(self.name, self.type)
-			text = f'Создана новая локация:\nномер: {self.location.id}\nназвание: {self.location.name}\n'
-			text += f'тип: {self.location.type}'
+			self.zone = self.app.equipment.create_new_zone(self.name, self.type)
+			text = f'Создана новая локация:\nномер: {self.zone.id}\nназвание: {self.zone.name}\n'
+			text += f'тип: {self.zone.type}'
 			self.GUI.tell_permanent(text)
 		self.name = ''
 		self.type = 0
@@ -115,7 +124,7 @@ class LocationGUI:
 
 	def process_delete_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
-			self.GUI.tell(f'Локация {self.location.id} удалена')
-			self.app.equipment.remove_location(self.location.id)
-			self.location = None
+			self.GUI.tell(f'Локация {self.zone.id} удалена')
+			self.app.equipment.remove_zone(self.zone.id)
+			self.zone = None
 		self.show_top_menu()

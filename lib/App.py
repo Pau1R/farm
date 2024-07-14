@@ -14,6 +14,7 @@ from lib.equipment.printer_type.Logic import Printer_type_logic
 from lib.request.Logic import Request_logic
 from lib.setting.Setting import Setting
 from lib.Clicker import Clicker
+from lib.Locations import Locations
 import jsonpickle
 from datetime import date
 from lib.Functions import Functions
@@ -45,6 +46,7 @@ class App:
 		self.request_logic = Request_logic(self)
 		self.functions = Functions()
 		self.data = Data()
+		self.locations = Locations(self)
 
 		self.booking_busy = False
 		
@@ -156,11 +158,11 @@ class App:
 #     1 container
 #     2 dryer
 #     3 extruder
-#     4 location
+#     4 zone
 #     5 printer
 #     6 spool
 #     7 color
-#     8 surface
+#     8 bed
 #	  9 setting
 #     10 requests
 #	3 Operator
@@ -169,4 +171,4 @@ class App:
 #	5 Delivery
 
 # TODO:
-# - for container, dryer, printer, spool, surface, order add location functionality when adding new objects
+# - for container, dryer, printer, spool, bed, order add location functionality when adding new objects

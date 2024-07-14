@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../lib')
 from lib.Gui import Gui
+import time
 
 class DryerGUI:
 	last_data = ''
@@ -105,6 +106,10 @@ class DryerGUI:
 		buttons = ['Подтверждаю', 'Отменить удаление']
 		self.GUI.tell_buttons('Подтвердите удаление сушилки', buttons, buttons, 9, 0)
 
+	def show_busy(self):
+		content = self.location.readable_content()
+		self.GUI.tell(f'Удалить нельзя - в сушилке находятся:\n{content.lower()}')
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
@@ -120,8 +125,14 @@ class DryerGUI:
 
 	def process_dryer(self):
 		if self.message.btn_data == 'Удалить':
-			# FUTURE_TODO: refuse if dryer is in use
-			self.show_delete_confirmation()
+			self.location = self.app.locations.get('dryer', self.dryer.id)
+			if self.location.empty():
+				self.show_delete_confirmation()
+			else:
+				self.show_busy()
+				time.sleep(2)
+				self.last_data = ''
+				self.show_dryer()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 

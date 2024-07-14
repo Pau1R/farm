@@ -74,6 +74,15 @@ class Printer_typeGUI:
 		buttons = ['Подтверждаю', 'Отменить удаление']
 		self.GUI.tell_buttons('Подтвердите удаление типа принтера', buttons, buttons, 6, 0)
 
+	def show_busy(self):
+		printers = []
+		for printer in self.app.equipment.printers:
+			if printer.type_ == self.printer_type.id:
+				printers.append(printer)
+		text = 'Удалить нельзя, данный тип назначен принтерам: '
+		text += ', '.join(map(str, [printer.id for printer in printers]))
+		self.GUI.tell(text)
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
@@ -89,7 +98,12 @@ class Printer_typeGUI:
 
 	def process_printer_type(self):
 		if self.message.btn_data == 'Удалить':
-			# TODO: don't allow deletion if there are any orders with it
+			for printer in self.app.equipment.printers:
+				if printer.type_ == self.printer_type.id:
+					self.show_busy()
+					self.last_data = ''
+					self.show_printer_type()
+					return
 			self.show_delete_confirmation()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()

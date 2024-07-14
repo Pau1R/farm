@@ -1,6 +1,6 @@
 from datetime import date
 
-class Surface:
+class Bed:
 
 	def __init__(self, app, id):
 		self.app = app

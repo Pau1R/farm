@@ -15,14 +15,14 @@ class Meta:
     container = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
-        "location_type": "INTEGER DEFAULT 0",
+        "location_type": "TEXT DEFAULT ''",
         "location": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''",
         "capacity": "INTEGER DEFAULT 0"}
     dryer = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
-        "location_type": "INTEGER DEFAULT 0",
+        "location_type": "TEXT DEFAULT ''",
         "location": "INTEGER DEFAULT 0",
         "name": "TEXT DEFAULT ''",
         "capacity": "INTEGER DEFAULT 0",
@@ -37,9 +37,9 @@ class Meta:
         "nozzleDiameter": "DECIMAL DEFAULT 0"}
     location_type = {
         "id": "INTEGER PRIMARY KEY",
-        "name": "TEXT DEFAULT ''", # ['','location','container','printer','dryer','delivery']
+        "name": "TEXT DEFAULT ''",
     }
-    location = {
+    zone = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
         "name": "TEXT DEFAULT ''",
@@ -51,14 +51,14 @@ class Meta:
     printer = {
         "id": "INTEGER PRIMARY KEY", 
         "created": "DATETIME DEFAULT ''",
-        "location_type": "INTEGER DEFAULT 0",
+        "location_type": "TEXT DEFAULT ''",
         "location": "INTEGER DEFAULT 0",
         "name": "TEXT DEFAULT ''",
         "type_": "INTEGER DEFAULT 0"}
     spool = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
-        "location_type": "INTEGER DEFAULT 0",
+        "location_type": "TEXT DEFAULT ''",
         "location": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''",
         "diameter": "DECIMAL DEFAULT 0",
@@ -78,17 +78,17 @@ class Meta:
         "name": "TEXT DEFAULT ''",
         "parent_id": "INTEGER DEFAULT 0",
         "samplePhoto": "TEXT DEFAULT ''"}
-    surface = {
+    bed = {
         "id": "INTEGER PRIMARY KEY",
         "created": "DATETIME DEFAULT ''",
-        "location_type": "INTEGER DEFAULT 0",
+        "location_type": "TEXT DEFAULT ''",
         "location": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''"}
     order = {
         "id": "INTEGER PRIMARY KEY",
         "name": "TEXT DEFAULT ''",
         "created": "DATETIME DEFAULT ''",
-        "location_type": "INTEGER DEFAULT 0",
+        "location_type": "TEXT DEFAULT ''",
         "location": "INTEGER DEFAULT 0",
         "user_id": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''",

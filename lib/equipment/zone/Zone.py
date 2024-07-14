@@ -1,6 +1,6 @@
 from datetime import date
 
-class Location:
+class Zone:
 
 	def __init__(self, app, id):
 		self.app = app

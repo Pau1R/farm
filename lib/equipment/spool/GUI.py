@@ -5,6 +5,7 @@ from lib.Gui import Gui
 from lib.Texts import Texts
 from datetime import date
 from datetime import timedelta
+import time
 
 class SpoolGUI:
 	last_data = ''
@@ -190,6 +191,10 @@ class SpoolGUI:
 		buttons = ['Подтверждаю', 'Отменить удаление']
 		self.GUI.tell_buttons('Подтвердите удаление катушки', buttons, buttons, 15, 0)
 
+	def show_busy(self):
+		text = 'Катушка забронирована либо находится в принтере или сушилке'
+		self.GUI.tell(text)
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
@@ -215,7 +220,12 @@ class SpoolGUI:
 		elif data == 'Изменить вес':
 			self.show_change_weight()
 		elif data == 'Удалить':
-			# TODO: refuse if spool is booked or is in use
+			if self.spool.booked or self.spool.location_type in ['printer','dryer']:
+				self.show_busy()
+				time.sleep(2)
+				self.last_data = ''
+				self.show_spool()
+				return
 			self.show_delete_confirmation()
 		elif data == 'Назад':
 			if self.spool.status == 'ordered':

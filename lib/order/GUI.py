@@ -86,7 +86,8 @@ class Order_GUI:
 		buttons = []
 		if self.chat.is_admin():
 			buttons.append(['Редактировать заказ','edit'])
-			# TODO: add tell client functionality
+			buttons.append(['Написать клиенту','talk'])
+			buttons.append(['Попросить перейти в чат', 'chat'])
 			buttons.append(['Отменить заказ','reject'])
 		elif self.chat.is_designer():
 			if order.designer_id:
@@ -248,6 +249,10 @@ class Order_GUI:
 				self.chat.user.admin.show_orders()
 			elif data == 'edit':
 				self.edit.first_message(self.message)
+			elif data == 'say':
+				x = '' # TODO: send text message to client
+			elif data == 'chat':
+				x = '' # TODO: send client 
 			elif data == 'reject':
 				self.show_reject_reason()
 		elif self.chat.is_designer():

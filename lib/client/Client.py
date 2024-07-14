@@ -156,7 +156,7 @@ class Client:
 		time.sleep(3)
 
 	def show_redirect_to_chat(self, order):
-		text = f'Для продолжения общения по заказу "{order.name}" напишите в чат: @str3d_chat'
+		text = f'Для обсуждения заказа "{order.name}" напишите в чат: @str3d_chat'
 		self.GUI.tell_permanent(text)
 
 #---------------------------- PROCESS ----------------------------

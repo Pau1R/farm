@@ -6,12 +6,12 @@ from lib.equipment.Equipment import Equipment
 from lib.equipment.container.GUI import ContainerGUI
 from lib.equipment.dryer.GUI import DryerGUI
 from lib.equipment.extruder.GUI import ExtruderGUI
-from lib.equipment.location.GUI import LocationGUI
+from lib.equipment.zone.GUI import ZoneGUI
 from lib.equipment.printer_type.GUI import Printer_typeGUI
 from lib.equipment.printer.GUI import PrinterGUI
 from lib.equipment.spool.GUI import SpoolGUI
 from lib.equipment.color.GUI import ColorGUI
-from lib.equipment.surface.GUI import SurfaceGUI
+from lib.equipment.Bed.GUI import BedGUI
 from lib.setting.GUI import SettingsGUI
 from lib.order.GUI import Order_GUI
 from lib.request.GUI import RequestGUI
@@ -29,12 +29,12 @@ class Admin:
 		self.containerGUI = ContainerGUI(app, chat, address + '/1')
 		self.dryerGUI = DryerGUI(app, chat, address + '/2')
 		self.extruderGUI = ExtruderGUI(app, chat, address + '/3')
-		self.locationGUI = LocationGUI(app, chat, address + '/4')
+		self.zoneGUI = ZoneGUI(app, chat, address + '/4')
 		self.printer_typeGUI = Printer_typeGUI(app, chat, address + '/5')
 		self.printerGUI = PrinterGUI(app, chat, address + '/6')
 		self.spoolGUI = SpoolGUI(app, chat, address + '/7')
 		self.colorGUI = ColorGUI(app, chat, address + '/8')
-		self.surfaceGUI = SurfaceGUI(app, chat, address + '/9')
+		self.bedGUI = BedGUI(app, chat, address + '/9')
 		self.settingsGUI = SettingsGUI(app, chat, address + '/10')
 		
 		self.order_GUI = Order_GUI(app, chat, address + '/11')
@@ -59,7 +59,7 @@ class Admin:
 			elif file == '3':
 				self.extruderGUI.new_message(message)
 			elif file == '4':
-				self.locationGUI.new_message(message)
+				self.zoneGUI.new_message(message)
 			elif file == '5':
 				self.printer_typeGUI.new_message(message)
 			elif file == '6':
@@ -69,7 +69,7 @@ class Admin:
 			elif file == '8':
 				self.colorGUI.new_message(message)
 			elif file == '9':
-				self.surfaceGUI.new_message(message)
+				self.bedGUI.new_message(message)
 			elif file == '10':
 				self.settingsGUI.new_message(message)
 			elif file == '11':
@@ -269,8 +269,8 @@ class Admin:
 			self.extruderGUI.last_data = ''
 			self.extruderGUI.first_message(self.message)
 		elif self.message.btn_data == 'Локации':
-			self.locationGUI.last_data = ''
-			self.locationGUI.first_message(self.message)
+			self.zoneGUI.last_data = ''
+			self.zoneGUI.first_message(self.message)
 		elif self.message.btn_data == 'Типы принтеров':
 			self.printer_typeGUI.last_data = ''
 			self.printer_typeGUI.first_message(self.message)
@@ -284,7 +284,7 @@ class Admin:
 			self.colorGUI.last_data = ''
 			self.colorGUI.first_message(self.message)
 		elif self.message.btn_data == 'Поверхности':
-			self.surfaceGUI.last_data = ''
-			self.surfaceGUI.first_message(self.message)
+			self.bedGUI.last_data = ''
+			self.bedGUI.first_message(self.message)
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()

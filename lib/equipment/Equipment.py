@@ -1,14 +1,14 @@
 from lib.equipment.container.Container import Container
 from lib.equipment.dryer.Dryer import Dryer
 from lib.equipment.extruder.Extruder import Extruder
-from lib.equipment.location.Location import Location
+from lib.equipment.zone.Zone import Zone
 from lib.equipment.printer_type.Printer_type import Printer_type
 from lib.equipment.printer.Printer import Printer
 from lib.equipment.spool.Spool import Spool
 from lib.equipment.spool.Logic import Spool_logic
 from lib.equipment.color.Color import Color
 from lib.equipment.color.Logic import Color_logic
-from lib.equipment.surface.Surface import Surface
+from lib.equipment.Bed.Bed import Bed
 from datetime import date
 
 class Equipment:
@@ -20,43 +20,43 @@ class Equipment:
 		self.containers = []
 		self.dryers = []
 		self.extruders = []
-		self.locations = []
+		self.zones = []
 		self.printer_types = []
 		self.printers = []
 		self.spools = []
 		self.spool_logic = None
 		self.color_logic = None
 		self.colors = []
-		self.surfaces = []
+		self.beds = []
 
 		self.container = None
 		self.dryer = None
 		self.extruder = None
-		self.location = None
+		self.zone = None
 		self.printer = None
 		self.spool = None
 		self.color = None
-		self.surface = None
+		self.bed = None
 
 		self.db.get_containers()
 		self.db.get_dryers()
 		self.db.get_extruders()
-		self.db.get_locations()
+		self.db.get_zones()
 		self.db.get_printer_types()
 		self.db.get_printers()
 		self.db.get_spools()
 		self.db.get_colors()
-		self.db.get_surfaces()
+		self.db.get_beds()
 
 		self.sort_containers()
 		self.sort_dryers()
 		self.sort_extruders()
-		self.sort_locations()
+		self.sort_zones()
 		self.sort_printer_types()
 		self.sort_printers()
 		self.sort_spools()
 		self.sort_colors()
-		self.sort_surfaces()
+		self.sort_beds()
 
 		self.color_logic = Color_logic(app)
 		self.spool_logic = Spool_logic(app)
@@ -106,6 +106,7 @@ class Equipment:
 
 	def sort_dryers(self):
 		self.dryers.sort(key=self.get_object_id)
+		self.dryers.sort(key=self.get_object_id)
 
 	def create_new_extruder(self, name, maxTemp, nozzle):
 		id = self.app.functions.get_next_free_id(self.extruders)
@@ -127,24 +128,24 @@ class Equipment:
 	def sort_extruders(self):
 		self.extruders.sort(key=self.get_object_id)
 
-	def create_new_location(self, name, type):
-		id = self.app.functions.get_next_free_id(self.locations)
-		location = Location(self.db, id)
-		location.name = name
-		location.type = type
-		self.db.add_location(location)
-		self.locations.append(location)
-		return location
+	def create_new_zone(self, name, type):
+		id = self.app.functions.get_next_free_id(self.zones)
+		zone = Zone(self.db, id)
+		zone.name = name
+		zone.type = type
+		self.db.add_zone(zone)
+		self.zones.append(zone)
+		return zone
 
-	def remove_location(self, id):
-		for location in self.locations:
-			if location.id == id:
-				self.db.remove_location(location)
-				self.locations.remove(location)
+	def remove_zone(self, id):
+		for zone in self.zones:
+			if zone.id == id:
+				self.db.remove_zone(zone)
+				self.zones.remove(zone)
 				break
 
-	def sort_locations(self):
-		self.locations.sort(key=self.get_object_id)
+	def sort_zones(self):
+		self.zones.sort(key=self.get_object_id)
 
 	def create_new_printer_type(self, name, hour_cost):
 		id = self.app.functions.get_next_free_id(self.printer_types)
@@ -233,20 +234,20 @@ class Equipment:
 	def sort_colors(self):
 		self.colors.sort(key=self.get_object_id)
 
-	def create_new_surface(self, type):
-		id = self.app.functions.get_next_free_id(self.surfaces)
-		surface = Surface(self.db, id)
-		surface.type = type
-		self.db.add_surface(surface)
-		self.surfaces.append(surface)
-		return surface
+	def create_new_bed(self, type):
+		id = self.app.functions.get_next_free_id(self.beds)
+		bed = Bed(self.db, id)
+		bed.type = type
+		self.db.add_bed(bed)
+		self.beds.append(bed)
+		return bed
 
-	def remove_surface(self, id):
-		for surface in self.surfaces:
-			if surface.id == id:
-				self.db.remove_surface(surface)
-				self.surfaces.remove(surface)
+	def remove_bed(self, id):
+		for bed in self.beds:
+			if bed.id == id:
+				self.db.remove_bed(bed)
+				self.beds.remove(bed)
 				break
 
-	def sort_surfaces(self):
-		self.surfaces.sort(key=self.get_object_id)
+	def sort_beds(self):
+		self.beds.sort(key=self.get_object_id)

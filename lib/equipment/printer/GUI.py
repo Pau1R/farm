@@ -78,6 +78,10 @@ class PrinterGUI:
 		buttons = ['Подтверждаю', 'Отменить удаление']
 		self.GUI.tell_buttons('Подтвердите удаление принтера', buttons, buttons, 6, 0)
 
+	def show_busy(self):
+		content = self.location.readable_content()
+		self.GUI.tell(f'Удалить нельзя - принтер не пустой:\n{content.lower()}')
+
 #---------------------------- PROCESS ----------------------------
 
 	def process_top_menu(self):
@@ -94,8 +98,13 @@ class PrinterGUI:
 
 	def process_printer(self):
 		if self.message.btn_data == 'Удалить':
-			# TODO: refuse if any situations
-			self.show_delete_confirmation()
+			self.location = self.app.locations.get('printer', self.printer.id)
+			if self.location.empty():
+				self.show_delete_confirmation()
+			else:
+				self.show_busy()
+				self.last_data = ''
+				self.show_printer()
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 
