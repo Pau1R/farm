@@ -37,8 +37,10 @@ class ContainerGUI:
 				elif function == '4':
 					self.process_add_new_container_capacity()
 				elif function == '5':
-					self.process_add_confirmation()
+					self.process_locations()
 				elif function == '6':
+					self.process_add_confirmation()
+				elif function == '7':
 					self.process_delete_confirmation()
 		self.chat.add_if_text(self)
 
@@ -77,13 +79,18 @@ class ContainerGUI:
 			buttons.append(str(capacity))
 		self.GUI.tell_buttons('Выберите сколько катушек вмещает ящик:', buttons, [], 4, 0)
 
+	def show_locations(self):
+		text = f'Выберите локацию'
+		buttons = self.app.locations.get_buttons('zone')
+		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
+
 	def show_add_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить добавление']
-		self.GUI.tell_buttons('Подтвердите добавление ящика', buttons, buttons, 5, 0)
+		self.GUI.tell_buttons('Подтвердите добавление ящика', buttons, buttons, 6, 0)
 
 	def show_delete_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить удаление']
-		self.GUI.tell_buttons('Подтвердите удаление ящика', buttons, buttons, 6, 0)
+		self.GUI.tell_buttons('Подтвердите удаление ящика', buttons, buttons, 7, 0)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -100,7 +107,7 @@ class ContainerGUI:
 
 	def process_container(self):
 		if self.message.btn_data == 'Удалить':
-			self.location = self.app.locations.get('container', self.container.id)
+			self.location = self.app.locations.get_location('container', self.container.id)
 			if self.location.empty():
 				self.show_delete_confirmation()
 			else:
@@ -117,14 +124,22 @@ class ContainerGUI:
 
 	def process_add_new_container_capacity(self):
 		self.capacity = self.message.btn_data
+		self.show_locations()
+
+	def process_locations(self):
+		self.location = self.message.btn_data
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.container = self.app.equipment.create_new_container(self.type, self.capacity)
+			self.container.location_type = 'zone'
+			self.container.location = self.location
+			self.app.db.update_container(self.container)
 			self.GUI.tell_permanent(f'Создан новый ящик\nномер: {self.container.id},\nтип: {self.container.type},\nемкость: {self.container.capacity} катушек\n\nНе забудьте нанести номер на ящик.')
 		self.type = ''
 		self.capacity = ''
+		self.location = 0
 		self.show_top_menu()
 
 	def process_delete_confirmation(self):

@@ -68,8 +68,12 @@ class SpoolGUI:
 				if function == '13':
 					self.process_add_delivery_date()
 				if function == '14':
-					self.process_add_confirmation()
+					self.process_location_types()
 				if function == '15':
+					self.process_locations()
+				if function == '16':
+					self.process_add_confirmation()
+				if function == '17':
 					self.process_delete_confirmation()
 		self.chat.add_if_text(self)
 
@@ -180,16 +184,27 @@ class SpoolGUI:
 		buttons = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20']
 		self.GUI.tell_buttons('Через сколько дней ожидается поставка', buttons, [], 13, 0)
 
+	def show_location_types(self):
+		buttons = []
+		for type_ in self.app.locations.spool_locations:
+			buttons.append([self.app.data.locations[type_],type_])
+		self.GUI.tell_buttons('Выберите тип локации', buttons, [], 14, 0)
+
+	def show_locations(self):
+		text = f'Выберите {self.app.data.locations[self.location_type]}'
+		buttons = self.app.locations.get_buttons(self.location_type)
+		self.GUI.tell_buttons(text, buttons, [], 15, 0)
+
 	def show_add_confirmation(self):
 		text = 'Подтвердите добавление катушки'
 		if self.quantity > 1:
 			text = f'Подтвердите добавление {self.quantity} катушек'
 		buttons = ['Подтверждаю', 'Отменить добавление']
-		self.GUI.tell_buttons(text, buttons, buttons, 14, 0)
+		self.GUI.tell_buttons(text, buttons, buttons, 16, 0)
 
 	def show_delete_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить удаление']
-		self.GUI.tell_buttons('Подтвердите удаление катушки', buttons, buttons, 15, 0)
+		self.GUI.tell_buttons('Подтвердите удаление катушки', buttons, buttons, 17, 0)
 
 	def show_busy(self):
 		text = 'Катушка забронирована либо находится в принтере или сушилке'
@@ -290,7 +305,20 @@ class SpoolGUI:
 		if self.status == 'ordered':
 			self.show_add_delivery_date()
 		else:
-			self.show_add_confirmation()
+			self.show_location_types()
+
+	def process_add_delivery_date(self):
+		days = int(self.message.btn_data)
+		self.delivery_date_estimate = date.today() + timedelta(days = days) # add days to current date
+		self.show_location_types()
+
+	def process_location_types(self):
+		self.location_type = self.message.btn_data
+		self.show_locations()
+
+	def process_locations(self):
+		self.location = int(self.message.btn_data)
+		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
@@ -300,6 +328,9 @@ class SpoolGUI:
 			for elem in range(1, self.quantity + 1):
 				spool = self.app.equipment.create_new_spool(self.type, self.diameter, self.weight, self.density, self.color_id, self.dried, self.brand, self.used, self.price, self.status, self.delivery_date_estimate)
 				spools.append(str(spool.id))
+				spool.location_type = self.location_type
+				spool.location = self.location
+				self.app.db.update_spool(spool)
 			if self.quantity == 1:
 				self.spool = spool
 				self.show_spool()
@@ -320,6 +351,8 @@ class SpoolGUI:
 		self.density = 0.0
 		self.delivery_date_estimate = None
 		self.status = ''
+		self.location_type = ''
+		self.location = 0
 
 	def process_delete_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
@@ -346,11 +379,6 @@ class SpoolGUI:
 				if spool.id == int(self.message.btn_data):
 					self.spool = spool
 					self.show_spool()
-
-	def process_add_delivery_date(self):
-		days = int(self.message.btn_data)
-		self.delivery_date_estimate = date.today() + timedelta(days = days) # add days to current date
-		self.show_add_confirmation()
 
 #---------------------------- LOGIC ----------------------------
 

@@ -53,7 +53,7 @@ class Meta:
         "created": "DATETIME DEFAULT ''",
         "location_type": "TEXT DEFAULT ''",
         "location": "INTEGER DEFAULT 0",
-        "name": "TEXT DEFAULT ''",
+        "name": "TEXT DEFAULT ''", # should remove field
         "type_": "INTEGER DEFAULT 0"}
     spool = {
         "id": "INTEGER PRIMARY KEY",
@@ -88,8 +88,8 @@ class Meta:
         "id": "INTEGER PRIMARY KEY",
         "name": "TEXT DEFAULT ''",
         "created": "DATETIME DEFAULT ''",
-        "location_type": "TEXT DEFAULT ''",
-        "location": "INTEGER DEFAULT 0",
+        "location_type": "TEXT DEFAULT ''", # probably should remove field
+        "location": "INTEGER DEFAULT 0", # probably should remove field
         "user_id": "INTEGER DEFAULT 0",
         "type": "TEXT DEFAULT ''",
         "physical_status": "TEXT DEFAULT ''",

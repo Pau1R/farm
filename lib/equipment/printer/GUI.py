@@ -32,12 +32,14 @@ class PrinterGUI:
 				elif function == '2':
 					self.process_printer()
 				elif function == '3':
-					self.process_add_type()
+					self.process_type()
 				elif function == '4':
-					self.process_add_name()
+					self.process_name()
 				elif function == '5':
-					self.process_add_confirmation()
+					self.process_locations()
 				elif function == '6':
+					self.process_add_confirmation()
+				elif function == '7':
 					self.process_delete_confirmation()
 		self.chat.add_if_text(self)
 
@@ -60,23 +62,28 @@ class PrinterGUI:
 		buttons = ['Удалить', 'Назад']
 		self.GUI.tell_buttons(text, buttons, buttons, 2, 0)
 
-	def show_add_type(self):
+	def show_type(self):
 		buttons = []
 		for type_ in self.app.equipment.printer_types:
 			buttons.append([type_.name, type_.id])
 		self.GUI.tell_buttons('Выберите тип принтера', buttons, buttons, 3, 0)
 
-	def show_add_name(self):
+	def show_name(self):
 		self.chat.set_context(self.address, 4)
 		self.GUI.tell('Введите название принтера')
 
+	def show_locations(self):
+		text = f'Выберите локацию'
+		buttons = self.app.locations.get_buttons('zone')
+		self.GUI.tell_buttons(text, buttons, buttons, 5, 0)
+
 	def show_add_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить добавление']
-		self.GUI.tell_buttons('Подтвердите добавление принтера', buttons, buttons, 5, 0)
+		self.GUI.tell_buttons('Подтвердите добавление принтера', buttons, buttons, 6, 0)
 
 	def show_delete_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить удаление']
-		self.GUI.tell_buttons('Подтвердите удаление принтера', buttons, buttons, 6, 0)
+		self.GUI.tell_buttons('Подтвердите удаление принтера', buttons, buttons, 7, 0)
 
 	def show_busy(self):
 		content = self.location.readable_content()
@@ -86,7 +93,7 @@ class PrinterGUI:
 
 	def process_top_menu(self):
 		if self.message.btn_data == 'Добавить':
-			self.show_add_type()
+			self.show_type()
 		elif self.message.btn_data == 'Назад':
 			self.app.chat.user.admin.last_data = ''
 			self.app.chat.user.admin.show_equipment()
@@ -98,7 +105,7 @@ class PrinterGUI:
 
 	def process_printer(self):
 		if self.message.btn_data == 'Удалить':
-			self.location = self.app.locations.get('printer', self.printer.id)
+			self.location = self.app.locations.get_location('printer', self.printer.id)
 			if self.location.empty():
 				self.show_delete_confirmation()
 			else:
@@ -108,23 +115,29 @@ class PrinterGUI:
 		elif self.message.btn_data == 'Назад':
 			self.show_top_menu()
 
-	def process_add_type(self):
-		for type_ in self.app.equipment.printer_types:
-			if type_.id == int(self.message.btn_data):
-				self.type_ = type_.name
-		self.show_add_name()
+	def process_type(self):
+		self.type_ = self.message.btn_data
+		self.show_name()
 
-	def process_add_name(self):
+	def process_name(self):
 		self.name = self.message.text
+		self.show_locations()
+	
+	def process_locations(self):
+		self.location = int(self.message.btn_data)
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.printer = self.app.equipment.create_new_printer(self.name, self.type_)
+			self.printer.location_type = 'zone'
+			self.printer.location = self.location
+			self.app.db.update_printer(self.printer)
 			text = f'Создан новый принтер:\nномер: {self.printer.id}\nназвание: {self.printer.name}\nтип: {self.printer.type_}'
 			self.GUI.tell_permanent(text)
 		self.name = ''
 		self.type = 0
+		self.location = 0
 		self.show_top_menu()
 
 	def process_delete_confirmation(self):

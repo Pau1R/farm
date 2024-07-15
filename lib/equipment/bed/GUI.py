@@ -33,9 +33,13 @@ class BedGUI:
 					self.process_bed()
 				elif function == '3':
 					self.process_add_new_bed()
-				elif function == '4':
+				if function == '4':
+					self.process_location_types()
+				if function == '5':
+					self.process_locations()
+				elif function == '6':
 					self.process_add_confirmation()
-				elif function == '5':
+				elif function == '7':
 					self.process_delete_confirmation()
 		self.chat.add_if_text(self)
 
@@ -62,13 +66,24 @@ class BedGUI:
 		buttons = ['PEI', 'Стекло']
 		self.GUI.tell_buttons('Выберите тип поверхности', buttons, [], 3, 0)
 
+	def show_location_types(self):
+		buttons = []
+		for type_ in self.app.locations.bed_locations:
+			buttons.append([self.app.data.locations[type_],type_])
+		self.GUI.tell_buttons('Выберите тип локации', buttons, [], 4, 0)
+
+	def show_locations(self):
+		text = f'Выберите {self.app.data.locations[self.location_type]}'
+		buttons = self.app.locations.get_buttons(self.location_type)
+		self.GUI.tell_buttons(text, buttons, [], 5, 0)
+
 	def show_add_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить добавление']
-		self.GUI.tell_buttons('Подтвердите добавление поверхности', buttons, buttons, 4, 0)
+		self.GUI.tell_buttons('Подтвердите добавление поверхности', buttons, buttons, 6, 0)
 
 	def show_delete_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить удаление']
-		self.GUI.tell_buttons('Подтвердите удаление поверхности', buttons, buttons, 5, 0)
+		self.GUI.tell_buttons('Подтвердите удаление поверхности', buttons, buttons, 7, 0)
 
 	def show_busy(self):
 		text = f'Поверхность находится в принтере {self.bed.location}'
@@ -100,11 +115,22 @@ class BedGUI:
 
 	def process_add_new_bed(self):
 		self.type = self.message.btn_data
+		self.show_location_types()
+
+	def process_location_types(self):
+		self.location_type = self.message.btn_data
+		self.show_locations()
+
+	def process_locations(self):
+		self.location = int(self.message.btn_data)
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.bed = self.app.equipment.create_new_bed(self.type)
+			self.bed.location_type = self.location_type
+			self.bed.location = self.location
+			self.app.db.update_bed(self.bed)
 			text = f'Создана новая поверхность:\nномер: {self.bed.id}\nтип: {self.bed.type}\n\nНе забудьте нанести номер на поверхность.'
 			self.GUI.tell_permanent(text)
 		self.type = ''

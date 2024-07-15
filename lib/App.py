@@ -169,6 +169,3 @@ class App:
 #	4 Designer
 #	  1 Validate
 #	5 Delivery
-
-# TODO:
-# - for container, dryer, printer, spool, bed, order add location functionality when adding new objects

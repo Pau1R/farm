@@ -64,7 +64,7 @@ class ZoneGUI:
 		self.GUI.tell('Введите название локации')
 
 	def show_add_new_zone_type(self):
-		buttons = ['Помещение', 'Зона']
+		buttons = ['Помещение', 'Зона', 'Контейнер']
 		self.GUI.tell_buttons('Выберите тип локации:', buttons, [], 4, 0)
 
 	def show_add_confirmation(self):
@@ -94,7 +94,7 @@ class ZoneGUI:
 
 	def process_zone(self):
 		if self.message.btn_data == 'Удалить':
-			self.location = self.app.locations.get('zone', self.zone.id)
+			self.location = self.app.locations.get_location('zone', self.zone.id)
 			if self.location.empty():
 				self.show_delete_confirmation()
 			else:

@@ -15,31 +15,31 @@ client = TelegramClient('session_name', conf.api_id, conf.api_hash)
 @bot.message_handler(func=lambda msg: True, content_types=['text', 'document', 'photo', 'video'])
 @bot.callback_query_handler(func=lambda call: True)
 def handle_all_messages(message: Union[types.Message, types.CallbackQuery]):
-    # print(message)
-    app.new_message(message)
+	# print(message)
+	app.new_message(message)
 
 @client.on(events.NewMessage)
 async def message_handler(event):
-    # print(event)
-    app.telethon_new_message(event)
+	# print(event)
+	app.telethon_new_message(event)
 
 def run_telebot():
-    bot.infinity_polling()
+	bot.infinity_polling()
 
 async def run_telethon():
-    await client.start()
-    await client.run_until_disconnected()
+	await client.start()
+	await client.run_until_disconnected()
 
 async def main():
-    tasks = [
-        asyncio.create_task(run_telethon())
-    ]
-    await asyncio.gather(*tasks)
+	tasks = [
+		asyncio.create_task(run_telethon())
+	]
+	await asyncio.gather(*tasks)
 
 if __name__ == '__main__':
-    telebot_thread = Thread(target=run_telebot)
-    telebot_thread.start()
+	telebot_thread = Thread(target=run_telebot)
+	telebot_thread.start()
 
-    asyncio.run(main())
+	asyncio.run(main())
 
-    telebot_thread.join()
+	telebot_thread.join()

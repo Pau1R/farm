@@ -44,8 +44,10 @@ class DryerGUI:
 				elif function == '7':
 					self.process_add_new_dryer_maxTime()
 				elif function == '8':
-					self.process_add_confirmation()
+					self.process_locations()
 				elif function == '9':
+					self.process_add_confirmation()
+				elif function == '10':
 					self.process_delete_confirmation()
 		self.chat.add_if_text(self)
 
@@ -98,13 +100,18 @@ class DryerGUI:
 			buttons.append(str(time))
 		self.GUI.tell_buttons('Выберите максимальное время таймера сушилки в часах:', buttons, [], 7, 0)
 
+	def show_locations(self):
+		text = f'Выберите локацию'
+		buttons = self.app.locations.get_buttons('zone')
+		self.GUI.tell_buttons(text, buttons, buttons, 8, 0)
+
 	def show_add_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить добавление']
-		self.GUI.tell_buttons('Подтвердите добавление сушилки', buttons, buttons, 8, 0)
+		self.GUI.tell_buttons('Подтвердите добавление сушилки', buttons, buttons, 9, 0)
 
 	def show_delete_confirmation(self):
 		buttons = ['Подтверждаю', 'Отменить удаление']
-		self.GUI.tell_buttons('Подтвердите удаление сушилки', buttons, buttons, 9, 0)
+		self.GUI.tell_buttons('Подтвердите удаление сушилки', buttons, buttons, 10, 0)
 
 	def show_busy(self):
 		content = self.location.readable_content()
@@ -125,7 +132,7 @@ class DryerGUI:
 
 	def process_dryer(self):
 		if self.message.btn_data == 'Удалить':
-			self.location = self.app.locations.get('dryer', self.dryer.id)
+			self.location = self.app.locations.get_location('dryer', self.dryer.id)
 			if self.location.empty():
 				self.show_delete_confirmation()
 			else:
@@ -154,17 +161,25 @@ class DryerGUI:
 
 	def process_add_new_dryer_maxTime(self):
 		self.maxTime = self.message.btn_data
+		self.show_locations()
+	
+	def process_locations(self):
+		self.location = self.message.btn_data
 		self.show_add_confirmation()
 
 	def process_add_confirmation(self):
 		if self.message.btn_data == 'Подтверждаю':
 			self.dryer = self.app.equipment.create_new_dryer(self.name, self.capacity, self.minTemp, self.maxTemp, self.maxTime)
+			self.dryer.location_type = 'zone'
+			self.dryer.location = self.location
+			self.app.db.update_dryer(self.dryer)
 			text = f'Создана новая сушилка:\nномер: {self.dryer.id}\nназвание: {self.dryer.name}\n'
 			text += f'емкость: {self.dryer.capacity} катушки\nдиапазон температур: {self.dryer.minTemp}-{self.dryer.maxTemp}\n'
 			text += f'максимальное время таймера: {self.dryer.maxTime}\n\nНе забудьте нанести номер на сушилку.'
 			self.GUI.tell_permanent(text)
 		self.type = ''
 		self.capacity = 0
+		self.location = 0
 		self.show_top_menu()
 
 	def process_delete_confirmation(self):
