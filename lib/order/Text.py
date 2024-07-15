@@ -203,7 +203,7 @@ class Order_text:
 				text += f'Дата готовности (примерно): {completion_date}\n'
 			if support_time:
 				text += f"Удаление поддержек: {support_remover}\n"
-			if prepayed:
+			if payed:
 				text += f'{prepayed}\n'
 			if comment:
 				text += f'Комментарий: {comment}\n'

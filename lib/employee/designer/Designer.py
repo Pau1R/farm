@@ -50,6 +50,8 @@ class Designer:
 					self.process_design_confirmed()
 				if function == '6':
 					self.process_clarify()
+				if function == '7':
+					self.process_take()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -61,21 +63,28 @@ class Designer:
 		logic = self.app.order_logic
 		orders_of_type = logic.get_orders_by_type
 		orders_of_status = logic.get_orders_by_status
+		get_orders_by_user_id = logic.get_orders_by_user_id
 
 		orders = orders_of_type(self.app.orders, ['stl','link','sketch','item','production'])
 		orders = orders_of_status(orders, ['validate', 'prevalidate', 'waiting_for_design', 'clarify'])
-		orders = logic.get_orders_by_user_id(orders, self.chat.user_id)
+		orders = get_orders_by_user_id(orders, self.chat.user_id)
 		amount = len(orders)
 		if amount > 0:
 			text += f'Задач в очереди: {amount}'
 		else:
 			text += 'Задачи отсутствуют'
-
+		
 		buttons = []
+
+		# take item
+		orders = orders_of_status(self.app.orders, 'item_received')
+		orders = get_orders_by_user_id(orders, self.chat.user_id)
+		if orders:
+			buttons.append(['Принять предмет','take'])
 
 		# validate
 		validate = orders_of_status(self.orders, 'validate')
-		validate = logic.get_orders_by_user_id(validate, self.chat.user_id)
+		validate = get_orders_by_user_id(validate, self.chat.user_id)
 			# buttons.append(['Настройка параметрических моделей','parametric'])
 		if orders_of_type(validate, 'stl'):
 			buttons.append(['Валидация файла модели', 'stl'])
@@ -84,7 +93,7 @@ class Designer:
 
 		# prevalidate
 		prevalidate = orders_of_status(self.orders, 'prevalidate')
-		prevalidate = logic.get_orders_by_user_id(prevalidate, self.chat.user_id)
+		prevalidate = get_orders_by_user_id(prevalidate, self.chat.user_id)
 		if orders_of_type(prevalidate, 'sketch'):
 			buttons.append(['Валидация чертежа', 'sketch^prevalidate'])
 		if orders_of_type(prevalidate, 'item'):
@@ -92,7 +101,7 @@ class Designer:
 		
 		# design
 		waiting_for_design = orders_of_status(self.orders, ['waiting_for_design','clarify'])
-		waiting_for_design = logic.get_orders_by_user_id(waiting_for_design, self.chat.user_id)
+		waiting_for_design = get_orders_by_user_id(waiting_for_design, self.chat.user_id)
 		if orders_of_type(waiting_for_design, 'sketch'):
 			buttons.append(['Разработка модели по чертежу', 'sketch^["waiting_for_design","clarify"]'])
 		if orders_of_type(waiting_for_design, 'item'):
@@ -150,6 +159,12 @@ class Designer:
 		buttons = [['Перейти к заказу','show']]
 		self.GUI.tell_buttons(text, buttons, buttons, 6, order.id)
 
+	def show_take(self):
+		self.chat.set_context(self.address, 7)
+		text = 'Введите код предмета'
+		buttons = ['Назад']
+		self.GUI.tell_buttons(text, buttons, buttons, 7, 0)
+
 #---------------------------- PROCESS ----------------------------
 	
 	def process_top_menu(self):
@@ -168,6 +183,8 @@ class Designer:
 		elif data in ['stl','link','sketch','item','production']:
 			self.general.last_data = ''
 			self.general.first_message(self.message, data, status)
+		elif data == 'take':
+			self.show_take()
 		# if data == 'parametric':
 		# 	self.show_orders_parametric()
 
@@ -205,6 +222,20 @@ class Designer:
 	def process_clarify(self):
 		if self.message.btn_data == 'show':
 			self.show_order()
+
+	def process_take(self):
+		self.chat.context = ''
+		if self.message.btn_data == 'Назад':
+			self.show_top_menu()
+		else:
+			try:
+				code = int(self.message.text)
+				order = self.app.order_logic.get_order_by_delivery_code(code)
+				order.logical_status = 'waiting_for_design'
+				self.app.db.update_order(order)
+				self.show_top_menu()
+			except:
+				self.show_take()
 
 #---------------------------- LOGIC ----------------------------
 

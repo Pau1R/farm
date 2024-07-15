@@ -98,6 +98,8 @@ class Order_GUI:
 				elif order.type in ['sketch','item']:
 					if order.logical_status == 'prevalidate':
 						buttons.append(['Примерное понимание заказа сформировано','accept'])
+				if order.type == 'item' and order.logical_status == 'waiting_for_design':
+						buttons.append(['Моделирование и слайсинг выполнены','accept'])
 				if order.type == 'sketch' and order.logical_status in ['waiting_for_design','clarify']:
 					if order.confirmed:
 						buttons.append(['Моделирование и слайсинг выполнены','accept'])
@@ -193,7 +195,7 @@ class Order_GUI:
 		self.GUI.tell_buttons(text, buttons, buttons, 4, self.order.id)
 
 	def show_confirmed_by_designer(self, order):
-		text = f'Оценка заказа {order.name} выполнена'
+		text = f'Оценка заказа "{order.name}" выполнена'
 		buttons = [['Перейти к заказу', 'now']]
 		message = self.GUI.tell_buttons(text, buttons, buttons, 5, order.id)
 		message.general_clear = False
@@ -271,6 +273,7 @@ class Order_GUI:
 				self.app.db.update_order(self.order)
 				self.show_order()
 			elif data == 'accept':
+				self.chat.user.designer.general.order = self.order
 				self.chat.user.designer.general.last_data = ''
 				self.chat.user.designer.general.order_accepted()
 			elif data == 'chat':

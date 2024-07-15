@@ -240,6 +240,7 @@ class Order:
 				self.logical_status = 'waiting_for_design'
 			elif self.type == 'item':
 				self.logical_status = 'waiting_for_item'
+				self.set_delivery_code()
 			else:
 				self.logical_status = ''
 				self.physical_status = 'in_line'
