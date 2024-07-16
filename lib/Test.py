@@ -12,9 +12,10 @@ class Test:
 		for chat in self.app.chats:
 			if chat.user_id == 7246224587:
 				for order in self.app.orders:
-					if order.id == 2:
-						chat.user.admin.order_GUI.edit.order = order
-						chat.user.admin.order_GUI.edit.show_general()
+					if order.id == 5:
+						order.reserve_plastic('stock',5)
+						# chat.user.admin.order_GUI.edit.order = order
+						# chat.user.admin.order_GUI.edit.show_general()
 
 
 						# chat.user.admin.order_GUI.edit.client_color.last_data = ''

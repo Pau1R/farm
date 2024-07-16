@@ -41,44 +41,45 @@ class Gcode_logic:
 				return True
 		return False
 
+
 	def smallest_variants(self, order, statuses, color_id):
 		gcodes = self.get_gcodes(order)
-		gcodes = sorted(gcodes, key=lambda gcode: gcode.weight, reverse=True) # satisfy big gcodes first
+		gcodes = sorted(gcodes, key=lambda gcode: gcode.weight, reverse=True)  # satisfy big gcodes first
 		gcode_spools = {}
+		
 		for gcode in gcodes:
-			# get spool assignment variants
 			satisfy = self.app.equipment.spool_logic.satisfy
 			variants = []
-			variants.append(satisfy(statuses, order.plastic_type, color_id, gcode.weight, gcode.weight))
-			if len(variants[0]) != 1:
-				variants.append(satisfy(statuses, order.plastic_type, color_id, gcode.weight, int(gcode.weight/2)))
-				if len(variants[1]) != 1:
-					variants.append(satisfy(statuses, order.plastic_type, color_id, gcode.weight, int(gcode.weight/4)))
-					if len(variants[2]) != 1:
-						variants.append(satisfy(statuses, order.plastic_type, color_id, gcode.weight, int(gcode.weight/8)))
-			# get the minimum spools amount variant
+			weight_fractions = [1, 2, 4, 8]
+
+			for fraction in weight_fractions:
+				variant = satisfy(statuses, order.plastic_type, color_id, gcode.weight, int(gcode.weight / fraction))
+				variants.append(variant)
+				if len(variant) == 1:
+					break
+
 			shortest = float('inf')
 			smallest_variant = []
-			for l in variants:
-				if len(l) > 0 and len(l) < shortest:
-					shortest = len(l)
-					smallest_variant = l
+			for variant in variants:
+				if 0 < len(variant) < shortest:
+					shortest = len(variant)
+					smallest_variant = variant
+
 			if not smallest_variant:
 				return []
-			# save info to all
-			gcode_spools[gcode] = []
-			for spool in smallest_variant:
-				gcode_spools[gcode].append([spool[0].id, spool[1]])
-		return gcode_spools
+
+			gcode_spools[gcode] = [[spool[0].id, spool[1]] for spool in smallest_variant]
+			return gcode_spools
 
 	def book(self, order, statuses, color_id):
 		gcode_spools = self.smallest_variants(order, statuses, color_id)
+		if not gcode_spools:
+			return {}
 		for gcode, spools in gcode_spools.items():
 			gcode.booked = spools
 			self.app.db.update_gcode(gcode)
-			for spool in spools:
-				weight = spool[1]
-				spool = self.app.equipment.spool_logic.get_spool(spool[0])
+			for spool_id, weight in spools:
+				spool = self.app.equipment.spool_logic.get_spool(spool_id)
 				spool.booked += weight
 				self.app.db.update_spool(spool)
 		return gcode_spools

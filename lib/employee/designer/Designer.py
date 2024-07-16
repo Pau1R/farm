@@ -57,6 +57,7 @@ class Designer:
 #---------------------------- SHOW ----------------------------
 
 	def show_top_menu(self):
+		self.screenshots = []
 		self.last_data = ''
 		text = '____________ 3D-дизайн ____________\n\n'
 		
@@ -140,7 +141,6 @@ class Designer:
 	def show_screenshots(self, order):
 		self.chat.set_context(self.address, 4)
 		self.order = order
-		self.screenshots = []
 		text = 'Загрузите несколько скриншотов разработанной модели'
 		buttons = []
 		if self.screenshots:

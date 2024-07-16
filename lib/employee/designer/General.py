@@ -185,7 +185,6 @@ class General:
 			for order in self.app.orders:
 				if order.id == int(self.message.btn_data):
 					self.order = order
-					self.gcode_gui.order = order
 					self.show_order()
 
 	def order_accepted(self):
@@ -249,6 +248,7 @@ class General:
 		if self.order.logical_status == 'prevalidate':
 			self.show_confirmation()
 		else:
+			self.gcode_gui.order = self.order
 			self.gcode_gui.first_message(self.message)
 
 	def process_gcode_gui(self, gcodes):
@@ -268,6 +268,8 @@ class General:
 						gcode.order_id = order.id
 						gcode.file_id = temp_gcode.file_id
 						gcode.screenshot = temp_gcode.screenshot
+						gcode.weight = temp_gcode.weight
+						gcode.duration = temp_gcode.duration
 						self.app.gcodes_append(gcode)
 						self.app.db.create_gcode(gcode)
 			# add ordered spools if client included them in previous steps
@@ -277,15 +279,20 @@ class General:
 					spool = self.app.equipment.spool_logic.get_spool(book[0])
 					if spool.status == 'ordered':
 						statuses.append('ordered')
-			order.design_time = self.design_time
-			order.print_time = self.print_time
-			order.weight = self.weight
-			order.support_time = self.support_minutes
-			order.plastic_type = self.material
-			order.printer_type = self.printer_type
-			order.logical_status = 'validated'
+			if self.design_time:
+				order.design_time = self.design_time
+			if self.print_time:
+				order.print_time = self.print_time
+			if self.weight:
+				order.weight = self.weight # TODO: when gcodes are added recalculate weight
+			if self.support_minutes:
+				order.support_time = self.support_minutes
+			if self.material:
+				order.plastic_type = self.material
+			if self.printer_type:
+				order.printer_type = self.printer_type
 			if order.color_id:
-				booked = order.reserve_plastic(statuses, order.color_id) # rebook  # TODO: there is an error somewhere there
+				booked = order.reserve_plastic(statuses, order.color_id)
 				if booked:
 					order.set_price()
 					if order.logical_status == 'waiting_for_design':
@@ -297,6 +304,8 @@ class General:
 					time.sleep(3)
 					self.show_top_menu()
 					return
+			if order.logical_status:
+				order.logical_status = 'validated'
 			user = self.get_user(order.user_id)
 			user.order_GUI.show_confirmed_by_designer(order)
 			self.app.db.update_order(order)

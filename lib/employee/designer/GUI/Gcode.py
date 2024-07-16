@@ -111,17 +111,19 @@ class Gcode_gui:
 		self.chat.context = ''
 		try:
 			self.gcode.weight = int(self.message.text)
-			self.show_hours()
 		except:
 			self.show_weight()
+			return
+		self.show_hours()
 
 	def process_hours(self):
 		try:
 			hours = int(self.message.btn_data)
 			self.gcode.duration = hours * 60
-			self.show_minutes()
 		except:
 			self.show_hours()
+			return
+		self.show_minutes()
 
 	def process_minutes(self):
 		try:
