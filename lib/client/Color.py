@@ -78,7 +78,7 @@ class Client_color:
 		self.GUI.tell_buttons('Ожидающие поставки', buttons, buttons, 2, 0)
 
 	def show_order_colors(self):
-		buttons = self.spool_logic.get_in_stock_buttons(self.order.plastic_type, self.order.weight, self.order.quantity) # get weight info from gcodes
+		buttons = self.spool_logic.get_in_stock_buttons(self.order.plastic_type, self.order.weight, self.order.quantity)
 		if self.spool_logic.is_ordered(self.order.plastic_type, self.order.weight, self.order.quantity):
 			buttons.append(['Ожидающие поставки', 'ordered'])
 		if self.is_admin():

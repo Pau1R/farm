@@ -70,7 +70,8 @@ class Order:
 		if not self.prepayment_percent:
 			self.prepayment_percent = int(self.app.setting.get('prepayment_percent'))
 		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic
-		plastic_price = self.weight * self.quantity * gram_price  										# total plastic price for order
+		weight = self.get_gcodes_weight() if self.get_gcodes() else self.weight							# weight from order or gcodes
+		plastic_price = weight * self.quantity * gram_price  											# total plastic price for order
 		design_price = self.design_time / 60 * 1000														# cost for 3d design, 1000 rub
 		printer_cost = self.app.equipment.printer_cost(self.printer_type)  								# cost of one hour for printer
 		time_price = (self.get_printing_time() / 60) * printer_cost										# cost of all printer working time
@@ -183,15 +184,15 @@ class Order:
 		chat = self.app.get_chat(self.user_id)
 		chat.user.order_GUI.show_booking_canceled(self)
 
-	def min_weight(self): # minimum weight of one spool
-		if self.weight < 300:
-			limit = self.weight
-		else:
-			limit = 300
-		total_weight = self.weight * self.quantity
-		if total_weight < 300:
-			limit = total_weight
-		return limit
+	# def min_weight(self): # minimum weight of one spool
+	# 	if self.weight < 300:
+	# 		limit = self.weight
+	# 	else:
+	# 		limit = 300
+	# 	total_weight = self.weight * self.quantity
+	# 	if total_weight < 300:
+	# 		limit = total_weight
+	# 	return limit
 
 	def plastic_types(self):
 		if self.type == 'basic':
@@ -214,6 +215,12 @@ class Order:
 			if gcode.order_id == self.id:
 				gcodes.append(gcode)
 		return gcodes
+
+	def get_gcodes_weight(self):
+		weight = 0
+		for gcode in self.get_gcodes():
+			weight += gcode.weight
+		return weight
 
 	def get_gcodes_all_time(self):
 	    return sum(gcode.duration for gcode in self.get_gcodes())

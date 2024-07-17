@@ -191,7 +191,7 @@ class General:
 		if self.order.type in ['sketch','item']:
 			self.show_design_time()
 		else:
-			self.show_printer_type()
+			self.show_weight()
 
 	def process_design_time(self):
 		try:
@@ -260,10 +260,15 @@ class General:
 		if self.message.btn_data == 'Отмена':
 			self.show_order()
 		else:
+			order.design_time = self.design_time if self.design_time else order.design_time
+			order.print_time = self.print_time if self.print_time else order.print_time
+			order.weight = self.weight if self.weight else order.weight
+			order.support_time = self.support_minutes if self.support_minutes else order.support_time
+			order.plastic_type = self.material if self.material else order.plastic_type
+			order.printer_type = self.printer_type if self.printer_type else order.printer_type
 			if self.gcodes:
 				for temp_gcode in self.gcodes:
 					for i in range(1, temp_gcode.quantity + 1):
-						self.print_time = 0
 						gcode = Gcode(self.app, 0)
 						gcode.order_id = order.id
 						gcode.file_id = temp_gcode.file_id
@@ -279,18 +284,6 @@ class General:
 					spool = self.app.equipment.spool_logic.get_spool(book[0])
 					if spool.status == 'ordered':
 						statuses.append('ordered')
-			if self.design_time:
-				order.design_time = self.design_time
-			if self.print_time:
-				order.print_time = self.print_time
-			if self.weight:
-				order.weight = self.weight # TODO: when gcodes are added recalculate weight
-			if self.support_minutes:
-				order.support_time = self.support_minutes
-			if self.material:
-				order.plastic_type = self.material
-			if self.printer_type:
-				order.printer_type = self.printer_type
 			if order.color_id:
 				booked = order.reserve_plastic(statuses, order.color_id)
 				if booked:

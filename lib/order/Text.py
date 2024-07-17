@@ -56,8 +56,8 @@ class Order_text:
 		price = order.price
 		quantity = order.quantity
 		quality = data.quality[order.quality]
-		weight = int(order.weight) * quantity
-		total_weight = int(order.weight) * quantity
+		weight = int(order.weight)
+		total_weight = order.get_gcodes_weight() if order.get_gcodes() else weight * quantity
 		plastic_type = order.plastic_type
 		if plastic_type == 'basic':
 			plastic_type = 'любой базовый'

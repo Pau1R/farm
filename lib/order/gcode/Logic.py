@@ -41,7 +41,6 @@ class Gcode_logic:
 				return True
 		return False
 
-
 	def smallest_variants(self, order, statuses, color_id):
 		gcodes = self.get_gcodes(order)
 		gcodes = sorted(gcodes, key=lambda gcode: gcode.weight, reverse=True)  # satisfy big gcodes first
@@ -54,7 +53,10 @@ class Gcode_logic:
 
 			for fraction in weight_fractions:
 				variant = satisfy(statuses, order.plastic_type, color_id, gcode.weight, int(gcode.weight / fraction))
-				variants.append(variant)
+				if variant:
+					variants.append(variant)
+				else:
+					print('error: plastic not found')
 				if len(variant) == 1:
 					break
 
