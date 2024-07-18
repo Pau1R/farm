@@ -45,6 +45,7 @@ class Gcode_logic:
 		gcodes = self.get_gcodes(order)
 		gcodes = sorted(gcodes, key=lambda gcode: gcode.weight, reverse=True)  # satisfy big gcodes first
 		gcode_spools = {}
+		temp_book = []
 		
 		for gcode in gcodes:
 			satisfy = self.app.equipment.spool_logic.satisfy
@@ -70,8 +71,18 @@ class Gcode_logic:
 			if not smallest_variant:
 				return []
 
+			# temp book
+			temp_book.extend(smallest_variant)
+			for spool in smallest_variant:
+				spool[0].booked += spool[1]
+
 			gcode_spools[gcode] = [[spool[0].id, spool[1]] for spool in smallest_variant]
-			return gcode_spools
+
+		# remove temp booking
+		for spool in temp_book:
+			spool[0].booked -= spool[1]
+
+		return gcode_spools
 
 	def book(self, order, statuses, color_id):
 		gcode_spools = self.smallest_variants(order, statuses, color_id)

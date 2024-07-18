@@ -50,6 +50,16 @@ class Functions:
 		else:
 			return self.russian_date(date_)
 
+	def clean_time(self, minutes):
+		rounding = 15 if minutes < (5*60) else 30 if minutes < (10*60) else 60 # < 5 hours; 5 - 10 hours; > 10 hours
+		rounded_minutes = (minutes + rounding // 2) // rounding * rounding
+		hours = rounded_minutes // 60
+		minutes = rounded_minutes % 60
+		text = f'{hours} часов'
+		if minutes:
+			text += f' {minutes} минут'
+		return text
+
 	def get_weight_string(self, weight):
 		if weight % 1000 == 0:
 			return str(weight // 1000) + ' кг'

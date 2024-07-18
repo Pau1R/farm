@@ -76,7 +76,7 @@ class Gcode_gui:
 		self.GUI.tell_buttons(text, buttons, [], 5, self.order.id)
 
 	def show_quantity(self):
-		self.chat.set_context(self.address, 4)
+		self.chat.set_context(self.address, 6)
 		text = 'Выберите либо введите сколько раз печатать загруженный файл'
 		buttons = ['1','2','3','4','5','6','7','8','9','10']
 		self.GUI.tell_buttons(text, buttons, [], 6, self.order.id)

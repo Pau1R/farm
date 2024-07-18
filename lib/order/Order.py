@@ -45,10 +45,10 @@ class Order:
 
 		# evaluation data and process
 		self.design_time = 0
-		self.print_time = 0
+		self.print_time = 0 # for one copy
 		self.plastic_type = ''
 		self.printer_type = 0
-		self.weight = 0
+		self.weight = 0 # for one copy
 		self.completion_date = None
 		self.start_datetime = None # date and time when order started printing
 		self.support_time = 0
@@ -92,7 +92,7 @@ class Order:
 	def get_printing_time(self):
 		gcode_time = self.app.gcode_logic.get_all_time(self)
 		if gcode_time == 0:
-			return self.print_time
+			return self.print_time * self.quantity
 		return gcode_time
 
 	def get_prepayment_price(self):
@@ -203,9 +203,7 @@ class Order:
 		return element.created
 
 	def set_completion_date(self):
-		print_time = self.get_gcodes_all_time()
-		if not print_time:
-			print_time = self.print_time
+		print_time = self.get_printing_time()
 		self.completion_date = self.app.order_logic.get_completion_date(print_time, self.printer_type)
 		self.app.db.update_order(self)
 

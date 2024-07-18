@@ -58,6 +58,7 @@ class Order_text:
 		quality = data.quality[order.quality]
 		weight = int(order.weight)
 		total_weight = order.get_gcodes_weight() if order.get_gcodes() else weight * quantity
+		print_time = self.app.functions.clean_time(order.get_printing_time()) # convert to hours
 		plastic_type = order.plastic_type
 		if plastic_type == 'basic':
 			plastic_type = 'любой базовый'
@@ -195,6 +196,8 @@ class Order_text:
 			if total_weight:
 				text0 = 'Общий вес' if quantity else 'Вес'
 				text += f'{text0}: {total_weight} грамм\n'
+			if print_time:
+				text += f'Длительность печати: {print_time}\n'
 			if plastic_type:
 				text += f'Тип материала: {plastic_type}\n'
 			if color_id:

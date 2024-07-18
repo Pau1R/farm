@@ -80,7 +80,8 @@ class Order_logic:
 
 	def get_completion_date(self, order_time, printer_type):
 		average_load = self.app.printer_logic.get_average_load(printer_type)		# average time to begin this order
-		end_time = average_load + order_time										# add order time
+		quantity = self.app.printer_logic.quantity(printer_type)
+		end_time = average_load + (order_time/quantity)										# add order time
 		add_days = 0
 		difference = datetime.today() - datetime.combine(date.today(), date_time(9, 0))
 		difference = difference.total_seconds()

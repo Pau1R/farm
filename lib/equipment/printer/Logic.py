@@ -14,3 +14,6 @@ class Printer_logic:
 			if printer.type_ == type_ or type_ == '*':
 				printers.append(printer)
 		return printers
+
+	def quantity(self, type_):
+		return len(self.get_printers_by_type(type_))

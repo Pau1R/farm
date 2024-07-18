@@ -60,9 +60,10 @@ class Spool_logic:
 
 		for spool in spools:
 			spool_weight = self.available_weight(spool)
-			# if spool_weight >= one_copy_weight:
+			if all_weight < 1:
+				break
 			# 1) try to fit all order
-			if spool_weight > all_weight:
+			elif spool_weight > all_weight:
 				selected_spools.append([spool, all_weight])
 				all_weight = 0
 			# 2) try to fit several copies
