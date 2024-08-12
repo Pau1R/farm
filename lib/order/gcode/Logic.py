@@ -13,6 +13,11 @@ class Gcode_logic:
 				time += gcode.duration
 		return time
 
+	def get_gcode(self, id):
+		for gcode in self.gcodes:
+			if gcode.id == int(id):
+				return gcode
+
 	def get_gcodes(self, order):
 		gcodes = []
 		for gcode in self.gcodes:

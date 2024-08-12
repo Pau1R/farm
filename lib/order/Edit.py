@@ -176,9 +176,15 @@ class Edit:
 		elif data == 'delivery':
 			self.show_delivery()
 		elif data == 'Назад':
-			self.chat.user.admin.order_GUI.last_data = ''
-			self.chat.user.admin.order_GUI.order = self.order
-			self.chat.user.admin.order_GUI.show_order()
+			self.last_data = ''
+			if self.chat.is_admin():
+				self.chat.user.admin.order_GUI.last_data = ''
+				self.chat.user.admin.order_GUI.order = self.order
+				self.chat.user.admin.order_GUI.show_order()
+			elif self.chat.is_designer():
+				self.chat.user.designer.order_GUI.last_data = ''
+				self.chat.user.designer.order_GUI.order = self.order
+				self.chat.user.designer.order_GUI.show_order()
 			return
 		self.parameters_type = data
 

@@ -81,10 +81,13 @@ class Client_color:
 		buttons = self.spool_logic.get_in_stock_buttons(self.order.plastic_type, self.order.weight, self.order.quantity)
 		if self.spool_logic.is_ordered(self.order.plastic_type, self.order.weight, self.order.quantity):
 			buttons.append(['Ожидающие поставки', 'ordered'])
+		text = 'Выберите цвет'
+		if not buttons:
+			text = 'Пластика недостаточно для вашего заказа'
 		if self.is_admin():
 			buttons.append(['Удалить цвет', 'reset'])
 		buttons.append('Назад')
-		self.GUI.tell_buttons('Выберите цвет', buttons, buttons, 3, self.order.id)
+		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.id)
 
 	def show_order_colors_ordered(self):
 		buttons = self.spool_logic.get_ordered_buttons(self.order.plastic_type, self.order.weight, self.order.quantity)

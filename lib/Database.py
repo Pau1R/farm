@@ -502,7 +502,7 @@ class Database:
 			settings[setting[0]] = setting[1]
 		return settings
 
-	def add_setting(self, name, value):
+	def add_setting(self, name, value): # TODO: setting logic is incorrect, refactor
 		self.create_table_row('setting (id)', (setting.id,))
 		self.update_setting(setting)
 

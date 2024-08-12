@@ -70,8 +70,8 @@ class Order:
 		if not self.prepayment_percent:
 			self.prepayment_percent = int(self.app.setting.get('prepayment_percent'))
 		gram_price = self.app.equipment.spool_logic.get_gram_price(self.color_id, self.plastic_type)	# cost of one gramm of plastic
-		weight = self.get_gcodes_weight() if self.get_gcodes() else self.weight							# weight from order or gcodes
-		plastic_price = weight * self.quantity * gram_price  											# total plastic price for order
+		weight = self.get_gcodes_weight() if self.get_gcodes() else self.weight	* self.quantity			# weight from order or gcodes
+		plastic_price = weight * gram_price  															# total plastic price for order
 		design_price = self.design_time / 60 * 1000														# cost for 3d design, 1000 rub
 		printer_cost = self.app.equipment.printer_cost(self.printer_type)  								# cost of one hour for printer
 		time_price = (self.get_printing_time() / 60) * printer_cost										# cost of all printer working time
@@ -231,6 +231,8 @@ class Order:
 	            if time_passed < gcode.duration:  # Only consider remaining time
 	                remaining_duration = gcode.duration - time_passed
 	                total_duration += max(0, remaining_duration)  # Ensure no negative duration
+	        else:
+	        	total_duration += gcode.duration
 	    return total_duration
 
 	def get_gcodes_past_time(self):

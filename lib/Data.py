@@ -85,6 +85,12 @@ class Data:
 			'dryer':'сушилка',
 		}
 
+		self.gcode_statuses = {
+			'':'',
+			'printing':'',
+			'finished':''
+		}
+
 # str
 #  'name', 'comment', 'link'
 

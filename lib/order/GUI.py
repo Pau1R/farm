@@ -5,6 +5,7 @@ from lib.Gui import Gui
 from lib.client.Color import Client_color
 from lib.order.Text import Order_text
 from lib.order.Edit import Edit
+from lib.order.gcode.GUI import Gcode_gui
 from datetime import date
 import time
 
@@ -19,6 +20,7 @@ class Order_GUI:
 		self.client_color = Client_color(app, chat, address + '/1')
 		self.order_text = Order_text(app, chat)
 		self.edit = Edit(app, chat, address + '/2')
+		self.gcode_gui = Gcode_gui(app, chat, address + '/3')
 		self.message = None
 		self.order = None
 		self.order_waiting = None
@@ -42,6 +44,8 @@ class Order_GUI:
 				self.client_color.new_message(message)
 			elif file == '2':
 				self.edit.new_message(message)
+			elif file == '3':
+				self.gcode_gui.new_message(message)
 			elif self.chat.not_repeated_button(self):
 				if function == '1':
 					self.process_order()
@@ -80,13 +84,13 @@ class Order_GUI:
 	def show_order(self):
 		order = self.order
 		text = self.order_text.get_text(order)
-		# order.logical_status = 'validated' # TODO: remove for production!
 
 		logical = order.logical_status
 		physical = order.physical_status
 		
 		buttons = []
 		if self.chat.is_admin():
+			buttons.append(['Файлы gcode','gcode'])
 			buttons.append(['Редактировать заказ','edit'])
 			buttons.append(['Написать клиенту','say'])
 			buttons.append(['Попросить перейти в чат', 'chat'])
@@ -175,7 +179,7 @@ class Order_GUI:
 		setting = self.app.setting.get
 		tell = self.GUI.tell
 
-		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру карточки. Обязательно укажите код перевода в сообщении получателю.\n\n'
+		text = 'Для оплаты сделайте перевод на карту сбербанка по номеру карточки. ОБЯЗАТЕЛЬНО укажите код перевода в сообщении получателю.\n\n'
 		text += f'Код перевода: {order.pay_code}\n'
 		text += f'Сумма перевода: {int(price)}\n'
 		text += f'Получатель перевода: {setting("transfer_receiver")}\n'
@@ -257,6 +261,10 @@ class Order_GUI:
 			if data == 'Назад':
 				self.chat.user.admin.last_data = ''
 				self.chat.user.admin.show_orders()
+			elif data == 'gcode':
+				self.gcode_gui.order = self.order
+				self.gcode_gui.last_data = ''
+				self.gcode_gui.first_message(self.message)
 			elif data == 'edit':
 				self.edit.first_message(self.message)
 			elif data == 'say':
@@ -264,6 +272,7 @@ class Order_GUI:
 			elif data == 'chat':
 				chat = self.app.get_chat(self.order.user_id)
 				chat.user.show_redirect_to_chat(self.order)
+				self.last_data = ''
 				self.show_order()
 			elif data == 'reject':
 				self.show_reject_reason()
@@ -280,6 +289,7 @@ class Order_GUI:
 				chat = self.app.get_chat(self.order.user_id)
 				chat.user.show_redirect_to_chat(self.order)
 				self.order.miscellaneous += '\nЗаказ переведен в чат'
+				self.last_data = ''
 				self.show_order()
 			elif data == 'edit':
 				self.edit.first_message(self.message)

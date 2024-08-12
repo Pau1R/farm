@@ -18,6 +18,7 @@ class Order_text:
 		if self.chat.is_employee:
 			status = data.statuses[status]
 		else:
+			delivery_text = ''
 			logical = order.logical_status
 			physical = order.physical_status
 			if logical in ['prevalidate','validate']:
@@ -30,6 +31,8 @@ class Order_text:
 			elif logical == 'waiting_for_item':
 				status = 'Принесите предмет в пункт выдачи'
 				delivery_text = 'Код передачи'
+			elif logical == 'item_received':
+				status = 'Ожидание'
 			elif logical in ['sample_aquired','waiting_for_design']:
 				status = 'Ожидание дизайнера'
 			elif logical == 'client_check':
