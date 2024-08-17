@@ -88,6 +88,7 @@ class Data:
 		self.gcode_statuses = {
 			'':'',
 			'printing':'',
+			'error':'',
 			'finished':''
 		}
 

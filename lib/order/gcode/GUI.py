@@ -31,6 +31,8 @@ class Gcode_gui:
 					self.process_top_menu()
 				if function == '2':
 					self.process_gcode()
+				if function == '3':
+					self.process_statuses()
 		self.chat.add_if_text(self)
 
 #---------------------------- SHOW ----------------------------
@@ -59,10 +61,15 @@ class Gcode_gui:
 		self.GUI.tell_buttons(text, buttons, buttons, 2, order.id)
 
 	def show_statuses(self):
+		self.order = self.app.order_logic.get_order_by_id(self.gcode.order_id)
 		text = f'Текущий статус gcode-файла: {self.gcode.status}. Выберите новый статус'
 		buttons = []
-		# TODO: think over
-		# TODO: show list of statuses, taking in account order status
+		buttons.append([' ','none'])
+		buttons.append(['Печатается','printing'])
+		buttons.append(['Сбой печати','error'])
+		buttons.append(['Отпечатан','finished'])
+		buttons.append('Назад')
+		self.GUI.tell_buttons(text, buttons, buttons, 3, self.order.id)
 
 #---------------------------- PROCESS ----------------------------
 
@@ -83,4 +90,9 @@ class Gcode_gui:
 			self.show_statuses()
 
 	def process_statuses(self):
-		# TODO: change status of gcode
+		data = self.message.btn_data
+		if data == 'none':
+			self.gcode.status = ''
+		else:
+			self.gcode.status = data
+		self.show_gcode()
